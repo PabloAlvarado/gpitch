@@ -1,1 +1,1 @@
-from . import model_pitch, likelihood_sig
+from . import mpdgp, likelihood_sig
