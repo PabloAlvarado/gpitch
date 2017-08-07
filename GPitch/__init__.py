@@ -1,1 +1,1 @@
-from . import pitch_detector, siglik
+from . import model_pitch, likelihood_sig
