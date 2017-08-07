@@ -1,4 +1,4 @@
-# Multi Gaussian process pitch detector (GPPD).
+# Gaussian process multi-pitch detector (GPMPD).
 import numpy as np
 
-Class GPMPD():
+class GPMPD():
