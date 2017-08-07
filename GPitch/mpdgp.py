@@ -1,4 +1,4 @@
-# Multi pitch detector using Gaussian processes (MPDGP).
+# Multi pitch detector using Gaussian processes (PDGP).
 import numpy as np
 
-Class MPDGP():
+Class PDGP():
