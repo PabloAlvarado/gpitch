@@ -1,1 +1,1 @@
-from . import gpitch
+from . import pitch_detector, siglik
