@@ -1,1 +1,1 @@
-from . import (pdgp, likelihood_sig)
+from . import (gpmpd, likelihood_sig)
