@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import tensorflow as tf
 import GPflow
 import time
-import modgp
+import loogp
 import gpitch as gpi
 reload(modgp)
 

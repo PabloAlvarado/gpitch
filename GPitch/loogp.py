@@ -3,9 +3,9 @@ import GPflow
 from GPflow import settings
 from GPflow.minibatch import MinibatchData
 import tensorflow as tf
-import modulating_likelihood
-reload(modulating_likelihood)
-from modulating_likelihood import ModLik
+import loo_likelihood
+reload(loo_likelihood)
+from loo_likelihood import LooLik
 
 
 class LooGP(GPflow.model.Model):
