@@ -65,7 +65,7 @@ for i in range(Nw):
     m.optimize(disp=1, maxiter=maxiter)
     qm1[i], qv1[i] = m.predict_f(x_l[i])
     qm2[i], qv2[i] = m.predict_g(x_l[i])
-print("--- %s seconds ---" % (time.time() - start_time))
+print("--- %s seconds---" % (time.time() - start_time))
 
 qm1 = np.asarray(qm1).reshape(-1, 1)
 qm2 = np.asarray(qm2).reshape(-1, 1)
