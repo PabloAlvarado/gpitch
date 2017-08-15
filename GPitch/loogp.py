@@ -105,19 +105,32 @@ class LooGP(GPflow.model.Model):
         return tf.reduce_sum(var_exp) * scale - KL
 
     @GPflow.param.AutoFlow((tf.float64, [None, None]))
-    def predict_f(self, Xnew):
+    def predict_f1(self, Xnew):
         return GPflow.conditionals.conditional(Xnew, self.Z, self.kern_f1,
                                                self.q_mu1, q_sqrt=self.q_sqrt1,
                                                full_cov=False,
                                                whiten=self.whiten)
 
     @GPflow.param.AutoFlow((tf.float64, [None, None]))
-    def predict_g(self, Xnew):
+    def predict_g1(self, Xnew):
         return GPflow.conditionals.conditional(Xnew, self.Z, self.kern_g1,
                                                self.q_mu2, q_sqrt=self.q_sqrt2,
                                                full_cov=False,
                                                whiten=self.whiten)
 
+    @GPflow.param.AutoFlow((tf.float64, [None, None]))
+    def predict_f2(self, Xnew):
+        return GPflow.conditionals.conditional(Xnew, self.Z, self.kern_f2,
+                                               self.q_mu3, q_sqrt=self.q_sqrt3,
+                                               full_cov=False,
+                                               whiten=self.whiten)
+
+    @GPflow.param.AutoFlow((tf.float64, [None, None]))
+    def predict_g2(self, Xnew):
+        return GPflow.conditionals.conditional(Xnew, self.Z, self.kern_g2,
+                                               self.q_mu4, q_sqrt=self.q_sqrt4,
+                                               full_cov=False,
+                                               whiten=self.whiten)
 
 
 
