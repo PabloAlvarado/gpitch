@@ -82,8 +82,18 @@ class LooGP(GPflow.model.Model):
                                                         q_sqrt=self.q_sqrt2,
                                                         full_cov=False,
                                                         whiten=self.whiten)
-        fmean = tf.concat(1, [fmean1, fmean2])
-        fvar = tf.concat(1, [fvar1, fvar2])
+        fmean3, fvar3 = GPflow.conditionals.conditional(self.X, self.Z,
+                                                        self.kern_f2, self.q_mu3,
+                                                        q_sqrt=self.q_sqrt3,
+                                                        full_cov=False,
+                                                        whiten=self.whiten)
+        fmean4, fvar4 = GPflow.conditionals.conditional(self.X, self.Z,
+                                                        self.kern_g2, self.q_mu4,
+                                                        q_sqrt=self.q_sqrt4,
+                                                        full_cov=False,
+                                                        whiten=self.whiten)
+        fmean = tf.concat(1, [fmean1, fmean2, fmean3, fmean4])
+        fvar = tf.concat(1, [fvar1, fvar2, fvar3, fvar4])
 
         # Get variational expectations.
         var_exp = self.likelihood.variational_expectations(fmean, fvar, self.Y)
