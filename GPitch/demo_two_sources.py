@@ -59,8 +59,10 @@ m = loogp.LooGP(x_l[0].copy(), y_l[0].copy(), [kper1, kper2], [kenv1, kenv2], z,
                 whiten=True)
 m.likelihood.noise_var = noise_var
 m.likelihood.noise_var.fixed = True
-# m.kern1.fixed = True
-# m.kern2.fixed = True
+m.kern_f1.fixed = True
+m.kern_f2.fixed = True
+m.kern_g1.fixed = True
+m.kern_g2.fixed = True
 #
 # qm1 = [np.zeros(z.shape) for i in range(0, Nw)]  # list to save predictions
 # qm2 = [np.zeros(z.shape) for i in range(0, Nw)]  # mean (qm) and variance (qv)
