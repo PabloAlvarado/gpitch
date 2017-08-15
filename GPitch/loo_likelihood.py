@@ -26,7 +26,8 @@ def mvhermgauss(means, covs, H, D):
         return Xr, wn * np.pi ** (-D * 0.5)
 
 
-class ModLik(GPflow.likelihoods.Likelihood):
+class LooLik(GPflow.likelihoods.Likelihood):
+    '''Leave One Out likelihood'''
     def __init__(self):
         GPflow.likelihoods.Likelihood.__init__(self)
         self.noise_var = GPflow.param.Param(1.0)
@@ -63,22 +64,6 @@ class ModLik(GPflow.likelihoods.Likelihood):
                   tf.log(self.noise_var))
         return var_exp
 
-    # # variational expectations function, GPflow modulated_GP version
-    # def variational_expectations(self, Fmu, Fvar, Y):
-    #     H = 20
-    #     D = 2
-    #     Fvar_matrix_diag = tf.matrix_diag(Fvar)
-    #     Xr, w = mvhermgauss(Fmu, Fvar_matrix_diag, H, D)
-    #     w = tf.reshape(w, [-1, 1])
-    #     f, g = Xr[:, 0], Xr[:, 1]
-    #     y = tf.tile(Y, [H**D, 1])[:, 0]
-    #     sigma_g = 1./(1 + tf.exp(-g))  # squash g to be positive
-    #     mean = f * sigma_g
-    #     evaluations = GPflow.densities.gaussian(y, mean, self.noise_var)
-    #     evaluations = tf.transpose(tf.reshape(evaluations, tf.pack([tf.size(w),
-    #                                tf.shape(Fmu)[0]])))
-    #     n_var_exp = tf.matmul(evaluations, w)
-    #     return n_var_exp
 
 
 
