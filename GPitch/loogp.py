@@ -8,8 +8,13 @@ reload(modulating_likelihood)
 from modulating_likelihood import ModLik
 
 
-class ModGP(GPflow.model.Model):
-    def __init__(self, X, Y, kern1, kern2, Z, whiten=True, minibatch_size=None):
+class LooGP(GPflow.model.Model):
+    def __init__(self, X, Y, kf, kg, Z, whiten=True, minibatch_size=None):
+        '''Leave One Out (LOO) model.
+        INPUTS:
+        kf : list of kernels for each latent quasi-periodic function
+        kg : list of kernels for each latent envelope function
+        '''
         GPflow.model.Model.__init__(self)
 
         if minibatch_size is None:
@@ -27,7 +32,8 @@ class ModGP(GPflow.model.Model):
         self.Z = GPflow.param.DataHolder(Z, on_shape_change='pass')
         #self.Z = GPflow.param.Param(Z)
 
-        self.kern1, self.kern2 = kern1, kern2
+        self.kern1, self.kern2 = kf[0], kf[1]
+        self.kern3, self.kern4 = kg[2], kg[3]
         self.likelihood = ModLik()
         self.num_inducing = Z.shape[0]
         self.whiten = whiten
@@ -35,11 +41,15 @@ class ModGP(GPflow.model.Model):
         # initialize variational parameters
         self.q_mu1 = GPflow.param.Param(np.zeros((self.Z.shape[0], 1)))
         self.q_mu2 = GPflow.param.Param(np.zeros((self.Z.shape[0], 1)))
+        self.q_mu3 = GPflow.param.Param(np.zeros((self.Z.shape[0], 1)))
+        self.q_mu4 = GPflow.param.Param(np.zeros((self.Z.shape[0], 1)))
+
         q_sqrt = np.array([np.eye(self.num_inducing)
                            for _ in range(1)]).swapaxes(0, 2)
-
         self.q_sqrt1 = GPflow.param.Param(q_sqrt.copy())
         self.q_sqrt2 = GPflow.param.Param(q_sqrt.copy())
+        self.q_sqrt3 = GPflow.param.Param(q_sqrt.copy())
+        self.q_sqrt4 = GPflow.param.Param(q_sqrt.copy())
 
     def build_prior_KL(self):
         if self.whiten:
