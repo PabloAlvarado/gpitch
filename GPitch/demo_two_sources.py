@@ -46,13 +46,14 @@ source2 = gpi.logistic(g2)*f2
 mean = source1 + source2
 y = mean + np.random.randn(*mean.shape) * np.sqrt(noise_var)
 
-
-plt.figure()
+plt.figure(), plt.title('Mixture signal')
 plt.plot(x, y)
 
-plt.figure()
-plt.plot(x, source1)
-plt.plot(x, source2)
+f, axarr = plt.subplots(2, sharex=True)
+axarr[0].plot(x, source1)
+axarr[0].set_title('Latent sources')
+axarr[1].plot(x, source2)
+
 # # split data into windows
 # #ws = 500  # window size (samples)
 # ws = N  # use all data at once (i.e. no windowing)
