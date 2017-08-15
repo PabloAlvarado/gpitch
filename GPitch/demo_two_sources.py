@@ -17,7 +17,7 @@ plt.close('all')
 
 # generate synthetic data
 fs = 16e3  # sample frequency
-N = 1500  # number of samples
+N = 500  # number of samples
 x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)  # time
 noise_var = 1.e-3
 pitch1 = 440.00  # Hertz, A4 (La)
@@ -47,7 +47,7 @@ mean = source1 + source2
 y = mean + np.random.randn(*mean.shape) * np.sqrt(noise_var)
 
 # split data into windows
-ws = 500  # window size (samples)
+ws = 250  # window size (samples)
 #ws = N  # use all data at once (i.e. no windowing)
 Nw = N/ws  # number of windows
 x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
