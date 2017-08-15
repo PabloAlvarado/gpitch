@@ -18,7 +18,7 @@ plt.close('all')
 # generate synthetic data
 fs = 16e3  # sample frequency
 N = 1500  # number of samples
-x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)  # time vector
+x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)  # time
 noise_var = 1.e-3
 kenv = GPflow.kernels.Matern32(input_dim=1, lengthscales=0.01, variance=10.)
 kper = GPflow.kernels.PeriodicKernel(input_dim=1, lengthscales=0.25,
