@@ -52,7 +52,7 @@ qm2 = [np.zeros(z.shape) for i in range(0, Nw)]  # mean (qm) and variance (qv)
 qv1 = [np.zeros(z.shape) for i in range(0, Nw)]
 qv2 = [np.zeros(z.shape) for i in range(0, Nw)]
 
-maxiter = 300
+maxiter = 200
 start_time = time.time()
 for i in range(Nw):
     m.X = x_l[i].copy()
