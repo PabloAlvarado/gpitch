@@ -39,7 +39,7 @@ Nw = N/ws  # number of windows
 x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
 y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
 
-jump = 15  # initialize model
+jump = 20  # initialize model
 z = x_l[0][::jump].copy()
 m = modgp.ModGP(x_l[0].copy(), y_l[0].copy(), kper, kenv, z, whiten=True)
 m.likelihood.noise_var = noise_var
