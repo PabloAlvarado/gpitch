@@ -46,39 +46,19 @@ source2 = gpi.logistic(g2)*f2
 mean = source1 + source2
 y = mean + np.random.randn(*mean.shape) * np.sqrt(noise_var)
 
-plt.figure(), plt.title('Mixture signal')
-plt.plot(x, y)
+# split data into windows
+ws = 500  # window size (samples)
+#ws = N  # use all data at once (i.e. no windowing)
+Nw = N/ws  # number of windows
+x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
+y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
 
-f, axarr = plt.subplots(2, sharex=True)
-axarr[0].plot(x, source1)
-axarr[0].set_title('Latent source 1 (A4)')
-axarr[1].plot(x, source2)
-axarr[1].set_title('Latent source 2 (E5)')
-
-f, axarr = plt.subplots(2, sharex=True)
-axarr[0].plot(x, gpi.logistic(g1))
-axarr[0].set_title('Latent envelope 1 (A4)')
-axarr[1].plot(x, gpi.logistic(g2))
-axarr[1].set_title('Latent envelope 2 (E5)')
-
-f, axarr = plt.subplots(2, sharex=True)
-axarr[0].plot(x, f1)
-axarr[0].set_title('Latent quasi-periodic function 1 (A4)')
-axarr[1].plot(x, f2)
-axarr[1].set_title('Latent quasi-periodic function 2 (E5)')
-
-# # split data into windows
-# #ws = 500  # window size (samples)
-# ws = N  # use all data at once (i.e. no windowing)
-# Nw = N/ws  # number of windows
-# x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
-# y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
-#
-# jump = 20  # initialize model
-# z = x_l[0][::jump].copy()
-# m = modgp.ModGP(x_l[0].copy(), y_l[0].copy(), kper, kenv, z, whiten=True)
-# m.likelihood.noise_var = noise_var
-# m.likelihood.noise_var.fixed = True
+jump = 20  # initialize model
+z = x_l[0][::jump].copy()
+m = loogp.LooGP(x_l[0].copy(), y_l[0].copy(), [kper1, kper2], [kenv1, kenv2], z,
+                whiten=True)
+m.likelihood.noise_var = noise_var
+m.likelihood.noise_var.fixed = True
 # m.kern1.fixed = True
 # m.kern2.fixed = True
 #
@@ -125,3 +105,25 @@ axarr[1].set_title('Latent quasi-periodic function 2 (E5)')
 # plt.fill_between(x[:, 0], gpi.logistic(qm2[:, 0] - 2*np.sqrt(qv2[:, 0])),
 #                   gpi.logistic(qm2[:, 0] + 2*np.sqrt(qv2[:, 0])),
 #                   color='green', alpha=0.2)
+
+
+plt.figure(), plt.title('Mixture signal')
+plt.plot(x, y)
+
+f, axarr = plt.subplots(2, sharex=True)
+axarr[0].plot(x, source1)
+axarr[0].set_title('Latent source 1 (A4)')
+axarr[1].plot(x, source2)
+axarr[1].set_title('Latent source 2 (E5)')
+
+f, axarr = plt.subplots(2, sharex=True)
+axarr[0].plot(x, gpi.logistic(g1))
+axarr[0].set_title('Latent envelope 1 (A4)')
+axarr[1].plot(x, gpi.logistic(g2))
+axarr[1].set_title('Latent envelope 2 (E5)')
+
+f, axarr = plt.subplots(2, sharex=True)
+axarr[0].plot(x, f1)
+axarr[0].set_title('Latent quasi-periodic function 1 (A4)')
+axarr[1].plot(x, f2)
+axarr[1].set_title('Latent quasi-periodic function 2 (E5)')
