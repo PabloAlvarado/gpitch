@@ -51,8 +51,9 @@ plt.plot(x, y)
 
 f, axarr = plt.subplots(2, sharex=True)
 axarr[0].plot(x, source1)
-axarr[0].set_title('Latent sources')
+axarr[0].set_title('Latent source 1 (A4)')
 axarr[1].plot(x, source2)
+axarr[1].set_title('Latent source 2 (E5)')
 
 # # split data into windows
 # #ws = 500  # window size (samples)
