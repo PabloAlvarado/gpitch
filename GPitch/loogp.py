@@ -34,7 +34,7 @@ class LooGP(GPflow.model.Model):
 
         self.kern1, self.kern2 = kf[0], kf[1]
         self.kern3, self.kern4 = kg[2], kg[3]
-        self.likelihood = ModLik()
+        self.likelihood = LooLik()
         self.num_inducing = Z.shape[0]
         self.whiten = whiten
 
