@@ -41,15 +41,11 @@ class LooGP(GPflow.model.Model):
         # initialize variational parameters
         self.q_mu1 = GPflow.param.Param(np.zeros((self.Z.shape[0], 1)))
         self.q_mu2 = GPflow.param.Param(np.zeros((self.Z.shape[0], 1)))
-        self.q_mu3 = GPflow.param.Param(np.zeros((self.Z.shape[0], 1)))
-        self.q_mu4 = GPflow.param.Param(np.zeros((self.Z.shape[0], 1)))
-
         q_sqrt = np.array([np.eye(self.num_inducing)
                            for _ in range(1)]).swapaxes(0, 2)
+
         self.q_sqrt1 = GPflow.param.Param(q_sqrt.copy())
         self.q_sqrt2 = GPflow.param.Param(q_sqrt.copy())
-        self.q_sqrt3 = GPflow.param.Param(q_sqrt.copy())
-        self.q_sqrt4 = GPflow.param.Param(q_sqrt.copy())
 
     def build_prior_KL(self):
         if self.whiten:
