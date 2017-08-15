@@ -55,6 +55,18 @@ axarr[0].set_title('Latent source 1 (A4)')
 axarr[1].plot(x, source2)
 axarr[1].set_title('Latent source 2 (E5)')
 
+f, axarr = plt.subplots(2, sharex=True)
+axarr[0].plot(x, gpi.logistic(g1))
+axarr[0].set_title('Latent envelope 1 (A4)')
+axarr[1].plot(x, gpi.logistic(g2))
+axarr[1].set_title('Latent envelope 2 (E5)')
+
+f, axarr = plt.subplots(2, sharex=True)
+axarr[0].plot(x, f1)
+axarr[0].set_title('Latent quasi-periodic function 1 (A4)')
+axarr[1].plot(x, f2)
+axarr[1].set_title('Latent quasi-periodic function 2 (E5)')
+
 # # split data into windows
 # #ws = 500  # window size (samples)
 # ws = N  # use all data at once (i.e. no windowing)
