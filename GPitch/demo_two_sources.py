@@ -8,7 +8,7 @@ import GPflow
 import time
 import loogp
 import gpitch as gpi
-reload(modgp)
+reload(loogp)
 
 
 plt.rcParams['figure.figsize'] = (18, 6)  # set plot size
@@ -34,19 +34,25 @@ Kenv2 = kenv2.compute_K_symm(x)
 Kper1 = kper1.compute_K_symm(x)
 Kper2 = kper2.compute_K_symm(x)
 
-np.random.seed(23)
+np.random.seed(29)
 f1 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper1).reshape(-1, 1)
 f2 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper2).reshape(-1, 1)
 f1 /= np.max(np.abs(f1))
 f2 /= np.max(np.abs(f2))
 g1 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kenv1).reshape(-1, 1)
 g2 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kenv2).reshape(-1, 1)
-mean = gpi.logistic(g1)*f1 + gpi.logistic(g2)*f2
+source1 = gpi.logistic(g1)*f1
+source2 = gpi.logistic(g2)*f2
+mean = source1 + source2
 y = mean + np.random.randn(*mean.shape) * np.sqrt(noise_var)
+
 
 plt.figure()
 plt.plot(x, y)
 
+plt.figure()
+plt.plot(x, source1)
+plt.plot(x, source2)
 # # split data into windows
 # #ws = 500  # window size (samples)
 # ws = N  # use all data at once (i.e. no windowing)
