@@ -47,8 +47,8 @@ mean = source1 + source2
 y = mean + np.random.randn(*mean.shape) * np.sqrt(noise_var)
 
 # split data into windows
-ws = 500  # window size (samples)
-#ws = N  # use all data at once (i.e. no windowing)
+#ws = 500  # window size (samples)
+ws = N  # use all data at once (i.e. no windowing)
 Nw = N/ws  # number of windows
 x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
 y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
@@ -114,50 +114,73 @@ plt.figure(), plt.title('Mixture data and approximation')
 plt.plot(x, y, '.k', mew=1)
 plt.plot(x, yhat, color=col , lw=2)
 
-plt.figure(), plt.title('Latent quasi-periodic function 1 (A4)')
-plt.plot(x, f1, '.k', mew=1)
-plt.plot(x, qm1, color=col, lw=2)
-plt.fill_between(x[:, 0], qm1[:, 0] - 2*np.sqrt(qv1[:, 0]),
+f, axarr = plt.subplots(2, sharex=True)
+axarr[0].set_title('Latent quasi-periodic function 1 (A4)')
+axarr[0].plot(x, f1, '.k', mew=1)
+axarr[0].plot(x, qm1, color=col, lw=2)
+axarr[0].fill_between(x[:, 0], qm1[:, 0] - 2*np.sqrt(qv1[:, 0]),
                  qm1[:, 0] + 2*np.sqrt(qv1[:, 0]),
                  color=col, alpha=0.2)
-
-plt.figure(), plt.title('Latent envelope 1 (A4)')
-plt.plot(x[::5], gpi.logistic(g1[::5]), '.k', mew=1)
-plt.plot(x, gpi.logistic(qm2), 'g', lw=2)
-plt.fill_between(x[:, 0], gpi.logistic(qm2[:, 0] - 2*np.sqrt(qv2[:, 0])),
-                  gpi.logistic(qm2[:, 0] + 2*np.sqrt(qv2[:, 0])),
-                  color='green', alpha=0.2)
-
-plt.figure(), plt.title('Latent quasi-periodic function 2 (A5)')
-plt.plot(x, f2, '.k', mew=1)
-plt.plot(x, qm3, color=col, lw=2)
-plt.fill_between(x[:, 0], qm3[:, 0] - 2*np.sqrt(qv3[:, 0]),
+axarr[1].set_title('Latent quasi-periodic function 2 (A5)')
+axarr[1].plot(x, f2, '.k', mew=1)
+axarr[1].plot(x, qm3, color=col, lw=2)
+axarr[1].fill_between(x[:, 0], qm3[:, 0] - 2*np.sqrt(qv3[:, 0]),
                  qm3[:, 0] + 2*np.sqrt(qv3[:, 0]),
                  color=col, alpha=0.2)
 
-plt.figure(), plt.title('Latent envelope 2 (E5)')
-plt.plot(x[::5], gpi.logistic(g2[::5]), '.k', mew=1)
-plt.plot(x, gpi.logistic(qm4), 'g', lw=2)
-plt.fill_between(x[:, 0], gpi.logistic(qm4[:, 0] - 2*np.sqrt(qv4[:, 0])),
+f, axarr = plt.subplots(2, sharex=True)
+axarr[0].set_title('Latent envelope 1 (A4)')
+axarr[0].plot(x[::5], gpi.logistic(g1[::5]), '.k', mew=1)
+axarr[0].plot(x, gpi.logistic(qm2), 'g', lw=2)
+axarr[0].fill_between(x[:, 0], gpi.logistic(qm2[:, 0] - 2*np.sqrt(qv2[:, 0])),
+                  gpi.logistic(qm2[:, 0] + 2*np.sqrt(qv2[:, 0])),
+                  color='green', alpha=0.2)
+axarr[1].set_title('Latent envelope 2 (E5)')
+axarr[1].plot(x[::5], gpi.logistic(g2[::5]), '.k', mew=1)
+axarr[1].plot(x, gpi.logistic(qm4), 'g', lw=2)
+axarr[1].fill_between(x[:, 0], gpi.logistic(qm4[:, 0] - 2*np.sqrt(qv4[:, 0])),
                   gpi.logistic(qm4[:, 0] + 2*np.sqrt(qv4[:, 0])),
                   color='green', alpha=0.2)
 
+f, axarr = plt.subplots(2, sharex=True)
+axarr[0].set_title('Latent source 1 (A4)')
+axarr[0].plot(x, source1, '.k', mew=1)
+axarr[0].plot(x, gpi.logistic(qm2)*qm1, color=col, lw=2)
+axarr[1].set_title('Latent source 2 (E5)')
+axarr[1].plot(x, source2, '.k')
+axarr[1].plot(x, gpi.logistic(qm4)*qm3, color=col, lw=2)
 
 
-# f, axarr = plt.subplots(2, sharex=True)
-# axarr[0].plot(x, source1)
-# axarr[0].set_title('Latent source 1 (A4)')
-# axarr[1].plot(x, source2)
-# axarr[1].set_title('Latent source 2 (E5)')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #
-# f, axarr = plt.subplots(2, sharex=True)
-# axarr[0].plot(x, gpi.logistic(g1))
-# axarr[0].set_title('Latent envelope 1 (A4)')
-# axarr[1].plot(x, gpi.logistic(g2))
-# axarr[1].set_title('Latent envelope 2 (E5)')
-#
-# f, axarr = plt.subplots(2, sharex=True)
-# axarr[0].plot(x, f1)
-# axarr[0].set_title('Latent quasi-periodic function 1 (A4)')
-# axarr[1].plot(x, f2)
-# axarr[1].set_title('Latent quasi-periodic function 2 (E5)')
