@@ -20,11 +20,20 @@ fs = 16e3  # sample frequency
 N = 1500  # number of samples
 x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)  # time
 noise_var = 1.e-3
-kenv = GPflow.kernels.Matern32(input_dim=1, lengthscales=0.01, variance=10.)
-kper = GPflow.kernels.PeriodicKernel(input_dim=1, lengthscales=0.25,
-                                     variance=np.sqrt(0.5), period=1./440)
-Kenv = kenv.compute_K_symm(x)
-Kper = kper.compute_K_symm(x)
+pitch1 = 440.00  # Hertz, A4 (La)
+pitch2 = 659.25  # Hertz, E5 (Mi)
+kenv1 = GPflow.kernels.Matern32(input_dim=1, lengthscales=0.01, variance=10.)
+kenv2 = GPflow.kernels.Matern32(input_dim=1, lengthscales=0.005, variance=10.)
+kper1 = GPflow.kernels.PeriodicKernel(input_dim=1, lengthscales=0.25,
+                                      variance=np.sqrt(0.5), period=1./pitch1)
+kper2 = GPflow.kernels.PeriodicKernel(input_dim=1, lengthscales=0.25,
+                                      variance=np.sqrt(0.5), period=1./pitch2)
+
+Kenv1 = kenv1.compute_K_symm(x)
+Kenv2 = kenv2.compute_K_symm(x)
+Kper1 = kper1.compute_K_symm(x)
+Kper2 = kper2.compute_K_symm(x)
+
 np.random.seed(23)
 f = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper).reshape(-1, 1)
 f /= np.max(np.abs(f))
