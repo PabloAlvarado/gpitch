@@ -32,8 +32,8 @@ class LooGP(GPflow.model.Model):
         self.Z = GPflow.param.DataHolder(Z, on_shape_change='pass')
         #self.Z = GPflow.param.Param(Z)
 
-        self.kern1, self.kern2 = kf[0], kf[1]
-        self.kern3, self.kern4 = kg[0], kg[1]
+        self.kern_f1, self.kern_f2  = kf[0], kf[1]
+        self.kern_g1, self.kern_g2 = kg[0], kg[1]
         self.likelihood = LooLik()
         self.num_inducing = Z.shape[0]
         self.whiten = whiten
@@ -58,9 +58,9 @@ class LooGP(GPflow.model.Model):
             KL2 = GPflow.kullback_leiblers.gauss_kl_white(self.q_mu2,
                                                           self.q_sqrt2)
         else:
-            K1 = self.kern1.K(self.Z) + \
+            K1 = self.kern_f1.K(self.Z) + \
                  np.eye(self.num_inducing) * settings.numerics.jitter_level
-            K2 = self.kern2.K(self.Z) + \
+            K2 = self.kern_g1.K(self.Z) + \
                  np.eye(self.num_inducing) * settings.numerics.jitter_level
             KL1 = GPflow.kullback_leiblers.gauss_kl(self.q_mu1,
                                                     self.q_sqrt1, K1)
@@ -74,12 +74,12 @@ class LooGP(GPflow.model.Model):
 
         # Get conditionals
         fmean1, fvar1 = GPflow.conditionals.conditional(self.X, self.Z,
-                                                        self.kern1, self.q_mu1,
+                                                        self.kern_f1, self.q_mu1,
                                                         q_sqrt=self.q_sqrt1,
                                                         full_cov=False,
                                                         whiten=self.whiten)
         fmean2, fvar2 = GPflow.conditionals.conditional(self.X, self.Z,
-                                                        self.kern2, self.q_mu2,
+                                                        self.kern_g1, self.q_mu2,
                                                         q_sqrt=self.q_sqrt2,
                                                         full_cov=False,
                                                         whiten=self.whiten)
@@ -97,14 +97,14 @@ class LooGP(GPflow.model.Model):
 
     @GPflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_f(self, Xnew):
-        return GPflow.conditionals.conditional(Xnew, self.Z, self.kern1,
+        return GPflow.conditionals.conditional(Xnew, self.Z, self.kern_f1,
                                                self.q_mu1, q_sqrt=self.q_sqrt1,
                                                full_cov=False,
                                                whiten=self.whiten)
 
     @GPflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_g(self, Xnew):
-        return GPflow.conditionals.conditional(Xnew, self.Z, self.kern2,
+        return GPflow.conditionals.conditional(Xnew, self.Z, self.kern_g1,
                                                self.q_mu2, q_sqrt=self.q_sqrt2,
                                                full_cov=False,
                                                whiten=self.whiten)
