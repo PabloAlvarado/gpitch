@@ -56,30 +56,30 @@ class LooLik(GPflow.likelihoods.Likelihood):
         evaluations = tf.transpose(tf.reshape(evaluations, tf.pack([tf.size(w), tf.shape(Fmu)[0]])))
         return tf.matmul(evaluations, w)
 
-    # # variational expectations function, Pablo Alvarado implementation
-    # def variational_expectations(self, Fmu, Fvar, Y):
-    #     H = 20  # get eval points and weights
-    #     gh_x, gh_w = GPflow.quadrature.hermgauss(H)
-    #     gh_x = gh_x.reshape(1, -1)
-    #     gh_w = gh_w.reshape(-1, 1) / np.sqrt(np.pi)
-    #
-    #     mean_f = Fmu[:, 0]  # get mean and var of each q distribution, and reshape
-    #     mean_g = Fmu[:, 1]
-    #     var_f = Fvar[:, 0]
-    #     var_g = Fvar[:, 1]
-    #     mean_f, mean_g, var_f, var_g = [tf.reshape(e, [-1, 1]) for e in (mean_f,
-    #                                     mean_g, var_f, var_g)]
-    #     shape = tf.shape(mean_g)  # get  output shape
-    #     X = gh_x * tf.sqrt(2.*var_g) + mean_g  # transformed evaluation points
-    #     evaluations = 1. / (1. + tf.exp(-X))  # sigmoid function
-    #     E1 = tf.reshape(tf.matmul(evaluations, gh_w), shape)  # compute expectations
-    #     E2 = tf.reshape(tf.matmul(evaluations**2, gh_w), shape)
-    #
-    #     # compute log-lik expectations under variational distribution
-    #     var_exp = -0.5*((1./self.noise_var)*(Y**2 - 2.*Y*mean_f*E1 +
-    #               (var_f + mean_f**2)*E2) + np.log(2.*np.pi) +
-    #               tf.log(self.noise_var))
-    #     return var_exp
+    # variational expectations function, Pablo Alvarado implementation
+    def variational_expectations_paad(self, Fmu, Fvar, Y):
+        H = 20  # get eval points and weights
+        gh_x, gh_w = GPflow.quadrature.hermgauss(H)
+        gh_x = gh_x.reshape(1, -1)
+        gh_w = gh_w.reshape(-1, 1) / np.sqrt(np.pi)
+
+        mean_f = Fmu[:, 0]  # get mean and var of each q distribution, and reshape
+        mean_g = Fmu[:, 1]
+        var_f = Fvar[:, 0]
+        var_g = Fvar[:, 1]
+        mean_f, mean_g, var_f, var_g = [tf.reshape(e, [-1, 1]) for e in (mean_f,
+                                        mean_g, var_f, var_g)]
+        shape = tf.shape(mean_g)  # get  output shape
+        X = gh_x * tf.sqrt(2.*var_g) + mean_g  # transformed evaluation points
+        evaluations = 1. / (1. + tf.exp(-X))  # sigmoid function
+        E1 = tf.reshape(tf.matmul(evaluations, gh_w), shape)  # compute expectations
+        E2 = tf.reshape(tf.matmul(evaluations**2, gh_w), shape)
+
+        # compute log-lik expectations under variational distribution
+        var_exp = -0.5*((1./self.noise_var)*(Y**2 - 2.*Y*mean_f*E1 +
+                  (var_f + mean_f**2)*E2) + np.log(2.*np.pi) +
+                  tf.log(self.noise_var))
+        return var_exp
 
 
 
