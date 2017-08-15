@@ -1,11 +1,13 @@
 import numpy as np
 import GPflow
 from GPflow import settings
+from GPflow.kullback_leiblers import gauss_kl, gauss_kl_white
 from GPflow.minibatch import MinibatchData
 import tensorflow as tf
 import loo_likelihood
 reload(loo_likelihood)
 from loo_likelihood import LooLik
+jitter = settings.numerics.jitter_level
 
 
 class LooGP(GPflow.model.Model):
@@ -28,8 +30,8 @@ class LooGP(GPflow.model.Model):
         #self.X = GPflow.param.DataHolder(X, on_shape_change='pass')
         #self.Y = GPflow.param.DataHolder(Y, on_shape_change='pass')
 
-        #self.Z = Z
         self.Z = GPflow.param.DataHolder(Z, on_shape_change='pass')
+        #self.Z = Z
         #self.Z = GPflow.param.Param(Z)
 
         self.kern_f1, self.kern_f2  = kf[0], kf[1]
@@ -39,34 +41,31 @@ class LooGP(GPflow.model.Model):
         self.whiten = whiten
 
         # initialize variational parameters
-        self.q_mu1 = GPflow.param.Param(np.zeros((self.Z.shape[0], 1)))
-        self.q_mu2 = GPflow.param.Param(np.zeros((self.Z.shape[0], 1)))
-        self.q_mu3 = GPflow.param.Param(np.zeros((self.Z.shape[0], 1)))
-        self.q_mu4 = GPflow.param.Param(np.zeros((self.Z.shape[0], 1)))
+        self.q_mu1, self.q_mu2, self.q_mu3, self.q_mu4 = \
+        [GPflow.param.Param(np.zeros((self.Z.shape[0], 1))) for _ in range(4)]
 
         q_sqrt = np.array([np.eye(self.num_inducing)
                            for _ in range(1)]).swapaxes(0, 2)
-        self.q_sqrt1 = GPflow.param.Param(q_sqrt.copy())
-        self.q_sqrt2 = GPflow.param.Param(q_sqrt.copy())
-        self.q_sqrt3 = GPflow.param.Param(q_sqrt.copy())
-        self.q_sqrt4 = GPflow.param.Param(q_sqrt.copy())
+
+        self.q_sqrt1, self.q_sqrt2, self.q_sqrt3, self.q_sqrt4 = \
+        [GPflow.param.Param(q_sqrt.copy()) for _ in range(4)]
 
     def build_prior_KL(self):
         if self.whiten:
-            KL1 = GPflow.kullback_leiblers.gauss_kl_white(self.q_mu1,
-                                                          self.q_sqrt1)
-            KL2 = GPflow.kullback_leiblers.gauss_kl_white(self.q_mu2,
-                                                          self.q_sqrt2)
+            KL1 = gauss_kl_white(self.q_mu1, self.q_sqrt1)
+            KL2 = gauss_kl_white(self.q_mu2, self.q_sqrt2)
+            KL3 = gauss_kl_white(self.q_mu3, self.q_sqrt3)
+            KL4 = gauss_kl_white(self.q_mu4, self.q_sqrt4)
         else:
-            K1 = self.kern_f1.K(self.Z) + \
-                 np.eye(self.num_inducing) * settings.numerics.jitter_level
-            K2 = self.kern_g1.K(self.Z) + \
-                 np.eye(self.num_inducing) * settings.numerics.jitter_level
-            KL1 = GPflow.kullback_leiblers.gauss_kl(self.q_mu1,
-                                                    self.q_sqrt1, K1)
-            KL2 = GPflow.kullback_leiblers.gauss_kl(self.q_mu2,
-                                                    self.q_sqrt2, K2)
-        return KL1 + KL2
+            K1 = self.kern_f1.K(self.Z) + np.eye(self.num_inducing) * jitter
+            K2 = self.kern_g1.K(self.Z) + np.eye(self.num_inducing) * jitter
+            K3 = self.kern_f2.K(self.Z) + np.eye(self.num_inducing) * jitter
+            K4 = self.kern_g2.K(self.Z) + np.eye(self.num_inducing) * jitter
+            KL1 = gauss_kl(self.q_mu1, self.q_sqrt1, K1)
+            KL2 = gauss_kl(self.q_mu2, self.q_sqrt2, K2)
+            KL3 = gauss_kl(self.q_mu3, self.q_sqrt3, K3)
+            KL4 = gauss_kl(self.q_mu4, self.q_sqrt4, K4)
+        return KL1 + KL2 + KL3 + KL4
 
     def build_likelihood(self):
         # Get prior KL.
