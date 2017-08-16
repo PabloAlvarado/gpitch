@@ -17,7 +17,7 @@ plt.close('all')
 
 # generate synthetic data
 fs = 16e3  # sample frequency
-N = 1500  # number of samples
+N = 1600  # number of samples
 x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)  # time
 noise_var = 1.e-3
 pitch1 = 440.00  # Hertz, A4 (La)
@@ -34,7 +34,7 @@ Kenv2 = kenv2.compute_K_symm(x)
 Kper1 = kper1.compute_K_symm(x)
 Kper2 = kper2.compute_K_symm(x)
 
-np.random.seed(29)
+np.random.seed()
 f1 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper1).reshape(-1, 1)
 f2 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper2).reshape(-1, 1)
 f1 /= np.max(np.abs(f1))
@@ -47,8 +47,8 @@ mean = source1 + source2
 y = mean + np.random.randn(*mean.shape) * np.sqrt(noise_var)
 
 # split data into windows
-#ws = 500  # window size (samples)
-ws = N  # use all data at once (i.e. no windowing)
+ws = 400  # window size (samples)
+#ws = N  # use all data at once (i.e. no windowing)
 Nw = N/ws  # number of windows
 x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
 y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
@@ -84,7 +84,6 @@ for i in range(Nw):
     m.q_mu2._array = np.zeros(z.shape)
     m.q_mu3._array = np.zeros(z.shape)
     m.q_mu4._array = np.zeros(z.shape)
-
     m.q_sqrt1._array = np.expand_dims(np.eye(z.size), 2)
     m.q_sqrt2._array = np.expand_dims(np.eye(z.size), 2)
     m.q_sqrt3._array = np.expand_dims(np.eye(z.size), 2)
@@ -95,6 +94,7 @@ for i in range(Nw):
     qm2[i], qv2[i] = m.predict_g1(x_l[i])
     qm3[i], qv3[i] = m.predict_f2(x_l[i])
     qm4[i], qv4[i] = m.predict_g2(x_l[i])
+
 print("--- %s seconds ---" % (time.time() - start_time))
 
 qm1 = np.asarray(qm1).reshape(-1, 1)
