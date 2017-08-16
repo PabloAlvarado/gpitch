@@ -43,7 +43,7 @@ class LooLik(GPflow.likelihoods.Likelihood):
 
     def variational_expectations(self, Fmu, Fvar, Y):
         D = 4  # Number of input dimensions (increased from 2 to 4)
-        H = 5 # number of Gauss-Hermite evaluation points. (reduced from 10 to 3)
+        H = 5 # number of Gauss-Hermite evaluation points. (reduced  to 5)
         Xr, w = mvhermgauss(Fmu, tf.matrix_diag(Fvar), H, D)
         w = tf.reshape(w, [-1, 1])
         f1, g1 = Xr[:, 0], Xr[:, 1]
@@ -51,7 +51,7 @@ class LooLik(GPflow.likelihoods.Likelihood):
         y = tf.tile(Y, [H**D, 1])[:, 0]
         sigma_g1 = 1./(1 + tf.exp(-g1))  # squash g to be positive
         sigma_g2 = 1./(1 + tf.exp(-g2))  # squash g to be positive
-        mean =  sigma_g1 * f1 + sigma_g2 * f2  #Instead of sigmoid function we use the softmax.
+        mean =  sigma_g1 * f1 + sigma_g2 * f2
         evaluations = GPflow.densities.gaussian(y, mean, self.noise_var)
         evaluations = tf.transpose(tf.reshape(evaluations, tf.pack([tf.size(w),
                                                             tf.shape(Fmu)[0]])))
@@ -66,7 +66,7 @@ class LooLik(GPflow.likelihoods.Likelihood):
         gh_x = gh_x.reshape(1, -1)
         gh_w = gh_w.reshape(-1, 1) / np.sqrt(np.pi)
 
-        mean_f = Fmu[:, 0]  # get mean and var of each q distribution, and reshape
+        mean_f = Fmu[:, 0]  # get mean and var of each q dist, and reshape
         mean_g = Fmu[:, 1]
         var_f = Fvar[:, 0]
         var_g = Fvar[:, 1]
@@ -75,7 +75,7 @@ class LooLik(GPflow.likelihoods.Likelihood):
         shape = tf.shape(mean_g)  # get  output shape
         X = gh_x * tf.sqrt(2.*var_g) + mean_g  # transformed evaluation points
         evaluations = 1. / (1. + tf.exp(-X))  # sigmoid function
-        E1 = tf.reshape(tf.matmul(evaluations, gh_w), shape)  # compute expectations
+        E1 = tf.reshape(tf.matmul(evaluations, gh_w), shape)  # compute expect
         E2 = tf.reshape(tf.matmul(evaluations**2, gh_w), shape)
 
         # compute log-lik expectations under variational distribution
