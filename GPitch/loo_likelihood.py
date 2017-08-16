@@ -58,6 +58,8 @@ class LooLik(GPflow.likelihoods.Likelihood):
         return tf.matmul(evaluations, w)
 
     # variational expectations function, Pablo Alvarado implementation
+    # define a function that returns the transformed weights and eval points and
+    # use it in the variational_expectations_paad() function.
     def variational_expectations_paad(self, Fmu, Fvar, Y):
         H = 20  # get eval points and weights
         gh_x, gh_w = GPflow.quadrature.hermgauss(H)
