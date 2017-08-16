@@ -57,8 +57,8 @@ class LooLik(GPflow.likelihoods.Likelihood):
     def variational_expectations(self, Fmu, Fvar, Y):
         old_version = False
         if old_version:
-            D = 4  # Number of input dimensions (increased from 2 to 4)
             H = 10 # number of Gauss-Hermite evaluation points. (reduced  to 5)
+            D = 4  # Number of input dimensions (increased from 2 to 4)
             Xr, w = mvhermgauss(Fmu, tf.matrix_diag(Fvar), H, D)
             w = tf.reshape(w, [-1, 1])
             f1, g1 = Xr[:, 0], Xr[:, 1]
