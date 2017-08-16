@@ -53,7 +53,7 @@ Nw = N/ws  # number of windows
 x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
 y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
 
-jump = 25  # initialize model
+jump = 5  # initialize model
 z = x_l[0][::jump].copy()
 m = loogp.LooGP(x_l[0].copy(), y_l[0].copy(), [kper1, kper2], [kenv1, kenv2], z,
                 whiten=True)
@@ -73,7 +73,7 @@ qv2 = [np.zeros(z.shape) for i in range(0, Nw)]
 qv3 = [np.zeros(z.shape) for i in range(0, Nw)]
 qv4 = [np.zeros(z.shape) for i in range(0, Nw)]
 
-maxiter = 250
+maxiter = 500
 start_time = time.time()
 for i in range(Nw):
     m.X = x_l[i].copy()
