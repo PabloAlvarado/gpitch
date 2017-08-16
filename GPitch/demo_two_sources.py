@@ -53,7 +53,7 @@ Nw = N/ws  # number of windows
 x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
 y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
 
-jump = 15  # initialize model
+jump = 10  # initialize model
 z = x_l[0][::jump].copy()
 m = loogp.LooGP(x_l[0].copy(), y_l[0].copy(), [kper1, kper2], [kenv1, kenv2], z,
                 whiten=True)
