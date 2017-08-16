@@ -53,7 +53,8 @@ class LooLik(GPflow.likelihoods.Likelihood):
         sigma_g2 = 1./(1 + tf.exp(-g2))  # squash g to be positive
         mean =  sigma_g1 * f1 + sigma_g2 * f2  #Instead of sigmoid function we use the softmax.
         evaluations = GPflow.densities.gaussian(y, mean, self.noise_var)
-        evaluations = tf.transpose(tf.reshape(evaluations, tf.pack([tf.size(w), tf.shape(Fmu)[0]])))
+        evaluations = tf.transpose(tf.reshape(evaluations, tf.pack([tf.size(w),
+                                                            tf.shape(Fmu)[0]])))
         return tf.matmul(evaluations, w)
 
     # variational expectations function, Pablo Alvarado implementation
