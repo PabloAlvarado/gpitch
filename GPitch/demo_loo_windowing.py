@@ -34,7 +34,7 @@ Kenv2 = kenv2.compute_K_symm(x)
 Kper1 = kper1.compute_K_symm(x)
 Kper2 = kper2.compute_K_symm(x)
 
-np.random.seed()
+np.random.seed(29)
 f1 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper1).reshape(-1, 1)
 f2 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper2).reshape(-1, 1)
 f1 /= np.max(np.abs(f1))
