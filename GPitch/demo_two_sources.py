@@ -7,8 +7,8 @@ import tensorflow as tf
 import GPflow
 import time
 import loogp
-import gpitch as gpi
 reload(loogp)
+import gpitch as gpi
 
 
 plt.rcParams['figure.figsize'] = (18, 6)  # set plot size
