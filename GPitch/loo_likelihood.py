@@ -58,7 +58,7 @@ class LooLik(GPflow.likelihoods.Likelihood):
         old_version = False
         if old_version:
             D = 4  # Number of input dimensions (increased from 2 to 4)
-            H = 5 # number of Gauss-Hermite evaluation points. (reduced  to 5)
+            H = 10 # number of Gauss-Hermite evaluation points. (reduced  to 5)
             Xr, w = mvhermgauss(Fmu, tf.matrix_diag(Fvar), H, D)
             w = tf.reshape(w, [-1, 1])
             f1, g1 = Xr[:, 0], Xr[:, 1]
@@ -89,7 +89,7 @@ class LooLik(GPflow.likelihoods.Likelihood):
 
             mean_f2, mean_g2, var_f2, var_g2 = [tf.reshape(e, [-1, 1]) for e in
                                                (mean_f2, mean_g2, var_f2, var_g2)]
-            H = 20
+            H = 10
             # calculate required quadratures
             E1, E2 = hermgauss1d(mean_g1, var_g1, H)
             E3, E4 = hermgauss1d(mean_g2, var_g2, H)
