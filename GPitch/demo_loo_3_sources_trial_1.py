@@ -2,6 +2,7 @@
 ws defines the size (in number of samples) of the analysis window. choose ws=N
 to analyze all data at once.'''
 import numpy as np
+from scipy import fftpack
 from matplotlib import pyplot as plt
 import tensorflow as tf
 import GPflow
@@ -46,13 +47,16 @@ Kper1 = kper1.compute_K_symm(x)
 Kper2 = kper2.compute_K_symm(x)
 Kper3 = kper3.compute_K_symm(x)
 
-np.random.seed(30)
+np.random.seed(29)
 f1 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper1).reshape(-1, 1)
 f2 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper2).reshape(-1, 1)
 f3 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper3).reshape(-1, 1)
 f1 /= 3.*np.max(np.abs(f1))
 f2 /= 3.*np.max(np.abs(f2))
 f3 /= 3.*np.max(np.abs(f3))
+f1 = f1 - f1.mean()
+f2 = f2 - f2.mean()
+f3 = f3 - f3.mean()
 g1 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kenv1).reshape(-1, 1)
 g2 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kenv2).reshape(-1, 1)
 g3 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kenv3).reshape(-1, 1)
@@ -63,27 +67,36 @@ mean = source1 + source2 + source3
 
 y = mean + np.random.randn(*mean.shape) * np.sqrt(noise_var)
 
+s1, s2, s3 = [fftpack.fft(signal.reshape(-1,)) for signal in (source1, source2, source3)]
+T = 1. / fs
+F = np.linspace(0., 0.5*fs, N/2)
+S1 = 2.0/N * np.abs(s1[0:N/2])
+S2 = 2.0/N * np.abs(s2[0:N/2])
+S3 = 2.0/N * np.abs(s3[0:N/2])
+
+plt.figure()
+plt.plot(F, S1)
+plt.plot(F, S2)
+plt.plot(F, S3)
+
 f, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex=True, sharey=True)
 ax1.plot(x, y)
 ax2.plot(x, source1)
 ax3.plot(x, source2)
 ax4.plot(x, source3)
 f.subplots_adjust(hspace=0)
-#plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
 
 f, (ax2, ax3, ax4) = plt.subplots(3, sharex=True, sharey=True)
 ax2.plot(x, f1)
 ax3.plot(x, f2)
 ax4.plot(x, f3)
 f.subplots_adjust(hspace=0)
-#plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
 
 f, (ax2, ax3, ax4) = plt.subplots(3, sharex=True, sharey=True)
 ax2.plot(x, gpi.logistic(g1))
 ax3.plot(x, gpi.logistic(g2))
 ax4.plot(x, gpi.logistic(g3))
 f.subplots_adjust(hspace=0)
-#plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
 
 f, (ax1, ax2) = plt.subplots(2, sharex=True, sharey=True)
 ax1.plot(x, source1)
