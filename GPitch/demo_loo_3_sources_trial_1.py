@@ -77,9 +77,19 @@ S2 = 2.0/N * np.abs(s2[0:N/2])
 S3 = 2.0/N * np.abs(s3[0:N/2])
 
 plt.figure()
-plt.plot(F, S1)
-plt.plot(F, S2)
-plt.plot(F, S3)
+plt.plot(F, S1, 'o')
+plt.plot(F, S2, 'o')
+plt.plot(F, S3, 'o')
+
+F1, F2, F3 = [fftpack.fft(signal.reshape(-1,)) for signal in (f1, f2, f3)]
+F1 = 2.0/N * np.abs(F1[0:N/2])
+F2 = 2.0/N * np.abs(F2[0:N/2])
+F3 = 2.0/N * np.abs(F3[0:N/2])
+
+plt.figure()
+plt.plot(F, F1, 'o')
+plt.plot(F, F2, 'o')
+plt.plot(F, F3, 'o')
 
 
 # idx = np.argmax(S1)
@@ -116,14 +126,14 @@ S3k = gpi.LorM(x=Faux, s=a3, l=1./b3, f=2*np.pi*c3 )
 
 f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
 ax1.plot(F, S1, '.k')
-ax1.plot(Faux, S1k, '', lw=2)
-ax1.set_xlim([0, 4000])
+ax1.plot(Faux, S1k, 'g', lw=2)
+ax1.set_xlim([0, 3000])
 ax2.plot(F, S2, '.k')
-ax2.plot(Faux, S2k, '', lw=2)
-ax2.set_xlim([0, 4000])
+ax2.plot(Faux, S2k, 'g', lw=2)
+ax2.set_xlim([0, 3000])
 ax3.plot(F, S3, '.k')
-ax3.plot(Faux, S3k, '', lw=2)
-ax3.set_xlim([0, 4000])
+ax3.plot(Faux, S3k, 'g', lw=2)
+ax3.set_xlim([0, 3000])
 #
 # f, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex=True, sharey=True)
 # ax1.plot(x, y)
