@@ -66,7 +66,8 @@ class LooGP(GPflow.model.Model):
             KL2 = gauss_kl(self.q_mu2, self.q_sqrt2, K2)
             KL3 = gauss_kl(self.q_mu3, self.q_sqrt3, K3)
             KL4 = gauss_kl(self.q_mu4, self.q_sqrt4, K4)
-        return KL1 + KL2 + KL3 + KL4
+        #aux0 = tf.reduce_max(tf.abs(self.q_mu1))
+        return KL1 + KL2 + KL3 + KL4 #+ 100.*tf.abs(aux0 - 1.)
 
     def build_likelihood(self):
         # Get prior KL.
