@@ -81,54 +81,74 @@ plt.plot(F, S1)
 plt.plot(F, S2)
 plt.plot(F, S3)
 
+
+# idx = np.argmax(S1)
+# a, b = idx - 25, idx + 25
+# if a < 0:
+#     a = 0
+# X, y = F[a: b,].reshape(-1,), S1[a: b,].reshape(-1,)
+#
+# p0 = np.array([1., 1., 2*np.pi*F[idx]])
+# phat = sp.optimize.minimize(gpi.Lloss, p0, method='L-BFGS-B', args=(X, y), tol = 1e-10, options={'disp': True})
+# pstar = phat.x
+# Xaux = np.linspace(X.min(), X.max(), 1000)
+# L = gpi.Lorentzian(pstar,Xaux)
+# plt.figure(), plt.xlim([X.min(), X.max()])
+# plt.plot(Xaux, L, '.', ms=8)
+# plt.plot(X, y, '.', ms=8)
+
+
+#plt.figure()
+#plt.plot(X,y)
+
 a1, b1, c1 = gpi.learnparams(X=F, S=S1, Nh=10)
-a2, b2, c2 = gpi.learnparams(X=F, S=S2, Nh=10)
-a3, b3, c3 = gpi.learnparams(X=F, S=S3, Nh=10)
-
+# a2, b2, c2 = gpi.learnparams(X=F, S=S2, Nh=10)
+# a3, b3, c3 = gpi.learnparams(X=F, S=S3, Nh=10)
+#
 S1k = gpi.LorM(x=F, s=a1, l=1./b1, f=2*np.pi*c1 )
-S2k = gpi.LorM(x=F, s=a2, l=1./b2, f=2*np.pi*c2 )
-S3k = gpi.LorM(x=F, s=a3, l=1./b3, f=2*np.pi*c3 )
+# S2k = gpi.LorM(x=F, s=a2, l=1./b2, f=2*np.pi*c2 )
+# S3k = gpi.LorM(x=F, s=a3, l=1./b3, f=2*np.pi*c3 )
 plt.figure()
-plt.plot(F, S1, '')
-plt.plot(F, S1k, 'r')
-
-plt.figure()
-plt.plot(F, S2, '')
-plt.plot(F, S2k, 'r')
-
-plt.figure()
-plt.plot(F, S3, '')
-plt.plot(F, S3k, 'r')
-
-
-f, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex=True, sharey=True)
-ax1.plot(x, y)
-ax2.plot(x, source1)
-ax3.plot(x, source2)
-ax4.plot(x, source3)
-f.subplots_adjust(hspace=0)
-
-f, (ax2, ax3, ax4) = plt.subplots(3, sharex=True, sharey=True)
-ax2.plot(x, f1)
-ax3.plot(x, f2)
-ax4.plot(x, f3)
-f.subplots_adjust(hspace=0)
-
-f, (ax2, ax3, ax4) = plt.subplots(3, sharex=True, sharey=True)
-ax2.plot(x, gpi.logistic(g1))
-ax3.plot(x, gpi.logistic(g2))
-ax4.plot(x, gpi.logistic(g3))
-f.subplots_adjust(hspace=0)
-
-f, (ax1, ax2) = plt.subplots(2, sharex=True, sharey=True)
-ax1.plot(x, source1)
-ax2.plot(x, source2 + source3)
-
-
-f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
-ax1.plot(x, source2 + source3)
-ax2.plot(x, source2)
-ax3.plot(x, source3)
+plt.plot(F, S1, 'x')
+plt.plot(F, S1k, 'xr')
+#
+# plt.figure()
+# plt.plot(F, S2, '')
+# plt.plot(F, S2k, 'r')
+#
+# plt.figure()
+# plt.plot(F, S3, '')
+# plt.plot(F, S3k, 'r')
+#
+#
+# f, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex=True, sharey=True)
+# ax1.plot(x, y)
+# ax2.plot(x, source1)
+# ax3.plot(x, source2)
+# ax4.plot(x, source3)
+# f.subplots_adjust(hspace=0)
+#
+# f, (ax2, ax3, ax4) = plt.subplots(3, sharex=True, sharey=True)
+# ax2.plot(x, f1)
+# ax3.plot(x, f2)
+# ax4.plot(x, f3)
+# f.subplots_adjust(hspace=0)
+#
+# f, (ax2, ax3, ax4) = plt.subplots(3, sharex=True, sharey=True)
+# ax2.plot(x, gpi.logistic(g1))
+# ax3.plot(x, gpi.logistic(g2))
+# ax4.plot(x, gpi.logistic(g3))
+# f.subplots_adjust(hspace=0)
+#
+# f, (ax1, ax2) = plt.subplots(2, sharex=True, sharey=True)
+# ax1.plot(x, source1)
+# ax2.plot(x, source2 + source3)
+#
+#
+# f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
+# ax1.plot(x, source2 + source3)
+# ax2.plot(x, source2)
+# ax3.plot(x, source3)
 
 
 
