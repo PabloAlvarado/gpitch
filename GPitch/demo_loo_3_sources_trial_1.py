@@ -46,7 +46,7 @@ Kper1 = kper1.compute_K_symm(x)
 Kper2 = kper2.compute_K_symm(x)
 Kper3 = kper3.compute_K_symm(x)
 
-np.random.seed()
+np.random.seed(30)
 f1 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper1).reshape(-1, 1)
 f2 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper2).reshape(-1, 1)
 f3 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper3).reshape(-1, 1)
@@ -84,6 +84,16 @@ ax3.plot(x, gpi.logistic(g2))
 ax4.plot(x, gpi.logistic(g3))
 f.subplots_adjust(hspace=0)
 #plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
+
+f, (ax1, ax2) = plt.subplots(2, sharex=True, sharey=True)
+ax1.plot(x, source1)
+ax2.plot(x, source2 + source3)
+
+
+f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
+ax1.plot(x, source2 + source3)
+ax2.plot(x, source2)
+ax3.plot(x, source3)
 
 # # split data into windows
 # ws = 800 # window size (samples)
