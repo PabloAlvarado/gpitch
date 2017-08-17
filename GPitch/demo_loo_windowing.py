@@ -6,9 +6,10 @@ from matplotlib import pyplot as plt
 import tensorflow as tf
 import GPflow
 import time
+import gpitch as gpi
 import loogp
 reload(loogp)
-import gpitch as gpi
+
 
 
 plt.rcParams['figure.figsize'] = (18, 6)  # set plot size
