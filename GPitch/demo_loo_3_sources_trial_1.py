@@ -102,24 +102,28 @@ plt.plot(F, S3)
 #plt.plot(X,y)
 
 a1, b1, c1 = gpi.learnparams(X=F, S=S1, Nh=10)
-# a2, b2, c2 = gpi.learnparams(X=F, S=S2, Nh=10)
-# a3, b3, c3 = gpi.learnparams(X=F, S=S3, Nh=10)
+Nh1 = a1.size
+a2, b2, c2 = gpi.learnparams(X=F, S=S2, Nh=10)
+Nh2 = a2.size
+a3, b3, c3 = gpi.learnparams(X=F, S=S3, Nh=10)
+Nh3 = a3.size
+
 #
-S1k = gpi.LorM(x=F, s=a1, l=1./b1, f=2*np.pi*c1 )
-# S2k = gpi.LorM(x=F, s=a2, l=1./b2, f=2*np.pi*c2 )
-# S3k = gpi.LorM(x=F, s=a3, l=1./b3, f=2*np.pi*c3 )
-plt.figure()
-plt.plot(F, S1, 'x')
-plt.plot(F, S1k, 'xr')
-#
-# plt.figure()
-# plt.plot(F, S2, '')
-# plt.plot(F, S2k, 'r')
-#
-# plt.figure()
-# plt.plot(F, S3, '')
-# plt.plot(F, S3k, 'r')
-#
+Faux = np.linspace(F.min(), F.max(), 10000)
+S1k = gpi.LorM(x=Faux, s=a1, l=1./b1, f=2*np.pi*c1 )
+S2k = gpi.LorM(x=Faux, s=a2, l=1./b2, f=2*np.pi*c2 )
+S3k = gpi.LorM(x=Faux, s=a3, l=1./b3, f=2*np.pi*c3 )
+
+f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
+ax1.plot(F, S1, '.k')
+ax1.plot(Faux, S1k, 'g', lw=2)
+ax1.set_xlim([0, 4000])
+ax2.plot(F, S2, '.k')
+ax2.plot(Faux, S2k, 'g', lw=2)
+ax2.set_xlim([0, 4000])
+ax3.plot(F, S3, '.k')
+ax3.plot(Faux, S3k, 'g', lw=2)
+ax3.set_xlim([0, 4000])
 #
 # f, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex=True, sharey=True)
 # ax1.plot(x, y)
