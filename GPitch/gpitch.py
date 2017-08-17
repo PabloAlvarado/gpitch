@@ -88,8 +88,10 @@ def learnparams(X, S, Nh):
         idx = np.argmax(Shat)
         if Shat[idx] > 0.025*S.max():
             count += 1
-            a = idx - 100
-            b = idx + 100
+            a = idx - 25
+            if a < 0:
+                a = 0
+            b = idx + 25
             x = X
             y = Shat
             p0 = np.array([0.1, 0.1, 2.*np.pi*X[idx]])
