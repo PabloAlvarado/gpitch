@@ -67,7 +67,8 @@ mean = source1 + source2 + source3
 
 y = mean + np.random.randn(*mean.shape) * np.sqrt(noise_var)
 
-s1, s2, s3 = [fftpack.fft(signal.reshape(-1,)) for signal in (source1, source2, source3)]
+s1, s2, s3 = [fftpack.fft(signal.reshape(-1,)) for signal in (source1, source2,
+                                                              source3)]
 T = 1. / fs
 F = np.linspace(0., 0.5*fs, N/2)
 S1 = 2.0/N * np.abs(s1[0:N/2])
