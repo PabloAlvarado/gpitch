@@ -10,6 +10,7 @@ import time
 import gpitch as gpi
 import loogp
 reload(loogp)
+reload(gpi)
 
 
 plt.rcParams['figure.figsize'] = (18, 6)  # set plot size
@@ -80,6 +81,26 @@ plt.plot(F, S1)
 plt.plot(F, S2)
 plt.plot(F, S3)
 
+a1, b1, c1 = gpi.learnparams(X=F, S=S1, Nh=10)
+a2, b2, c2 = gpi.learnparams(X=F, S=S2, Nh=10)
+a3, b3, c3 = gpi.learnparams(X=F, S=S3, Nh=10)
+
+S1k = gpi.LorM(x=F, s=a1, l=1./b1, f=2*np.pi*c1 )
+S2k = gpi.LorM(x=F, s=a2, l=1./b2, f=2*np.pi*c2 )
+S3k = gpi.LorM(x=F, s=a3, l=1./b3, f=2*np.pi*c3 )
+plt.figure()
+plt.plot(F, S1, '')
+plt.plot(F, S1k, 'r')
+
+plt.figure()
+plt.plot(F, S2, '')
+plt.plot(F, S2k, 'r')
+
+plt.figure()
+plt.plot(F, S3, '')
+plt.plot(F, S3k, 'r')
+
+
 f, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex=True, sharey=True)
 ax1.plot(x, y)
 ax2.plot(x, source1)
@@ -108,6 +129,8 @@ f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
 ax1.plot(x, source2 + source3)
 ax2.plot(x, source2)
 ax3.plot(x, source3)
+
+
 
 # # split data into windows
 # ws = 800 # window size (samples)
