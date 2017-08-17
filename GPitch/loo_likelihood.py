@@ -41,10 +41,10 @@ def hermgauss1d(mean_g, var_g, H):
 
 class LooLik(GPflow.likelihoods.Likelihood):
     '''Leave One Out likelihood'''
-    def __init__(self):
+    def __init__(self, version):
         GPflow.likelihoods.Likelihood.__init__(self)
         self.noise_var = GPflow.param.Param(1.0)
-
+        self.version = version
     def logp(self, F, Y):
         f1, g1 = F[:, 0], F[:, 1]
         f2, g2 = F[:, 2], F[:, 3]
@@ -55,7 +55,7 @@ class LooLik(GPflow.likelihoods.Likelihood):
         return GPflow.densities.gaussian(y, mean, self.noise_var).reshape(-1, 1)
 
     def variational_expectations(self, Fmu, Fvar, Y):
-        old_version = False
+        old_version = self.version
         if old_version:
             H = 10 # number of Gauss-Hermite evaluation points. (reduced  to 5)
             D = 4  # Number of input dimensions (increased from 2 to 4)

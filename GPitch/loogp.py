@@ -11,7 +11,8 @@ jitter = settings.numerics.jitter_level
 
 
 class LooGP(GPflow.model.Model):
-    def __init__(self, X, Y, kf, kg, Z, whiten=True, minibatch_size=None):
+    def __init__(self, X, Y, kf, kg, Z, whiten=True, minibatch_size=None,
+                 old_version=False):
         '''Leave One Out (LOO) model.
         INPUTS:
         kf : list of kernels for each latent quasi-periodic function
@@ -36,7 +37,7 @@ class LooGP(GPflow.model.Model):
 
         self.kern_f1, self.kern_f2  = kf[0], kf[1]
         self.kern_g1, self.kern_g2 = kg[0], kg[1]
-        self.likelihood = LooLik()
+        self.likelihood = LooLik(version=old_version)
         self.num_inducing = Z.shape[0]
         self.whiten = whiten
 
@@ -65,7 +66,7 @@ class LooGP(GPflow.model.Model):
             KL2 = gauss_kl(self.q_mu2, self.q_sqrt2, K2)
             KL3 = gauss_kl(self.q_mu3, self.q_sqrt3, K3)
             KL4 = gauss_kl(self.q_mu4, self.q_sqrt4, K4)
-        return KL1 + KL2 + KL3 + KL4 
+        return KL1 + KL2 + KL3 + KL4
 
     def build_likelihood(self):
         # Get prior KL.
