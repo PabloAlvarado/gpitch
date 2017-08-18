@@ -99,7 +99,8 @@ plt.plot(F, F3, 'o')
 # X, y = F[a: b,].reshape(-1,), S1[a: b,].reshape(-1,)
 #
 # p0 = np.array([1., 1., 2*np.pi*F[idx]])
-# phat = sp.optimize.minimize(gpi.Lloss, p0, method='L-BFGS-B', args=(X, y), tol = 1e-10, options={'disp': True})
+# phat = sp.optimize.minimize(gpi.Lloss, p0, method='L-BFGS-B', args=(X, y),
+#                             tol = 1e-10, options={'disp': True})
 # pstar = phat.x
 # Xaux = np.linspace(X.min(), X.max(), 1000)
 # L = gpi.Lorentzian(pstar,Xaux)
