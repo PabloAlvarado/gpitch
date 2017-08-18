@@ -42,7 +42,7 @@ def MaternSM(x, s, l, f):
 
 def ker_msm(s, l, f, Nh):
     '''
-    Matern spectral mixture kernel
+    Matern spectral mixture kernel in GPflow
     Input:
     s  : variance vector
     l  : Matern lengthscales vector
