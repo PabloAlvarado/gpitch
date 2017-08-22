@@ -82,15 +82,21 @@ plt.plot(F, S1, '')
 plt.plot(F, S2, '')
 plt.plot(F, S3, '')
 
-F1, F2, F3 = [fftpack.fft(signal.reshape(-1,)) for signal in (f1, f2, f3)]
-F1 = 2.0/N * np.abs(F1[0:N/2])
-F2 = 2.0/N * np.abs(F2[0:N/2])
-F3 = 2.0/N * np.abs(F3[0:N/2])
 
+y1_ifft = np.fft.ifft(s1)
+plt.plot(source1, '.')
+plt.plot(y1_ifft)
+aux0 = np.fft.ifft(np.abs(s1))
 plt.figure()
-plt.plot(F, F1, '')
-plt.plot(F, F2, '')
-plt.plot(F, F3, '')
+plt.plot(aux0[0:800])
+
+
+ker_test = 2.0*aux0[0:800]
+
+#plt.figure()
+#plt.plot(F, F1, '')
+#plt.plot(F, F2, '')
+#plt.plot(F, F3, '')
 
 
 idx = np.argmax(S1)
@@ -99,9 +105,9 @@ if a < 0:
     a = 0
 X, y = F[a: b,].reshape(-1,), S1[a: b,].reshape(-1,)
 
-p0 = np.array([0.01, 1.0, 2*np.pi*F[idx]])
+p0 = np.array([1.0, 0.1, 2*np.pi*F[idx]])
 phat = sp.optimize.minimize(gpi.Lloss, p0, method='L-BFGS-B', args=(X, y),
-                            tol = 1e-20, options={'disp': True})
+                            tol = 1e-8, options={'disp': True})
 pstar = phat.x
 Xaux = np.linspace(X.min(), X.max(), 1000)
 L = gpi.Lorentzian(pstar,Xaux)
@@ -109,10 +115,8 @@ plt.figure(), plt.xlim([X.min(), X.max()])
 plt.plot(Xaux, L, '.', ms=8)
 plt.plot(X, y, '.', ms=8)
 print pstar
-
-
-#plt.figure()
-#plt.plot(X,y)
+plt.figure()
+plt.plot(X,y)
 
 a1, b1, c1 = gpi.learnparams(X=F, S=S1, Nh=10)
 Nh1 = a1.size
@@ -121,7 +125,6 @@ Nh2 = a2.size
 a3, b3, c3 = gpi.learnparams(X=F, S=S3, Nh=10)
 Nh3 = a3.size
 
-#
 Faux = np.linspace(F.min(), F.max(), 10000)
 S1k = gpi.LorM(x=Faux, s=a1, l=1./b1, f=2*np.pi*c1 )
 S2k = gpi.LorM(x=Faux, s=a2, l=1./b2, f=2*np.pi*c2 )
@@ -143,9 +146,9 @@ kper_msm_1 = gpi.ker_msm(s=a1, l=b1, f=c1, Nh=Nh1)
 kper_msm_2 = gpi.ker_msm(s=a2, l=b2, f=c2, Nh=Nh2)
 kper_msm_3 = gpi.ker_msm(s=a3, l=b3, f=c3, Nh=Nh3)
 
-kper1_plot = kper_msm_1.compute_K(x,x)[:,0]
-kper2_plot = kper_msm_2.compute_K(x,x)[:,0]
-kper3_plot = kper_msm_3.compute_K(x,x)[:,0]
+kper1_plot = gpi.MaternSM(x=x, s=a1, l=1./b1, f=2*np.pi*c1)
+kper2_plot = gpi.MaternSM(x=x, s=a2, l=1./b2, f=2*np.pi*c2)
+kper3_plot = gpi.MaternSM(x=x, s=a3, l=1./b3, f=2*np.pi*c3)
 
 plt.figure(), plt.title('kernel 1')
 plt.plot(x, kper1_plot)
@@ -155,18 +158,19 @@ plt.plot(x, kper2_plot)
 
 plt.figure(), plt.title('kernel 3')
 plt.plot(x, kper3_plot)
-#
-# ks1, ks2, ks3 = [fftpack.fft(i.reshape(-1,)) for i in (kper1_plot, kper2_plot,
-#                                                               kper3_plot)]
-# kS1 = 0.15/N * np.abs(ks1[0:N/2])
-# kS2 = 0.15/N * np.abs(ks2[0:N/2])
-# kS3 = 0.15/N * np.abs(ks3[0:N/2])
-#
-#
-# plt.figure()
-# plt.plot(F, kS1, '')
-# plt.plot(F, S1, '')
-#
+
+
+ks1, ks2, ks3 = [fftpack.fft(i.reshape(-1,)) for i in (kper1_plot, kper2_plot,
+                                                              kper3_plot)]
+kS1 = 1./N * np.abs(ks1[0:N/2])
+kS2 = 1./N * np.abs(ks2[0:N/2])
+kS3 = 1./N * np.abs(ks3[0:N/2])
+
+
+plt.figure()
+plt.plot(F, kS1, '')
+plt.plot(F, S1, '')
+
 # plt.figure()
 # plt.plot(F, kS2, '')
 # plt.plot(F, S2, '')
@@ -175,9 +179,7 @@ plt.plot(x, kper3_plot)
 # plt.plot(F, kS3, '')
 # plt.plot(F, S3, '')
 #
-Xk = np.linspace(-1.,1.,2*16000).reshape(-1,1)
-ttk1 = gpi.MaternSM(x=Xk, s=a1, l=1./b1, f=2*np.pi*c1)
-plt.plot(Xk, ttk1)
+
 # #ttk2 = gpi.MaternSM(Xk, s=s_2, l=1./l_2, f=2*np.pi*f_2)
 #
 # #
