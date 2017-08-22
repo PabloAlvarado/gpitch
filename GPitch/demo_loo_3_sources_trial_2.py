@@ -21,7 +21,7 @@ plt.close('all')
 
 # generate synthetic data
 fs = 16e3  # sample frequency
-N = 2000  # number of samples
+N = 800  # number of samples
 x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)  # time
 noise_var = 1.e-3
 
@@ -61,44 +61,31 @@ aux0 = np.fft.ifftshift(aux0)
 plt.figure()
 plt.plot(x- x[-1]/2, aux0)
 
-
-# s1  = fftpack.fft(aux0.reshape(-1,))
-# T = 1. / fs
-# F = np.linspace(0., 0.5*fs, N/2)
-# S1 = 2.0/N * np.abs(s1[0:N/2])
-#
-# plt.figure()
-# plt.plot(F, S1, '')
-
 idx = np.argmax(S1)
 a, b = idx - 50, idx + 50
 if a < 0:
     a = 0
 X, y = F[a: b,].reshape(-1,), S1[a: b,].reshape(-1,)
-yhat = gpi.Lorentzian([1.0, 25., 2.*pitch1], X/(2.*np.pi))
+
+
+Nloop = 100
+sig_v = np.linspace(0., 5., Nloop).reshape(-1,1)
+lambda_v = np.linspace(0., 50., Nloop).reshape(-1,1)
+objetive = np.zeros((Nloop, Nloop))
+
+for i in range(Nloop):
+   for j in range(Nloop):
+       yhat = gpi.Lorentzian([sig_v[i], lambda_v[j], pitch1], X/(2.*np.pi))
+       objetive[i, j] = mse(y, yhat)
+
+
+
+plt.matshow(objetive)
+plt.colorbar()
 
 plt.figure()
 plt.plot(X, y)
 plt.plot(X, yhat, 'r')
-
-Nloop = 100
-sig_v = np.linspace(0., 2., Nloop).reshape(-1,1)
-lambda_v = np.linspace(0., 2., Nloop).reshape(-1,1)
-objetive = np.zeros((Nloop, Nloop))
-
-for i in range(Nloop):
-    for j in range(Nloop):
-        yhat = gpi.Lorentzian([sig_v[i], lambda_v[j], 2.*pitch1], X/(2.*np.pi))
-        objetive[i, j] = mse(y, yhat)
-
-
-plt.matshow(objetive)
-
-
-
-
-
-
 
 
 

@@ -96,7 +96,7 @@ def learnparams(X, S, Nh):
             y = Shat
             p0 = np.array([1.0, 0.1, 2.*np.pi*X[idx]])
             phat = sp.optimize.minimize(Lloss, p0, method='L-BFGS-B',
-                                        args=(x, y), tol=1e-8,
+                                        args=(x, y), tol=1e-5,
                                         options={'disp': False})
             pstar = phat.x
             Pstar[i,:] = pstar
