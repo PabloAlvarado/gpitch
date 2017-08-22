@@ -44,7 +44,6 @@ mean = gpi.logistic(g1)*f1
 y = mean + np.random.randn(*mean.shape) * np.sqrt(noise_var)
 
 s1  = fftpack.fft(mean.reshape(-1,))
-T = 1. / fs
 F = np.linspace(0., 0.5*fs, N/2)
 S1 = 2.0/N * np.abs(s1[0:N/2])
 
