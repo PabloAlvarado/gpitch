@@ -86,17 +86,17 @@ def learnparams(X, S, Nh):
     count = 0
     for i in range(0, Nh):
         idx = np.argmax(Shat)
-        if Shat[idx] > 0.010*S.max():
+        if Shat[idx] > 0.02*S.max():
             count += 1
             a = idx - 25
+            b = idx + 25
             if a < 0:
                 a = 0
-            b = idx + 25
             x = X
             y = Shat
             p0 = np.array([1.0, 0.1, 2.*np.pi*X[idx]])
             phat = sp.optimize.minimize(Lloss, p0, method='L-BFGS-B',
-                                        args=(x, y), tol=1e-5,
+                                        args=(x, y), tol=1e-10,
                                         options={'disp': False})
             pstar = phat.x
             Pstar[i,:] = pstar

@@ -1,15 +1,17 @@
-'''This script is a demo of the new version for the modulated GP. The variable
-ws defines the size (in number of samples) of the analysis window. choose ws=N
-to analyze all data at once.'''
 import numpy as np
+import scipy as sp
+from scipy import fftpack
 from matplotlib import pyplot as plt
 import tensorflow as tf
+from sklearn.metrics import mean_squared_error as mse
 import GPflow
 import time
-import loogp
-reload(loogp)
 import gpitch as gpi
-
+import loogp
+import sounddevice as sod #reproduce audio from numpy arrays
+import soundfile  # package to load wav files
+reload(loogp)
+reload(gpi)
 
 plt.rcParams['figure.figsize'] = (18, 6)  # set plot size
 plt.interactive(True)
@@ -17,34 +19,63 @@ plt.close('all')
 
 # generate synthetic data
 fs = 16e3  # sample frequency
-N = 1500  # number of samples
+N = 1600  # number of samples
 x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)  # time
 noise_var = 1.e-3
+
 pitch1 = 440.00  # Hertz, A4 (La)
-pitch2 = 659.25  # Hertz, E5 (Mi)
+
 kenv1 = GPflow.kernels.Matern32(input_dim=1, lengthscales=0.01, variance=10.)
-kenv2 = GPflow.kernels.Matern32(input_dim=1, lengthscales=0.005, variance=10.)
-kper1 = GPflow.kernels.PeriodicKernel(input_dim=1, lengthscales=0.25,
-                                      variance=np.sqrt(0.5), period=1./pitch1)
-kper2 = GPflow.kernels.PeriodicKernel(input_dim=1, lengthscales=0.25,
-                                      variance=np.sqrt(0.5), period=1./pitch2)
+
+
+s1 = np.asarray([0.1, 0.05, 0.125])
+l1 = np.asarray([0.1, 0.01, 0.05])
+f1 = np.asarray([pitch1, 2.01*pitch1, 3.05*pitch1])
+
+kper1 = gpi.ker_msm(s=s1, l=l1, f=f1, Nh=s1.size)
+
+
+pitch2 = 659.25  # Hertz, E5 (Mi)
+kenv2 = GPflow.kernels.Matern32(input_dim=1, lengthscales=0.01, variance=10.)
+s2 = np.asarray([0.1, 0.05, 0.125])
+l2 = np.asarray([0.1, 0.01, 0.05])
+f2 = np.asarray([pitch2, 2.01*pitch2, 3.05*pitch2])
+
+kper2 = gpi.ker_msm(s=s2, l=l2, f=f2, Nh=s2.size)
+
+
 
 Kenv1 = kenv1.compute_K_symm(x)
-Kenv2 = kenv2.compute_K_symm(x)
 Kper1 = kper1.compute_K_symm(x)
+
+Kenv2 = kenv2.compute_K_symm(x)
 Kper2 = kper2.compute_K_symm(x)
 
-np.random.seed(29)
+
+#np.random.seed()
 f1 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper1).reshape(-1, 1)
-f2 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper2).reshape(-1, 1)
-f1 /= np.max(np.abs(f1))
-f2 /= np.max(np.abs(f2))
 g1 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kenv1).reshape(-1, 1)
+f2 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper2).reshape(-1, 1)
 g2 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kenv2).reshape(-1, 1)
 source1 = gpi.logistic(g1)*f1
 source2 = gpi.logistic(g2)*f2
 mean = source1 + source2
 y = mean + np.random.randn(*mean.shape) * np.sqrt(noise_var)
+
+
+fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
+ax1.plot(x, y)
+ax2.plot(x, source1)
+ax3.plot(x, source2)
+
+fig, (ax1, ax2) = plt.subplots(2, sharex=True, sharey=True)
+ax1.plot(x, f1)
+ax2.plot(x, f2)
+
+fig, (ax1, ax2) = plt.subplots(2, sharex=True, sharey=True)
+ax1.plot(x, gpi.logistic(g1))
+ax2.plot(x, gpi.logistic(g2))
+
 
 # split data into windows
 #ws = 500  # window size (samples)
@@ -53,7 +84,7 @@ Nw = N/ws  # number of windows
 x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
 y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
 
-jump = 10  # initialize model
+jump = 20  # initialize model
 z = x_l[0][::jump].copy()
 m = loogp.LooGP(x_l[0].copy(), y_l[0].copy(), [kper1, kper2], [kenv1, kenv2], z,
                 whiten=True)
@@ -73,7 +104,7 @@ qv2 = [np.zeros(z.shape) for i in range(0, Nw)]
 qv3 = [np.zeros(z.shape) for i in range(0, Nw)]
 qv4 = [np.zeros(z.shape) for i in range(0, Nw)]
 
-maxiter = 250
+maxiter = 500
 start_time = time.time()
 for i in range(Nw):
     m.X = x_l[i].copy()
@@ -115,34 +146,6 @@ plt.plot(x, y, '.k', mew=1)
 plt.plot(x, yhat, color=col , lw=2)
 
 f, axarr = plt.subplots(2, sharex=True)
-axarr[0].set_title('Latent quasi-periodic function 1 (A4)')
-axarr[0].plot(x, f1, '.k', mew=1)
-axarr[0].plot(x, qm1, color=col, lw=2)
-axarr[0].fill_between(x[:, 0], qm1[:, 0] - 2*np.sqrt(qv1[:, 0]),
-                 qm1[:, 0] + 2*np.sqrt(qv1[:, 0]),
-                 color=col, alpha=0.2)
-axarr[1].set_title('Latent quasi-periodic function 2 (A5)')
-axarr[1].plot(x, f2, '.k', mew=1)
-axarr[1].plot(x, qm3, color=col, lw=2)
-axarr[1].fill_between(x[:, 0], qm3[:, 0] - 2*np.sqrt(qv3[:, 0]),
-                 qm3[:, 0] + 2*np.sqrt(qv3[:, 0]),
-                 color=col, alpha=0.2)
-
-f, axarr = plt.subplots(2, sharex=True)
-axarr[0].set_title('Latent envelope 1 (A4)')
-axarr[0].plot(x[::5], gpi.logistic(g1[::5]), '.k', mew=1)
-axarr[0].plot(x, gpi.logistic(qm2), 'g', lw=2)
-axarr[0].fill_between(x[:, 0], gpi.logistic(qm2[:, 0] - 2*np.sqrt(qv2[:, 0])),
-                  gpi.logistic(qm2[:, 0] + 2*np.sqrt(qv2[:, 0])),
-                  color='green', alpha=0.2)
-axarr[1].set_title('Latent envelope 2 (E5)')
-axarr[1].plot(x[::5], gpi.logistic(g2[::5]), '.k', mew=1)
-axarr[1].plot(x, gpi.logistic(qm4), 'g', lw=2)
-axarr[1].fill_between(x[:, 0], gpi.logistic(qm4[:, 0] - 2*np.sqrt(qv4[:, 0])),
-                  gpi.logistic(qm4[:, 0] + 2*np.sqrt(qv4[:, 0])),
-                  color='green', alpha=0.2)
-
-f, axarr = plt.subplots(2, sharex=True)
 axarr[0].set_title('Latent source 1 (A4)')
 axarr[0].plot(x, source1, '.k', mew=1)
 axarr[0].plot(x, gpi.logistic(qm2)*qm1, color=col, lw=2)
@@ -153,12 +156,6 @@ axarr[1].plot(x, gpi.logistic(qm4)*qm3, color=col, lw=2)
 
 
 
-x = np.linspace(0,1,1000).reshape(-1,1)
-ker = GPflow.kernels.Cosine(input_dim=1, lengthscales=1./(2.0*2.0*np.pi), variance=1.0)
-K = ker.compute_K_symm(x)
-sample =  np.random.multivariate_normal(np.zeros(x.shape[0]), K).reshape(-1, 1)
-plt.figure
-plt.plot(x, sample)
 
 
 
