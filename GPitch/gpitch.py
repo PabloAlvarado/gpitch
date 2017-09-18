@@ -42,7 +42,7 @@ def MaternSM(x, s, l, f):
 
 def ker_msm(s, l, f, Nh):
     '''
-    Matern spectral mixture kernel
+    Matern spectral mixture kernel in GPflow
     Input:
     s  : variance vector
     l  : Matern lengthscales vector
@@ -86,13 +86,15 @@ def learnparams(X, S, Nh):
     count = 0
     for i in range(0, Nh):
         idx = np.argmax(Shat)
-        if Shat[idx] > 0.025*S.max():
+        if Shat[idx] > 0.02*S.max():
             count += 1
-            a = idx - 100
-            b = idx + 100
+            a = idx - 25
+            b = idx + 25
+            if a < 0:
+                a = 0
             x = X
             y = Shat
-            p0 = np.array([0.1, 0.1, 2.*np.pi*X[idx]])
+            p0 = np.array([1.0, 0.1, 2.*np.pi*X[idx]])
             phat = sp.optimize.minimize(Lloss, p0, method='L-BFGS-B',
                                         args=(x, y), tol=1e-10,
                                         options={'disp': False})
