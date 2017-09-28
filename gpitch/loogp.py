@@ -1,16 +1,14 @@
 import numpy as np
-import GPflow
-from GPflow import settings
-from GPflow.kullback_leiblers import gauss_kl, gauss_kl_white
-from GPflow.minibatch import MinibatchData
+import gpflow
+from gpflow import settings
+from gpflow.kullback_leiblers import gauss_kl, gauss_kl_white
+from gpflow.minibatch import MinibatchData
 import tensorflow as tf
-import loo_likelihood
-reload(loo_likelihood)
-from loo_likelihood import LooLik
+from likelihoods import LooLik
 jitter = settings.numerics.jitter_level
 
 
-class LooGP(GPflow.model.Model):
+class LooGP(gpflow.model.Model):
     def __init__(self, X, Y, kf, kg, Z, whiten=True, minibatch_size=None,
                  old_version=False):
         '''Leave One Out (LOO) model.
@@ -18,7 +16,7 @@ class LooGP(GPflow.model.Model):
         kf : list of kernels for each latent quasi-periodic function
         kg : list of kernels for each latent envelope function
         '''
-        GPflow.model.Model.__init__(self)
+        gpflow.model.Model.__init__(self)
 
         if minibatch_size is None:
             minibatch_size = X.shape[0]
@@ -28,12 +26,12 @@ class LooGP(GPflow.model.Model):
         self.Y = Y
         self.X = MinibatchData(X, minibatch_size, np.random.RandomState(0))
         self.Y = MinibatchData(Y, minibatch_size, np.random.RandomState(0))
-        #self.X = GPflow.param.DataHolder(X, on_shape_change='pass')
-        #self.Y = GPflow.param.DataHolder(Y, on_shape_change='pass')
+        #self.X = gpflow.param.DataHolder(X, on_shape_change='pass')
+        #self.Y = gpflow.param.DataHolder(Y, on_shape_change='pass')
 
-        self.Z = GPflow.param.DataHolder(Z, on_shape_change='pass')
+        self.Z = gpflow.param.DataHolder(Z, on_shape_change='pass')
         #self.Z = Z
-        #self.Z = GPflow.param.Param(Z)
+        #self.Z = gpflow.param.Param(Z)
 
         self.kern_f1, self.kern_f2  = kf[0], kf[1]
         self.kern_g1, self.kern_g2 = kg[0], kg[1]
@@ -43,13 +41,13 @@ class LooGP(GPflow.model.Model):
 
         # initialize variational parameters
         self.q_mu1, self.q_mu2, self.q_mu3, self.q_mu4 = \
-        [GPflow.param.Param(np.zeros((self.Z.shape[0], 1))) for _ in range(4)]
+        [gpflow.param.Param(np.zeros((self.Z.shape[0], 1))) for _ in range(4)]
 
         q_sqrt = np.array([np.eye(self.num_inducing)
                            for _ in range(1)]).swapaxes(0, 2)
 
         self.q_sqrt1, self.q_sqrt2, self.q_sqrt3, self.q_sqrt4 = \
-        [GPflow.param.Param(q_sqrt.copy()) for _ in range(4)]
+        [gpflow.param.Param(q_sqrt.copy()) for _ in range(4)]
 
     def build_prior_KL(self):
         if self.whiten:
@@ -74,28 +72,28 @@ class LooGP(GPflow.model.Model):
         KL = self.build_prior_KL()
 
         # Get conditionals
-        fmean1, fvar1 = GPflow.conditionals.conditional(self.X, self.Z,
+        fmean1, fvar1 = gpflow.conditionals.conditional(self.X, self.Z,
                                                         self.kern_f1, self.q_mu1,
                                                         q_sqrt=self.q_sqrt1,
                                                         full_cov=False,
                                                         whiten=self.whiten)
-        fmean2, fvar2 = GPflow.conditionals.conditional(self.X, self.Z,
+        fmean2, fvar2 = gpflow.conditionals.conditional(self.X, self.Z,
                                                         self.kern_g1, self.q_mu2,
                                                         q_sqrt=self.q_sqrt2,
                                                         full_cov=False,
                                                         whiten=self.whiten)
-        fmean3, fvar3 = GPflow.conditionals.conditional(self.X, self.Z,
+        fmean3, fvar3 = gpflow.conditionals.conditional(self.X, self.Z,
                                                         self.kern_f2, self.q_mu3,
                                                         q_sqrt=self.q_sqrt3,
                                                         full_cov=False,
                                                         whiten=self.whiten)
-        fmean4, fvar4 = GPflow.conditionals.conditional(self.X, self.Z,
+        fmean4, fvar4 = gpflow.conditionals.conditional(self.X, self.Z,
                                                         self.kern_g2, self.q_mu4,
                                                         q_sqrt=self.q_sqrt4,
                                                         full_cov=False,
                                                         whiten=self.whiten)
-        fmean = tf.concat(1, [fmean1, fmean2, fmean3, fmean4])
-        fvar = tf.concat(1, [fvar1, fvar2, fvar3, fvar4])
+        fmean = tf.concat([fmean1, fmean2, fmean3, fmean4], 1)
+        fvar = tf.concat([fvar1, fvar2, fvar3, fvar4], 1)
 
         # Get variational expectations.
         var_exp = self.likelihood.variational_expectations(fmean, fvar, self.Y)
@@ -106,30 +104,30 @@ class LooGP(GPflow.model.Model):
 
         return tf.reduce_sum(var_exp) * scale - KL
 
-    @GPflow.param.AutoFlow((tf.float64, [None, None]))
+    @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_f1(self, Xnew):
-        return GPflow.conditionals.conditional(Xnew, self.Z, self.kern_f1,
+        return gpflow.conditionals.conditional(Xnew, self.Z, self.kern_f1,
                                                self.q_mu1, q_sqrt=self.q_sqrt1,
                                                full_cov=False,
                                                whiten=self.whiten)
 
-    @GPflow.param.AutoFlow((tf.float64, [None, None]))
+    @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_g1(self, Xnew):
-        return GPflow.conditionals.conditional(Xnew, self.Z, self.kern_g1,
+        return gpflow.conditionals.conditional(Xnew, self.Z, self.kern_g1,
                                                self.q_mu2, q_sqrt=self.q_sqrt2,
                                                full_cov=False,
                                                whiten=self.whiten)
 
-    @GPflow.param.AutoFlow((tf.float64, [None, None]))
+    @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_f2(self, Xnew):
-        return GPflow.conditionals.conditional(Xnew, self.Z, self.kern_f2,
+        return gpflow.conditionals.conditional(Xnew, self.Z, self.kern_f2,
                                                self.q_mu3, q_sqrt=self.q_sqrt3,
                                                full_cov=False,
                                                whiten=self.whiten)
 
-    @GPflow.param.AutoFlow((tf.float64, [None, None]))
+    @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_g2(self, Xnew):
-        return GPflow.conditionals.conditional(Xnew, self.Z, self.kern_g2,
+        return gpflow.conditionals.conditional(Xnew, self.Z, self.kern_g2,
                                                self.q_mu4, q_sqrt=self.q_sqrt4,
                                                full_cov=False,
                                                whiten=self.whiten)

@@ -1,15 +1,10 @@
-'''This script is a demo of the new version for the modulated GP. The variable
-ws defines the size (in number of samples) of the analysis window. choose ws=N
-to analyze all data at once.'''
 import numpy as np
 from matplotlib import pyplot as plt
 import tensorflow as tf
-import GPflow
+import gpflow
 import time
-import gpitch as gpi
 import loogp
-reload(loogp)
-
+import amtgp
 
 
 plt.rcParams['figure.figsize'] = (18, 6)  # set plot size
@@ -18,16 +13,16 @@ plt.close('all')
 
 # generate synthetic data
 fs = 16e3  # sample frequency
-N = 1600  # number of samples
+N = 1500  # number of samples
 x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)  # time
 noise_var = 1.e-3
 pitch1 = 440.00  # Hertz, A4 (La)
 pitch2 = 659.25  # Hertz, E5 (Mi)
-kenv1 = GPflow.kernels.Matern32(input_dim=1, lengthscales=0.01, variance=10.)
-kenv2 = GPflow.kernels.Matern32(input_dim=1, lengthscales=0.005, variance=10.)
-kper1 = GPflow.kernels.PeriodicKernel(input_dim=1, lengthscales=0.25,
+kenv1 = gpflow.kernels.Matern32(input_dim=1, lengthscales=0.01, variance=10.)
+kenv2 = gpflow.kernels.Matern32(input_dim=1, lengthscales=0.005, variance=10.)
+kper1 = gpflow.kernels.PeriodicKernel(input_dim=1, lengthscales=0.25,
                                       variance=np.sqrt(0.5), period=1./pitch1)
-kper2 = GPflow.kernels.PeriodicKernel(input_dim=1, lengthscales=0.25,
+kper2 = gpflow.kernels.PeriodicKernel(input_dim=1, lengthscales=0.25,
                                       variance=np.sqrt(0.5), period=1./pitch2)
 
 Kenv1 = kenv1.compute_K_symm(x)
@@ -42,14 +37,14 @@ f1 /= np.max(np.abs(f1))
 f2 /= np.max(np.abs(f2))
 g1 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kenv1).reshape(-1, 1)
 g2 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kenv2).reshape(-1, 1)
-source1 = gpi.logistic(g1)*f1
-source2 = gpi.logistic(g2)*f2
+source1 = amtgp.logistic(g1)*f1
+source2 = amtgp.logistic(g2)*f2
 mean = source1 + source2
 y = mean + np.random.randn(*mean.shape) * np.sqrt(noise_var)
 
 # split data into windows
-ws = 400  # window size (samples)
-#ws = N  # use all data at once (i.e. no windowing)
+#ws = 500  # window size (samples)
+ws = N  # use all data at once (i.e. no windowing)
 Nw = N/ws  # number of windows
 x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
 y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, Nw)]
@@ -85,6 +80,7 @@ for i in range(Nw):
     m.q_mu2._array = np.zeros(z.shape)
     m.q_mu3._array = np.zeros(z.shape)
     m.q_mu4._array = np.zeros(z.shape)
+
     m.q_sqrt1._array = np.expand_dims(np.eye(z.size), 2)
     m.q_sqrt2._array = np.expand_dims(np.eye(z.size), 2)
     m.q_sqrt3._array = np.expand_dims(np.eye(z.size), 2)
@@ -95,7 +91,6 @@ for i in range(Nw):
     qm2[i], qv2[i] = m.predict_g1(x_l[i])
     qm3[i], qv3[i] = m.predict_f2(x_l[i])
     qm4[i], qv4[i] = m.predict_g2(x_l[i])
-
 print("--- %s seconds ---" % (time.time() - start_time))
 
 qm1 = np.asarray(qm1).reshape(-1, 1)
@@ -108,7 +103,7 @@ qv2 = np.asarray(qv2).reshape(-1, 1)
 qv3 = np.asarray(qv3).reshape(-1, 1)
 qv4 = np.asarray(qv4).reshape(-1, 1)
 
-yhat = gpi.logistic(qm2)*qm1 + gpi.logistic(qm4)*qm3
+yhat = amtgp.logistic(qm2)*qm1 + amtgp.logistic(qm4)*qm3
 
 col = '#0172B2'
 plt.figure(), plt.title('Mixture data and approximation')
@@ -131,28 +126,25 @@ axarr[1].fill_between(x[:, 0], qm3[:, 0] - 2*np.sqrt(qv3[:, 0]),
 
 f, axarr = plt.subplots(2, sharex=True)
 axarr[0].set_title('Latent envelope 1 (A4)')
-axarr[0].plot(x[::5], gpi.logistic(g1[::5]), '.k', mew=1)
-axarr[0].plot(x, gpi.logistic(qm2), 'g', lw=2)
-axarr[0].fill_between(x[:, 0], gpi.logistic(qm2[:, 0] - 2*np.sqrt(qv2[:, 0])),
-                  gpi.logistic(qm2[:, 0] + 2*np.sqrt(qv2[:, 0])),
+axarr[0].plot(x[::5], amtgp.logistic(g1[::5]), '.k', mew=1)
+axarr[0].plot(x, amtgp.logistic(qm2), 'g', lw=2)
+axarr[0].fill_between(x[:, 0], amtgp.logistic(qm2[:, 0] - 2*np.sqrt(qv2[:, 0])),
+                  amtgp.logistic(qm2[:, 0] + 2*np.sqrt(qv2[:, 0])),
                   color='green', alpha=0.2)
 axarr[1].set_title('Latent envelope 2 (E5)')
-axarr[1].plot(x[::5], gpi.logistic(g2[::5]), '.k', mew=1)
-axarr[1].plot(x, gpi.logistic(qm4), 'g', lw=2)
-axarr[1].fill_between(x[:, 0], gpi.logistic(qm4[:, 0] - 2*np.sqrt(qv4[:, 0])),
-                  gpi.logistic(qm4[:, 0] + 2*np.sqrt(qv4[:, 0])),
+axarr[1].plot(x[::5], amtgp.logistic(g2[::5]), '.k', mew=1)
+axarr[1].plot(x, amtgp.logistic(qm4), 'g', lw=2)
+axarr[1].fill_between(x[:, 0], amtgp.logistic(qm4[:, 0] - 2*np.sqrt(qv4[:, 0])),
+                  amtgp.logistic(qm4[:, 0] + 2*np.sqrt(qv4[:, 0])),
                   color='green', alpha=0.2)
 
 f, axarr = plt.subplots(2, sharex=True)
 axarr[0].set_title('Latent source 1 (A4)')
 axarr[0].plot(x, source1, '.k', mew=1)
-axarr[0].plot(x, gpi.logistic(qm2)*qm1, color=col, lw=2)
+axarr[0].plot(x, amtgp.logistic(qm2)*qm1, color=col, lw=2)
 axarr[1].set_title('Latent source 2 (E5)')
 axarr[1].plot(x, source2, '.k')
-axarr[1].plot(x, gpi.logistic(qm4)*qm3, color=col, lw=2)
-
-
-
+axarr[1].plot(x, amtgp.logistic(qm4)*qm3, color=col, lw=2)
 
 
 
