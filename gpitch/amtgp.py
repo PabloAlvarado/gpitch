@@ -13,7 +13,7 @@ if server:
     matplotlib.use('agg')
 from matplotlib import pyplot as plt
 
-def init_settings(visible_device='0', interactive=True):
+def init_settings(visible_device='0', interactive=False):
     '''Initialize usage of GPU and plotting'''
     os.environ["CUDA_VISIBLE_DEVICES"] = visible_device # configuration use only one GPU
     config = tf.ConfigProto() #Configuration to not to use all the memory
@@ -164,7 +164,8 @@ def wavread(filename, start=0, N=None, norm=True, mono=True):
     if norm:
         y = y / np.max(np.abs(y))
 
-    start = start
+    if N == None:
+    	N = y.size
     y = y[start: N + start].reshape(-1, 1) # select data subset
     return fs, y
 
