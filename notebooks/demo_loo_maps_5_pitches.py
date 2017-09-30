@@ -17,6 +17,13 @@ name_list = ['60', '64', '67', '72', '76'] #  pitches to detect
 params = [np.load('../results/isolated_sounds/params_' + name_list[i] + '_1-down.npz')
           for i in range(0, 5)] #  load hyperparams learnt from isolated sounds
 
+for i in range(0, 5):
+    print params[i]['act_params'][0]
+
+for i in range(0, 5):
+    print params[i]['act_params'][1]
+
+#
 # gpitch.amtgp.init_settings(visible_device = '0', interactive=False) #  configure gpu usage and plotting
 # sf, y = wav.read('../data/segment4-down.wav') #load test data
 # _, yt1 = wav.read('../data/60_1-down.wav') #load test data
