@@ -24,22 +24,18 @@ gpitch.amtgp.init_settings(visible_device = '0', interactive=True) #  configure 
 
 Nc = 3 #  number of components
 var = 1. + np.zeros((Nc, 1))
-beta = 0.1
+beta = 0.01
 f0 = 10.00
-leng = 0.1*var.copy()
+leng = 0.2*var.copy()
 k = gpitch.kernels.Inharmonic(input_dim=1, lengthscales=leng, variances=var, beta=beta, f0=f0)
 
 N = 2000
 x = np.linspace(-1, 1, N).reshape(-1,1)
 
-cov = k.compute_K_symm(x)
+kernel_f = k.compute_K(x, np.asarray(0.).reshape(-1,1))
 
 plt.figure()
-plt.matshow(cov)
-plt.savefig('../figures/inharmonic_kernel_K.png')
-
-plt.figure()
-plt.plot(x, cov[:,1000].reshape(-1, 1))
+plt.plot(x, kernel_f)
 plt.savefig('../figures/inharmonic_kernel_kernel.png')
 
 # m = gpitch.modpdet.ModPDet(x=x, y=y, fs=fs, ws=ws, jump=dsamp)
