@@ -22,12 +22,15 @@ dsamp = 160 #  downsample rate for inducing points vector
 
 m = gpitch.modpdet.ModPDet(x=x, y=y, fs=fs, ws=ws, jump=dsamp)
 m.model.whiten = False
+m.model.kern1.fixed = True
 m.model.kern2.fixed = False # activation kernel
 maxiter = 100
-restarts = 20
+restarts = 2
 init_hyper, learnt_hyper, mse = m.optimize_restart(maxiter=maxiter, restarts=restarts)
 m.model.kern2.lengthscales = learnt_hyper[0].mean()
 m.model.kern2.variance = learnt_hyper[1].mean()
+m.model.kern1.fixed = True
+m.model.kern2.fixed = False
 m.optimize(disp=0, maxiter=maxiter)
 
 plt.rcParams['figure.figsize'] = (18, 18)  # set plot size
