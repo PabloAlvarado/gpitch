@@ -25,7 +25,7 @@ m.model.whiten = False
 m.model.kern1.fixed = True
 m.model.kern2.fixed = False # activation kernel
 maxiter = 100
-restarts = 2
+restarts = 10
 init_hyper, learnt_hyper, mse = m.optimize_restart(maxiter=maxiter, restarts=restarts)
 m.model.kern2.lengthscales = learnt_hyper[0].mean()
 m.model.kern2.variance = learnt_hyper[1].mean()
