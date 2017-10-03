@@ -18,10 +18,10 @@ params = [np.load('../results/isolated_sounds/params_' + name_list[i] + '_1-down
           for i in range(0, 5)] #  load hyperparams learnt from isolated sounds
 
 for i in range(0, 5):
-    print params[i]['act_params'][0]
+    print params[i]['com_params'][0]
 
-for i in range(0, 5):
-    print params[i]['act_params'][1]
+#for i in range(0, 5):
+#    print params[i]['act_params'][1]
 
 #
 # gpitch.amtgp.init_settings(visible_device = '0', interactive=False) #  configure gpu usage and plotting
