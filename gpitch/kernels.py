@@ -84,8 +84,11 @@ class Inharmonic(gpflow.kernels.Kern):
         return k
 
 
-    def Kdiag(self, X, presliced=False):
-        return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance_1))
+    def Kdiag(self, X):
+        var = tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance_1))
+        for i in range(2, self.Nc + 1):
+            var += tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(getattr(self, 'variance_' + str(i))))
+        return var
 
 
 

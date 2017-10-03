@@ -27,7 +27,7 @@ def init_settings(visible_device='0', interactive=False):
     plt.rcParams['figure.figsize'] = (18, 6)  # set plot size
     plt.interactive(True)
     plt.close('all')
-
+    
 
 def Lorentzian(p, x):
     '''
