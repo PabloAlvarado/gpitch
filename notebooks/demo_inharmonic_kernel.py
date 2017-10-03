@@ -23,16 +23,17 @@ gpitch.amtgp.init_settings(visible_device = '0', interactive=True) #  configure 
 # dsamp = 160 #  downsample rate for inducing points vector
 
 Nc = 4 #  number of components
-var = 1. + np.zeros((Nc, 1))
-var[0] = 1.
-var[1] = 2.
-var[2] = 3.
-beta = 0.01
-f0 = 5.00
-leng = 0.2*var.copy()
+var =  np.zeros((Nc, 1))
+var[0] = 0.5
+var[1] = 0.3
+var[2] = 0.4
+var[3] = 0.2
+beta = 0.05
+f0 = 5.
+leng = 1./5. * np.ones((Nc, 1))
 k = gpitch.kernels.Inharmonic(input_dim=1, lengthscales=leng, variances=var, beta=beta, f0=f0)
 
-N = 2000
+N = 10000
 x = np.linspace(-1, 1, N).reshape(-1,1)
 
 kernel_f = k.compute_K(x, np.asarray(0.).reshape(-1,1))
@@ -41,7 +42,7 @@ plt.figure()
 plt.plot(x, kernel_f, lw=2)
 plt.xlim([-1, 1])
 plt.tight_layout()
-plt.savefig('../figures/inharmonic_kernel_kernel.pdf')
+plt.savefig('../figures/inharmonic_kernel_kernel.png')
 
 print k.compute_Kdiag(x)
 
