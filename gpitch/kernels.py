@@ -2,7 +2,6 @@ from __future__ import print_function, absolute_import
 from functools import reduce
 import itertools
 import warnings
-
 import tensorflow as tf
 import numpy as np
 from gpflow.param import Param, Parameterized, AutoFlow
@@ -11,10 +10,9 @@ from gpflow._settings import settings
 float_type = settings.dtypes.float_type
 int_type = settings.dtypes.int_type
 np_float_type = np.float32 if float_type is tf.float32 else np.float64
-from gpflow.kernels import Kern
 
 
-class Matern12Cosine(Kern):
+class Matern12Cosine(gpflow.kernels.Kern):
     """
     Matern 1/2 times Cosine kernel
     """
@@ -22,7 +20,7 @@ class Matern12Cosine(Kern):
     def __init__(self, input_dim, period=1.0, variance=1.0,
                  lengthscales=1.0, active_dims=None):
         # No ARD support for lengthscale or period yet
-        Kern.__init__(self, input_dim, active_dims)
+        gpflow.kernels.Kern.__init__(self, input_dim, active_dims)
         self.variance = Param(variance, transforms.positive)
         self.lengthscales = Param(lengthscales, transforms.positive)
         self.ARD = False
@@ -48,8 +46,26 @@ class Matern12Cosine(Kern):
         return self.variance * tf.exp(-r1) * tf.cos(r2)
 
 
+class Inharmonic(kernels.Kern):
+    '''Inharmonic kernel. Useful for modelling piano sounds.'''
+    def __init__(self, input_dim, lengthscales, variances, beta, f0):
+        kernels.Kern.__init__(self, input_dim, active_dims=None)
+        self.Nc = lengthscales.size
+        self.ARD = False
+        #  generate a param object for each lengthscale and variance.
+        #  lengthscales and variances must be (Nc,) arrays.
+        for i in range(self.Nc):
+            setattr(self, 'lengthscale_' + str(i+1), param.Param(lengthscales[i], transforms.positive) )
+            setattr(self, 'variance_' + str(i+1), param.Param(variances[i], transforms.positive) )
+        self.beta = param.Param(beta, transforms.positive)
+        self.f0 = param.Param(f0, transforms.positive)
 
 
+    def K(self, arg):
+        pass
+
+    def Kdiag(self, arg):
+        pass
 
 
 
