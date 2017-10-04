@@ -4,13 +4,14 @@ import gpflow
 from scipy.io import wavfile as wav
 from scipy.fftpack import fft, ifft
 import matplotlib
-server = False # define if running code on server
+server = True # define if running code on server
 if server:
    matplotlib.use('agg')
 from matplotlib import pyplot as plt
 import sys
 sys.path.append('../')
 import gpitch
+from gpitch.amtgp import logistic
 reload(gpitch)
 
 
@@ -35,14 +36,36 @@ Kf = kern_f.compute_K_symm(x)
 Kg = kern_g.compute_K_symm(x)
 f = np.random.multivariate_normal(np.zeros(N), Kf, 1).reshape(-1, 1)
 g = np.random.multivariate_normal(np.zeros(N), Kg, 1).reshape(-1, 1)
-mean = gpitch.amtgp.logistic(g) * f
+mean = logistic(g) * f
 y = mean + np.sqrt(noise_var)*np.random.randn(*mean.shape)
 
+
+m = gpitch.modgp.ModGP(x, y, kern_f, kern_g, x[::10].copy())
+m.kern1.fixed = True
+m.kern2.fixed = True
+m.likelihood.noise_var = noise_var
+m.likelihood.noise_var.fixed = True
+m.optimize(disp=1, maxiter=100)
+
+m.kern1.fixed = False
+m.kern2.fixed = False
+m.optimize(disp=1, maxiter=100)
+
+
+mu, var = m.predict_f(x)
+plt.plot(x, mu, 'C0')
+plt.plot(x, mu + 2*np.sqrt(var), 'C0--')
+plt.plot(x, mu - 2*np.sqrt(var), 'C0--')
+plt.twinx()
+mu, var = m.predict_g(x)
+plt.plot(x, logistic(mu), 'g')
+plt.plot(x, logistic(mu + 2*np.sqrt(var)), 'g--')
+plt.plot(x, logistic(mu - 2*np.sqrt(var)), 'g--')
 
 plt.figure()
 plt.plot(x, f, lw=2)
 plt.twinx()
-plt.plot(x, gpitch.amtgp.logistic(g), 'g', lw=2)
+plt.plot(x, logistic(g), 'g', lw=2)
 
 plt.figure()
 plt.plot(x, y, lw=2)
