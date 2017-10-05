@@ -8,7 +8,7 @@ float_type = settings.dtypes.float_type
 
 
 class ModGP(gpflow.model.Model):
-    def __init__(self, X, Y, kern1, kern2, Z, whiten=True, minibatch_size=None):
+    def __init__(self, X, Y, kern1, kern2, Z, whiten=False, minibatch_size=None):
         gpflow.model.Model.__init__(self)
         if minibatch_size is None:
             minibatch_size = X.shape[0]
