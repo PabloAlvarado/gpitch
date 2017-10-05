@@ -15,7 +15,7 @@ from gpitch.amtgp import logistic
 reload(gpitch)
 
 
-
+np.random.seed(29) # initialize randomly params
 gpitch.amtgp.init_settings(visible_device = '0', interactive=True) #  configure gpu usage and plotting
 
 Nc = 4 #  set kernel params
@@ -42,7 +42,7 @@ mean = logistic(g) * f
 y = mean + np.sqrt(noise_var)*np.random.randn(*mean.shape)
 
 #  set model
-np.random.seed(29) # initialize randomly params
+
 Nc = 4
 init_leng_f =1.*np.random.rand(Nc, 1)
 init_var_f = 1.*np.random.rand(Nc, 1)
@@ -59,21 +59,21 @@ m.kern1.fixed = True
 m.kern2.fixed = True
 m.likelihood.noise_var = noise_var
 m.likelihood.noise_var.fixed = True
-m.optimize(disp=1, maxiter=500)
+m.optimize(disp=1, maxiter=400)
 
-mu, var = m.predict_f(x)
+m_f, v_f = m.predict_f(x)
+m_g, v_g = m.predict_g(x)
+
 plt.figure()
-plt.plot(x, mu, 'C0')
-plt.plot(x, mu + 2*np.sqrt(var), 'C0--')
-plt.plot(x, mu - 2*np.sqrt(var), 'C0--')
+plt.plot(x, m_f, 'C0')
+plt.plot(x, m_f + 2*np.sqrt(v_f), 'C0--')
+plt.plot(x, m_f - 2*np.sqrt(v_f), 'C0--')
 plt.twinx()
-mu, var = m.predict_g(x)
-plt.plot(x, logistic(mu), 'g')
-plt.plot(x, logistic(mu + 2*np.sqrt(var)), 'g--')
-plt.plot(x, logistic(mu - 2*np.sqrt(var)), 'g--')
+plt.plot(x, logistic(m_g), 'g')
+plt.plot(x, logistic(m_g + 2*np.sqrt(v_g)), 'g--')
+plt.plot(x, logistic(m_g - 2*np.sqrt(v_g)), 'g--')
 plt.title('Infered functions')
 plt.savefig('../figures/demo_inharmonic_toy_opt.png')
-
 
 plt.figure()
 plt.title('actual functions')
@@ -84,7 +84,7 @@ plt.savefig('../figures/demo_inharmonic_toy_latent_functions.png')
 
 plt.figure()
 plt.title('g functions')
-plt.plot(x, mu, 'C0')
+plt.plot(x, m_g, 'C0', lw=2)
 plt.plot(x, g, 'g', lw=2)
 plt.legend(['prediction', 'actual functions'])
 plt.savefig('../figures/demo_inharmonic_toy_latent_functions_g.png')
@@ -93,16 +93,77 @@ plt.figure()
 plt.plot(x, y, lw=2)
 plt.savefig('../figures/demo_inharmonic_toy_latent_data.png')
 
-x_plot = np.linspace(-1, 1, N).reshape(-1,1)
-kern_plot = kern_f.compute_K(x_plot, np.asarray(0.).reshape(-1,1)) #  plot kernel
+
+nrows = 4
+ncols = 2
+plt.rcParams['figure.figsize'] = (24,24)  # set plot size
+zoom_limits = [x.max()/2, x.max()/2 + 0.2*x.max()]
+
+fig, fig_array = plt.subplots(nrows, ncols, sharex='row', sharey='row')
+
+fig_array[0, 0].set_title('Data')
+fig_array[0, 0].plot(x, y, lw=2)
+fig_array[0, 1].set_title('Approximation')
+fig_array[0, 1].plot(x, logistic(m_g)*m_f , lw=2)
+
+fig_array[1, 0].set_title('Infered component')
+fig_array[1, 0].plot(x, m_f, color='C0', lw=2)
+fig_array[1, 0].fill_between(x[:, 0], m_f[:, 0] - 2*np.sqrt(v_f[:, 0]),
+                     m_f[:, 0] + 2*np.sqrt(v_f[:, 0]), color='C0', alpha=0.2)
+
+fig_array[1, 1].set_title('Actual component')
+fig_array[1, 1].plot(x, f, color='C0', lw=2)
+
+fig_array[2, 0].set_title('Infered activation')
+fig_array[2, 0].plot(x, logistic(m_g), color='g', lw=2)
+fig_array[2, 0].fill_between(x[:, 0], logistic(m_g[:, 0] - 2*np.sqrt(v_g[:, 0])),
+                     logistic(m_g[:, 0] + 2*np.sqrt(v_g[:, 0])), color='g', alpha=0.2)
+
+fig_array[2, 1].set_title('Actual activation ')
+fig_array[2, 1].plot(x, logistic(g), color='g', lw=2)
+
+fig_array[3, 0].set_title('Infered component (zoom in)')
+fig_array[3, 0].plot(x, m_f, color='C0', lw=2)
+fig_array[3, 0].fill_between(x[:, 0], m_f[:, 0] - 2*np.sqrt(v_f[:, 0]),
+                     m_f[:, 0] + 2*np.sqrt(v_f[:, 0]), color='C0', alpha=0.2)
+fig_array[3, 0].set_xlim(zoom_limits)
+
+fig_array[3, 1].set_title('Actual component (zoom in)')
+fig_array[3, 1].plot(x, f, color='C0', lw=2)
+fig_array[3, 1].set_xlim(zoom_limits)
+
+plt.savefig('../figures/demo_inharmonic_toy_all.png')
 
 
-plt.figure()
-plt.plot(x_plot, kern_plot, lw=2)
-plt.xlim([-1, 1])
-plt.tight_layout()
-plt.savefig('../figures/demo_inharmonic_toy.png')
-#print kern.compute_Kdiag(x)
+fig, fig_array = plt.subplots(nrows, ncols, sharex=False, sharey=False)
+
+fig_array[0, 0].set_title('Data')
+fig_array[0, 0].plot(x, y, lw=2)
+fig_array[0, 1].set_title('Approximation')
+fig_array[0, 1].plot(x, logistic(m_g)*m_f , lw=2)
+
+fig_array[1, 0].set_title('Component')
+fig_array[1, 0].plot(x, m_f, color='C0', lw=2)
+fig_array[1, 0].fill_between(x[:, 0], m_f[:, 0] - 2*np.sqrt(v_f[:, 0]),
+                     m_f[:, 0] + 2*np.sqrt(v_f[:, 0]), color='C0', alpha=0.2)
+
+fig_array[1, 1].set_title('Component (zoom in)')
+fig_array[1, 1].plot(x, m_f, color='C0', lw=2)
+fig_array[1, 1].fill_between(x[:, 0], m_f[:, 0] - 2*np.sqrt(v_f[:, 0]),
+                     m_f[:, 0] + 2*np.sqrt(v_f[:, 0]), color='C0', alpha=0.2)
+fig_array[1, 1].set_xlim(zoom_limits)
+
+fig_array[2, 0].set_title('Activation')
+fig_array[2, 0].plot(x, logistic(m_g), color='g', lw=2)
+fig_array[2, 0].fill_between(x[:, 0], logistic(m_g[:, 0] - 2*np.sqrt(v_g[:, 0])),
+                     logistic(m_g[:, 0] + 2*np.sqrt(v_g[:, 0])), color='g', alpha=0.2)
+
+fig_array[2, 1].set_title('Activation (zoom in)')
+fig_array[2, 1].plot(x, logistic(m_g), color='g', lw=2)
+fig_array[2, 1].fill_between(x[:, 0], logistic(m_g[:, 0] - 2*np.sqrt(v_g[:, 0])),
+                     logistic(m_g[:, 0] + 2*np.sqrt(v_g[:, 0])), color='g', alpha=0.2)
+fig_array[2, 1].set_xlim(zoom_limits)
+plt.savefig('../figures/demo_inharmonic_toy_zoom.png')
 
 
 
