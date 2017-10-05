@@ -16,7 +16,7 @@ import amtgp
 
 class ModPDet():
     '''Gaussian Process pitch detection using modulated GP'''
-    def __init__(self, x, y, fs, ws, jump, Nw=None, bounded=True):
+    def __init__(self, x, y, fs, ws, jump, Nw=None, bounded=True, whiten=False):
         self.x, self.y = x, y
         self.fs, self.ws = fs, ws # sample rate, and window size (samples)
         self.jump, self.N = jump, x.size
@@ -26,6 +26,7 @@ class ModPDet():
             self.Nw = 1
         self.Nh = 10 # number of maximun frequency components in density
         self.bounded = bounded #  bound inducing variables for f_m to be (-1, 1)
+        self.whiten = whiten
 
         # frequency representation data
         self.Y = fft(y.reshape(-1,)) #  FFT data
@@ -37,17 +38,18 @@ class ModPDet():
         self.s *= sig_scale
 
         self.kf = amtgp.Matern12CosineMix(variance=self.s, lengthscale=self.l, period=1./self.f, Nh=self.s.size)
-        self.kg = gpflow.kernels.Matern32(input_dim=1, variance=10.*np.random.rand(), lengthscales=10*np.random.rand())
+        self.kg = gpflow.kernels.Matern32(input_dim=1, variance=25.*np.random.rand(), lengthscales=np.random.rand())
 
         self.x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, self.Nw)] # split data into windows
         self.y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, self.Nw)]
         self.z = self.x_l[0][::jump].copy()
 
-        self.model = modgp.ModGP(self.x_l[0].copy(), self.y_l[0].copy(), self.kf, self.kg, self.z, whiten=True)
+        self.model = modgp.ModGP(self.x_l[0].copy(), self.y_l[0].copy(), self.kf, self.kg, self.z, whiten=self.whiten)
         self.model.likelihood.noise_var = 1e-7
         self.model.likelihood.noise_var.fixed = True
         if self.bounded:
             self.model.q_mu1.transform = gpflow.transforms.Logistic(a=-1.0, b=1.0)
+            self.model.q_mu2.transform = gpflow.transforms.Logistic(a=-8.0, b=8.0)
         self.model.kern1.fixed = True # component kernel
         self.model.kern2.fixed = True # activation kernel
 
@@ -66,15 +68,16 @@ class ModPDet():
         self.x_pred = np.asarray(self.x_pred_l).reshape(-1, 1)
         self.y_pred = np.asarray(self.y_pred_l).reshape(-1, 1)
 
-    def optimize(self, disp, maxiter):
+    def optimize(self, disp, maxiter, reinit_variational_params=True):
         for i in range(self.Nw):
             self.model.X = self.x_l[i].copy()
             self.model.Y = self.y_l[i].copy()
             self.model.Z = self.x_l[i][::self.jump].copy()
-            self.model.q_mu1._array = np.zeros(self.model.Z.shape)
-            self.model.q_mu2._array = np.zeros(self.model.Z.shape)
-            self.model.q_sqrt1._array = np.expand_dims(np.eye(self.model.Z.size), 2)
-            self.model.q_sqrt2._array = np.expand_dims(np.eye(self.model.Z.size), 2)
+            if reinit_variational_params:
+                self.model.q_mu1._array = np.zeros(self.model.Z.shape)
+                self.model.q_mu2._array = np.zeros(self.model.Z.shape)
+                self.model.q_sqrt1._array = np.expand_dims(np.eye(self.model.Z.size), 2)
+                self.model.q_sqrt2._array = np.expand_dims(np.eye(self.model.Z.size), 2)
             self.model.optimize(disp=disp, maxiter=maxiter)
             self.qm1_l[i], self.qv1_l[i] = self.model.predict_f(self.x_l[i])
             self.qm2_l[i], self.qv2_l[i] = self.model.predict_g(self.x_l[i])
