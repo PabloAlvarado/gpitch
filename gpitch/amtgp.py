@@ -7,10 +7,6 @@ from kernels import Matern12Cosine
 from scipy.fftpack import fft
 import os
 import tensorflow as tf
-server = True # define if running kernel on server
-import matplotlib
-if server:
-    matplotlib.use('agg')
 from matplotlib import pyplot as plt
 
 def init_settings(visible_device='0', interactive=False):
@@ -27,7 +23,7 @@ def init_settings(visible_device='0', interactive=False):
     plt.rcParams['figure.figsize'] = (18, 6)  # set plot size
     plt.interactive(True)
     plt.close('all')
-    
+
 
 def Lorentzian(p, x):
     '''
