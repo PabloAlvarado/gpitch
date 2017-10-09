@@ -48,20 +48,20 @@ K_prior = fft(k_plot_prior.reshape(-1,))
 Sk_prior = 2./N * np.abs(K_prior[0:N//2])
 
 # ------------------------------------------------------------------------------
-N = 1600 # numer of data points to load
+N = 3200 # numer of data points to load
 fs, y = gpitch.amtgp.wavread('../data/60_1-down.wav', start=11000, N=N) # load two seconds of data
 x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)
 ws = N # window size (in this case the complete data)
-dsamp = 20 #  downsample rate for inducing points vector
+dsamp = 5 #  downsample rate for inducing points vector
 
 z = x[::dsamp].copy()
-m = gpflow.svgp.SVGP(X=x, Y=y, kern=kern, likelihood=gpflow.likelihoods.Gaussian(), Z=z, whiten=False)
+m = gpflow.svgp.SVGP(X=x, Y=y, kern=kern, likelihood=gpflow.likelihoods.Gaussian(), Z=z, whiten=True)
 m.likelihood.variance = 1e-4
 m.Z.fixed = True
 
 m.likelihood.variance.fixed = True
 m.kern.fixed = True
-m.optimize(disp=0, maxiter=100) # init variational params
+m.optimize(disp=1, maxiter=500) # init variational params
 
 m.likelihood.variance.fixed = True
 m.kern.fixed = False
@@ -75,7 +75,7 @@ m.kern.matern12cosine_7.period.fixed=True
 m.kern.matern12cosine_8.period.fixed=True
 m.kern.matern12cosine_9.period.fixed=True
 m.kern.matern12cosine_10.period.fixed=True
-m.optimize(disp=1, maxiter=100)
+m.optimize(disp=1, maxiter=10)
 
 
 
@@ -83,6 +83,7 @@ m.optimize(disp=1, maxiter=100)
 plt.figure()
 plot(m=m, xpred=x, xdata=x, ydata=y)
 #plt.xlim([0.08, 0.10])
+plt.savefig('../figures/demo_svgp_prediction.png')
 
 
 k_plot_pos = m.kern.compute_K(x_full-1, np.asarray(0).reshape(-1,1))
@@ -95,16 +96,19 @@ plt.plot(x_full, k_plot_prior/np.max(np.abs(k_plot_prior)), lw=2)
 plt.plot(x_full, k_plot_pos/np.max(np.abs(k_plot_pos)), lw=2)
 plt.plot(x_full, k_hat/np.max(np.abs(k_hat)), lw=2)
 plt.legend(['kernel prior', 'kernel posterior', 'kernel_hat'])
+plt.savefig('../figures/demo_svgp_kernels.png')
 
-plt.figure()
-plt.plot(F, S/np.max(S), lw=2)
-plt.plot(F, Sk_prior /np.max(Sk_prior), lw=2)
-plt.plot(F, Sk_pos/np.max(Sk_pos), lw=2)
-plt.xlim([0, 4000])
-plt.legend(['S data', 'S prior', 'S posterior'])
+fig, axarr = plt.subplots(3, sharex=True, sharey=True)
+axarr[0].plot(F, Sk_prior /np.max(Sk_prior), lw=2)
+axarr[1].plot(F, Sk_pos/np.max(Sk_pos), lw=2)
+axarr[2].plot(F, S/np.max(S), lw=2)
+axarr[0].set_xlim([0, 4000])
+axarr[0].legend(['S prior'])
+axarr[1].legend(['S posterior'])
+axarr[2].legend(['S data'])
+plt.savefig('../figures/demo_svgp_densities.png')
 
-if server:
-    plt.savefig('../figures/demo_sgpr_maps.png')
+
 
 
 
