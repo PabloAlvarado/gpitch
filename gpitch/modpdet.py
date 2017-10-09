@@ -6,10 +6,10 @@ import modgp
 from scipy.fftpack import fft
 import os
 import tensorflow as tf
-server = True # define if running kernel on server
-import matplotlib
-if server:
-    matplotlib.use('agg')
+# server = True # define if running kernel on server
+# import matplotlib
+# if server:
+#     matplotlib.use('agg')
 from matplotlib import pyplot as plt
 import amtgp
 

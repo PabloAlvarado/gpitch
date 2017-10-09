@@ -25,6 +25,16 @@ def init_settings(visible_device='0', interactive=False):
     plt.close('all')
 
 
+def load_filename_list(filename):
+    file = open(filename, "r")
+    list_files =  file.readlines()
+    list_files = np.asarray(list_files).reshape(-1,)
+    for i in range(list_files.size):
+        list_files[i] = list_files[i].strip('.wav\n')
+    file.close()
+    return list_files
+
+
 def Lorentzian(p, x):
     '''
     Lorentzian function http://mathworld.wolframodel.com/LorentzianFunction.html
