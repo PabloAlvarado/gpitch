@@ -26,7 +26,7 @@ for nfile in range(lfiles.size):
     F = np.linspace(0, fs/2., N//2) #  frequency vector
     Nc = 10 #  maximun number of frequency components to select
     s, l, f = gpitch.amtgp.learnparams(X=F, S=S, Nh=Nc) #  param learning
-    np.savez_compressed('../../../results/isolated_sounds/params_com_' + lfiles[nfile],
+    np.savez_compressed('../../../results/isolated_sounds/params_comp_' + lfiles[nfile],
                         x = x,
                         y = y,
                         fs = fs,
