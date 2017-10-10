@@ -36,8 +36,8 @@ m.optimize(disp=0, maxiter=maxiter)
 plt.rcParams['figure.figsize'] = (18, 18)  # set plot size
 zoom_limits = [x.max()/2, x.max()/2 + 0.01*x.max()]
 fig, fig_array = m.plot_results(zoom_limits)
-plt.savefig('../figures/demo_modgp_maps.pdf')
-plt.savefig('../figures/demo_modgp_maps.png')
+#plt.savefig('../figures/demo_modgp_maps.pdf')
+plt.savefig('../../results/figures/demo_modgp_maps.png')
 
 f, axs = plt.subplots(1, 2, figsize=(8, 4), tight_layout=True, sharex=True, sharey=True)
 axs[0].plot(init_hyper[0], init_hyper[1], 'k.', ms=10, alpha=0.25)
@@ -47,8 +47,8 @@ axs[1].plot(learnt_hyper[0], learnt_hyper[1], 'k.', ms=10, alpha=0.25)
 axs[1].plot(m.model.kern2.lengthscales.value, m.model.kern2.variance.value, 'rx', mew=2)
 axs[1].set_xlabel('learnt lengthscale')
 axs[1].set_ylabel('learnt variance')
-plt.savefig('../figures/demo_modgp_maps_hyperparams.pdf')
-plt.savefig('../figures/demo_modgp_maps_hyperparams.png')
+#plt.savefig('../figures/demo_modgp_maps_hyperparams.pdf')
+plt.savefig('../../results/figures/demo_modgp_maps_hyperparams.png')
 
 
 

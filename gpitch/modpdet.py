@@ -16,7 +16,7 @@ import amtgp
 
 class ModPDet():
     '''Gaussian Process pitch detection using modulated GP'''
-    def __init__(self, x, y, fs, ws, jump, Nw=None, bounded=True, whiten=False):
+    def __init__(self, x, y, fs, ws, jump, Nw=None, bounded=False, whiten=False):
         self.x, self.y = x, y
         self.fs, self.ws = fs, ws # sample rate, and window size (samples)
         self.jump, self.N = jump, x.size
@@ -38,7 +38,7 @@ class ModPDet():
         self.s *= sig_scale
 
         self.kf = amtgp.Matern12CosineMix(variance=self.s, lengthscale=self.l, period=1./self.f, Nh=self.s.size)
-        self.kg = gpflow.kernels.Matern32(input_dim=1, variance=25.*np.random.rand(), lengthscales=np.random.rand())
+        self.kg = gpflow.kernels.Matern32(input_dim=1, variance=10.*np.random.rand(), lengthscales=10.*np.random.rand())
 
         self.x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, self.Nw)] # split data into windows
         self.y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, self.Nw)]
