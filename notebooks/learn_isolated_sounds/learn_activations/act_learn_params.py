@@ -20,7 +20,7 @@ gpitch.amtgp.init_settings(visible_device = '2', interactive=True) #  configure 
 
 print(filename)
 data_location = '../../../../datasets/maps/sample_rate_16khz/'
-results_location = '../../../../results/files/params_components/'
+results_location = '../../../../results/files/params_activations/'
 
 N = 32000 # numer of data points to load
 fs, y = gpitch.amtgp.wavread(data_location + filename + '.wav', start=5000, N=N) # load two seconds of data
@@ -30,7 +30,7 @@ S =  2./N * np.abs( Y[0:N//2] ) #  spectral density data
 F = np.linspace(0, fs/2., N//2) #  frequency vector
 Nc = 10 #  maximun number of frequency components to select
 s, l, f = gpitch.amtgp.learnparams(X=F, S=S, Nh=Nc) #  param learning
-np.savez_compressed(results_location + 'params_comp_' + filename,
+np.savez_compressed(results_location + 'params_act_' + filename,
                     x = x,
                     y = y,
                     fs = fs,

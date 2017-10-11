@@ -12,8 +12,10 @@ import sys
 sys.path.append('../../../')
 import gpitch
 
-
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings
 gpitch.amtgp.init_settings(visible_device = '0', interactive=True) #  configure gpu usage and plotting
+
 location = "../../../../../../datasets/MAPS/AkPnBcht/ISOL/NO/sample_rate_16khz/" # load list of files no analyse
 lfiles = gpitch.amtgp.load_filename_list(location + 'filename_list.txt')
 
