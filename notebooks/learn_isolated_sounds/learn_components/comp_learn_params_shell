@@ -1,0 +1,7 @@
+#!/bin/bash
+
+
+for i in $(cat ../../../../datasets/maps/sample_rate_16khz/filename_list.txt)
+do
+python comp_learn_params.py $i
+done
