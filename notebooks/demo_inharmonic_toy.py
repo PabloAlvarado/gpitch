@@ -15,6 +15,7 @@ from gpitch.amtgp import logistic
 reload(gpitch)
 
 
+
 #np.random.seed(29) # initialize randomly params
 gpitch.amtgp.init_settings(visible_device = '0', interactive=True) #  configure gpu usage and plotting
 

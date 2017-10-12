@@ -14,6 +14,32 @@ sys.path.append('../../../')
 import gpitch
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 filename = sys.argv[1].strip('.wav\n') #  load external variable (name of fole to process)
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings
 gpitch.amtgp.init_settings(visible_device = '2', interactive=True) #  configure gpu usage and plotting
