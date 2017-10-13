@@ -10,6 +10,7 @@ import sys
 sys.path.append('../')
 import gpitch
 
+
 gpitch.amtgp.init_settings(visible_device = '1', interactive=True) #  configure gpu usage and plotting
 np.random.seed(29)
 fs = 16e3  # sample frequency
