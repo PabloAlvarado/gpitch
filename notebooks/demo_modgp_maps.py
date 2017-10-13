@@ -17,7 +17,6 @@ N = 32000 # numer of data points to load
 fs, y = gpitch.amtgp.wavread('../../datasets/60_1-down.wav', start=5000, N=N) # load two seconds of data
 x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)
 ws = N # window size (in this case the complete data)
-Nr = 1 # number of restart
 dsamp = 160 #  downsample rate for inducing points vector
 
 m = gpitch.modpdet.ModPDet(x=x, y=y, fs=fs, ws=ws, jump=dsamp)
