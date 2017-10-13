@@ -19,19 +19,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings
 gpitch.amtgp.init_settings(visible_device = '2', interactive=True) #  configure gpu usage and plotting
 
 print('learning activation params from file ' + filename)
+data_location = '../../../../datasets/maps/sample_rate_16khz/'
+results_location = '../../../../results/files/params_activations/'
 
-
-# filename = sys.argv[1].strip('.wav\n') #  load external variable (name of fole to process)
-# os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings
-# gpitch.amtgp.init_settings(visible_device = '2', interactive=True) #  configure gpu usage and plotting
-#
-# print(filename)
-# data_location = '../../../../datasets/maps/sample_rate_16khz/'
-# results_location = '../../../../results/files/params_activations/'
-#
-# N = 32000 # numer of data points to load
-# fs, y = gpitch.amtgp.wavread(data_location + filename + '.wav', start=5000, N=N) # load two seconds of data
-# x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)
+N = 32000 # numer of data points to load
+fs, y = gpitch.amtgp.wavread(data_location + filename + '.wav', start=5000, N=N) # load 2 secs of data
+x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)
 # Y = fft(y.reshape(-1,)) #  FFT data
 # S =  2./N * np.abs( Y[0:N//2] ) #  spectral density data
 # F = np.linspace(0, fs/2., N//2) #  frequency vector
