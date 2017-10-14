@@ -11,12 +11,14 @@ from matplotlib import pyplot as plt
 import sys
 sys.path.append('../../../')
 import gpitch
-
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings
-gpitch.amtgp.init_settings(visible_device = '0', interactive=True) #  configure gpu usage and plotting
 
-location = "../../../../../../datasets/MAPS/AkPnBcht/ISOL/NO/sample_rate_16khz/" # load list of files no analyse
+visible_device = sys.argv[1] #  load external variable (gpu to use)
+os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings
+gpitch.amtgp.init_settings(visible_device = visible_device, interactive=True) #  configure gpu usage and plotting
+
+
+location = "../../../../datasets/maps/sample_rate_16khz/" # load list of files no analyse
 lfiles = gpitch.amtgp.load_filename_list(location + 'filename_list.txt')
 
 for nfile in range(lfiles.size):
@@ -28,7 +30,7 @@ for nfile in range(lfiles.size):
     F = np.linspace(0, fs/2., N//2) #  frequency vector
     Nc = 10 #  maximun number of frequency components to select
     s, l, f = gpitch.amtgp.learnparams(X=F, S=S, Nh=Nc) #  param learning
-    np.savez_compressed('../../../results/isolated_sounds/params_comp_' + lfiles[nfile],
+    np.savez_compressed('../../../../results/files/params_components/params_comp_' + lfiles[nfile],
                         x = x,
                         y = y,
                         fs = fs,
