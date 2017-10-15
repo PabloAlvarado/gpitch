@@ -48,7 +48,7 @@ s_act = m.model.kern2.variance.value
 plt.rcParams['figure.figsize'] = (18, 18)  # set plot size
 zoom_limits = [x.max()/2, x.max()/2 + 0.01*x.max()]
 fig, fig_array = m.plot_results(zoom_limits)
-plt.savefig('../../../../results/figures/isolated_sounds/activations/results/results_' + filename + '.png')
+plt.savefig('../../../../results/figures/isolated_sounds/activations/posterior/results_' + filename + '.png')
 
 
 f, axs = plt.subplots(1, 2, figsize=(8, 4), tight_layout=True, sharex=True, sharey=True)
