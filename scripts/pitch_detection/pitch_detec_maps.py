@@ -10,51 +10,45 @@ if server:
 from matplotlib import pyplot as plt
 import sys
 import os
-sys.path.append('../../../')
+sys.path.append('../../')
 import gpitch
 
 
-filename = sys.argv[1].strip('.wav\n') #  load external variable (name of fole to process)
+visible_device = sys.argv[1] #  load external variable (gpu to use)
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings
-gpitch.amtgp.init_settings(visible_device = '2', interactive=True) #  configure gpu usage and plotting
-
-print('learning activation params from file ' + filename)
-data_location = '../../../../datasets/maps/sample_rate_16khz/'
-test_data_location = '../../../../datasets/maps/test_data/'
-results_location = '../../../../results/files/pitch_detection/'
+gpitch.amtgp.init_settings(visible_device=visible_device, interactive=True) #  configure gpu usage and plotting
 
 
-name_list = ['60', '64', '67', '72', '76'] #  pitches to detect
+data_location = '../../../datasets/maps/sample_rate_16khz/'
+test_data_location = '../../../datasets/maps/test_data/'
+results_location = '../../../results/files/pitch_detection/'
 
+intensity = 'F' #  property maps datset, choose "forte" sounds
+pitch_list = np.asarray(['60', '64', '67', '72', '76']) #  pitches to detect
+Np = pitch_list.size
+filename_list =[None]*Np
 
-#
-# gpitch.amtgp.init_settings(visible_device = '0', interactive=False) #  configure gpu usage and plotting
-# sf, y = wav.read('../data/segment4-down.wav') #load test data
-# _, yt1 = wav.read('../data/60_1-down.wav') #load test data
-# _, yt2 = wav.read('../data/64_1-down.wav') #load test data
-# _, yt3 = wav.read('../data/67_1-down.wav') #load test data
-# _, yt4 = wav.read('../data/72_1-down.wav') #load test data
-# _, yt5 = wav.read('../data/76_1-down.wav') #load test data
-#
-# yt1 = yt1.astype(np.float64)
-# yt1 = np.mean(yt1, 1)
-# yt1 = yt1 / np.max(np.abs(yt1))
-#
-# yt2 = yt2.astype(np.float64)
-# yt2 = np.mean(yt2, 1)
-# yt2 = yt2 / np.max(np.abs(yt2))
-#
-# yt3 = yt3.astype(np.float64)
-# yt3 = np.mean(yt3, 1)
-# yt3 = yt3 / np.max(np.abs(yt3))
-#
-# yt4 = yt4.astype(np.float64)
-# yt4 = np.mean(yt4, 1)
-# yt4 = yt4 / np.max(np.abs(yt4))
-#
-# yt5 = yt5.astype(np.float64)
-# yt5 = np.mean(yt5, 1)
-# yt5 = yt5 / np.max(np.abs(yt5))
+location = "../../../datasets/maps/sample_rate_16khz/" # load list of files no analyse
+lfiles = gpitch.amtgp.load_filename_list(location + 'filename_list.txt')
+
+j = 0
+for pitch in pitch_list:
+    for i in lfiles:
+        if pitch in i:
+            if intensity in i:
+                filename_list[j] = i
+                j += 1
+final_list  = np.asarray(filename_list).reshape(-1, )
+print final_list
+
+train_data = [None]*Np
+
+for i in range(Np):
+    sf, aux = wav.read(location + final_list[i] + '.wav') #load test data
+    aux = aux.astype(np.float64)
+    aux = np.mean(aux, 1)
+    aux = aux / np.max(np.abs(aux))
+    train_data[i] = aux.copy()
 #
 # N = np.size(y)
 # y = y.astype(np.float64)
@@ -78,7 +72,8 @@ name_list = ['60', '64', '67', '72', '76'] #  pitches to detect
 # ytest = y.reshape(-1,1)
 #
 #
-# y1F, y2F, y3F, y4F, y5F = sp.fftpack.fft(yt1), sp.fftpack.fft(yt2), sp.fftpack.fft(yt3), sp.fftpack.fft(yt4), sp.fftpack.fft(yt5) #FT training data
+# y1F, y2F, y3F, y4F, y5F = sp.fftpack.fft(yt1), sp.fftpack.fft(yt2), sp.fftpack.fft(yt3),
+#sp.fftpack.fft(yt4), sp.fftpack.fft(yt5) #FT training data
 # T = 1.0 / sf # sample spacing
 # F = np.linspace(0.0, 1.0/(2.0*T), Nt/2)
 # S1 = 2.0/Nt * np.abs(y1F[0:Nt/2]) # spectral density training data 1
