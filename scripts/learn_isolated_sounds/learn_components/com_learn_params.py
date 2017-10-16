@@ -30,6 +30,22 @@ for nfile in range(lfiles.size):
     F = np.linspace(0, fs/2., N//2) #  frequency vector
     Nc = 10 #  maximun number of frequency components to select
     s, l, f = gpitch.amtgp.learnparams(X=F, S=S, Nh=Nc) #  param learning
+    Sker = gpitch.amtgp.LorM(x=F, s=s, l=1./l, f=2*np.pi*f) #  spectral density kernel
+
+    #  plot results
+    plt.rcParams['figure.figsize'] = (18, 12)
+    fig, arx = plt.subplots(2, 1, tight_layout=True, sharex=False, sharey=False)
+    arx[0].plot(x, y, lw=2)
+    arx[1].plot(F, S)
+    arx[0].legend(['data'])
+    arx[1].plot(F, Sker)
+    arx[1].set_xlim([0, 5000])
+    arx[1].set_xlabel('Frequency (Hz)')
+    arx[1].legend(['spectral density data', 'spectral density kernel'])
+    plt.savefig('../../../../results/figures/isolated_sounds/components/results_' + lfiles[nfile] + '.png')
+
+
+    #  save results
     np.savez_compressed('../../../../results/files/params_components/params_comp_' + lfiles[nfile],
                         x = x,
                         y = y,
