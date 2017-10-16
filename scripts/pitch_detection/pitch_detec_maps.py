@@ -9,19 +9,23 @@ if server:
    matplotlib.use('agg')
 from matplotlib import pyplot as plt
 import sys
-sys.path.append('../')
+import os
+sys.path.append('../../../')
 import gpitch
 
 
+filename = sys.argv[1].strip('.wav\n') #  load external variable (name of fole to process)
+os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings
+gpitch.amtgp.init_settings(visible_device = '2', interactive=True) #  configure gpu usage and plotting
+
+print('learning activation params from file ' + filename)
+data_location = '../../../../datasets/maps/sample_rate_16khz/'
+test_data_location = '../../../../datasets/maps/test_data/'
+results_location = '../../../../results/files/pitch_detection/'
+
+
 name_list = ['60', '64', '67', '72', '76'] #  pitches to detect
-params = [np.load('../results/isolated_sounds/params_' + name_list[i] + '_1-down.npz')
-          for i in range(0, 5)] #  load hyperparams learnt from isolated sounds
 
-for i in range(0, 5):
-    print params[i]['com_params'][0]
-
-#for i in range(0, 5):
-#    print params[i]['act_params'][1]
 
 #
 # gpitch.amtgp.init_settings(visible_device = '0', interactive=False) #  configure gpu usage and plotting
