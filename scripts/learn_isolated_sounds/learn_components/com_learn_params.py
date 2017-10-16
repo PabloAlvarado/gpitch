@@ -43,7 +43,7 @@ for nfile in range(lfiles.size):
     arx[1].set_xlabel('Frequency (Hz)')
     arx[1].legend(['spectral density data', 'spectral density kernel'])
     plt.savefig('../../../../results/figures/isolated_sounds/components/results_' + lfiles[nfile] + '.png')
-
+    plt.close('all')
 
     #  save results
     np.savez_compressed('../../../../results/files/params_components/params_comp_' + lfiles[nfile],
