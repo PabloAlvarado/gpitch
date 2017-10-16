@@ -60,7 +60,7 @@ axs[1].plot(m.model.kern2.lengthscales.value, m.model.kern2.variance.value, 'rx'
 axs[1].set_xlabel('learnt lengthscale')
 axs[1].set_ylabel('learnt variance')
 plt.savefig('../../../../results/figures/isolated_sounds/activations/params/params_' + filename + '.png')
-
+plt.close('all')
 np.savez_compressed(results_location + 'params_act_' + filename,
                     x = x,
                     y = y,
