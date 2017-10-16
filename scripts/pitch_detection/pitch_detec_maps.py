@@ -4,7 +4,7 @@ import gpflow
 from scipy.io import wavfile as wav
 from scipy.fftpack import fft, ifft
 import matplotlib
-server = True # define if running code on server
+server = False # define if running code on server
 if server:
    matplotlib.use('agg')
 from matplotlib import pyplot as plt
@@ -49,6 +49,9 @@ for i in range(Np):
     aux = np.mean(aux, 1)
     aux = aux / np.max(np.abs(aux))
     train_data[i] = aux.copy()
+    plt.figure()
+    plt.plot(aux)
+
 #
 # N = np.size(y)
 # y = y.astype(np.float64)
