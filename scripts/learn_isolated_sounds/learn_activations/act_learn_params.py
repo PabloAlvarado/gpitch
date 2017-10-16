@@ -61,18 +61,16 @@ axs[1].set_xlabel('learnt lengthscale')
 axs[1].set_ylabel('learnt variance')
 plt.savefig('../../../../results/figures/isolated_sounds/activations/params/params_' + filename + '.png')
 
-
 np.savez_compressed(results_location + 'params_act_' + filename,
                     x = x,
                     y = y,
                     fs = fs,
-                    #F = F,
-                    #Y = Y,
-                    #S = S,
-                    #Nc = Nc,
+                    F = m.F,
+                    Y = m.Y,
+                    S = m.S,
+                    Nc = m.Nh,
                     l_act = l_act,
                     s_act = s_act,
-                    #l_param = l,
-                    #s_param = s,
-                    #f_param = f
-                    )
+                    l_com = m.l,
+                    s_com = m.s,
+                    f_com = m.f)
