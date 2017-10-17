@@ -42,7 +42,7 @@ for pitch in pitch_list:
 final_list  = np.asarray(filename_list).reshape(-1, )
 print final_list
 
-train_data = [None]*Np #  load training data
+train_data = [None]*Np #  load training data and learned params
 for i in range(Np):
     N = 32000 # numer of data points to load
     fs, aux = gpitch.amtgp.wavread(location + final_list[i] + '.wav', start=5000, N=N)
