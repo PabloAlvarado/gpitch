@@ -12,6 +12,7 @@ import sys
 import os
 sys.path.append('../../')
 import gpitch
+reload(gpitch)
 
 
 visible_device = sys.argv[1] #  load external variable (gpu to use)
@@ -43,14 +44,50 @@ final_list  = np.asarray(filename_list).reshape(-1, )
 print final_list
 
 train_data = [None]*Np #  load training data and learned params
+params = [None]*Np
 for i in range(Np):
     N = 32000 # numer of data points to load
     fs, aux = gpitch.amtgp.wavread(location + final_list[i] + '.wav', start=5000, N=N)
     train_data[i] = aux.copy()
     x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)
-    plt.figure()
+    params[i] = np.load(params_location + 'params_act_' + final_list[i] + '.npz')
+    keys = np.asarray(params[i].keys()).reshape(-1,)
+print keys
+
+nrows = Np
+ncols = 1
+
+plt.rcParams['figure.figsize'] = (18, nrows*6)  # set plot size
+
+plt.figure()
+for i in range(Np):
+    Sk = gpitch.amtgp.LorM(x=params[i]['F'], s=params[i]['s_com'],
+                           l=1./params[i]['l_com'], f=2*np.pi*params[i]['f_com'])
+
+    plt.subplot(nrows, 2, 2*i + 1)
     plt.plot(x, train_data[i])
 
+    plt.subplot(nrows, 2, 2*i + 2)
+    plt.plot(params[i]['F'], params[i]['S'], lw=2)
+    plt.twinx()
+    plt.plot(params[i]['F'], Sk, '--C1', lw=2)
+    plt.xlim([0, 4000])
+    plt.tight_layout()
+
+# keys[0] frequency component
+# keys[7] lengthscale component
+# keys[10] variance component
+#
+# keys[3] lengthscale activation
+# keys[11] variance activation
+#
+# keys[9] x
+# keys[8] y
+# keys[1] fs
+# keys[2] frequency vector
+# keys[6] spectral density
+# keys[5] Fourier transform
+# keys[4] number of maximun components
 
 #
 # N = np.size(y)
