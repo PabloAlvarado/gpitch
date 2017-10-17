@@ -16,10 +16,11 @@ import gpitch
 
 visible_device = sys.argv[1] #  load external variable (gpu to use)
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings
-gpitch.amtgp.init_settings(visible_device=visible_device, interactive=True) #  configure gpu usage and plotting
+gpitch.amtgp.init_settings(visible_device=visible_device, interactive=True) #  configure gpu usage, plotting
 
 
 data_location = '../../../datasets/maps/sample_rate_16khz/'
+params_location = '../../../results/files/params_activations/'
 test_data_location = '../../../datasets/maps/test_data/'
 results_location = '../../../results/files/pitch_detection/'
 
@@ -41,16 +42,15 @@ for pitch in pitch_list:
 final_list  = np.asarray(filename_list).reshape(-1, )
 print final_list
 
-train_data = [None]*Np
-
+train_data = [None]*Np #  load training data
 for i in range(Np):
-    sf, aux = wav.read(location + final_list[i] + '.wav') #load test data
-    aux = aux.astype(np.float64)
-    aux = np.mean(aux, 1)
-    aux = aux / np.max(np.abs(aux))
+    N = 32000 # numer of data points to load
+    fs, aux = gpitch.amtgp.wavread(location + final_list[i] + '.wav', start=5000, N=N)
     train_data[i] = aux.copy()
+    x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)
     plt.figure()
-    plt.plot(aux)
+    plt.plot(x, train_data[i])
+
 
 #
 # N = np.size(y)
