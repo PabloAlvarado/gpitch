@@ -1,25 +1,19 @@
+import sys, os
+sys.path.append('../../')
+import matplotlib
+if True: matplotlib.use('agg') # define if running code on server (True)
+from matplotlib import pyplot as plt
 import numpy as np
 import tensorflow as tf
-import gpflow
 from scipy.io import wavfile as wav
 from scipy.fftpack import fft, ifft
-import matplotlib
-server = False # define if running code on server
-if server:
-   matplotlib.use('agg')
-from matplotlib import pyplot as plt
-import sys
-import os
-sys.path.append('../../')
-import gpitch
-reload(gpitch)
+import gpflow, gpitch
 from gpitch.amtgp import logistic
 
 
 visible_device = sys.argv[1] #  load external variable (gpu to use)
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings
-gpitch.amtgp.init_settings(visible_device=visible_device, interactive=True) #  configure gpu usage, plot
-
+gpitch.amtgp.init_settings(visible_device=visible_device, interactive=True) #  confi gpu usage, plot
 
 data_location = '../../../datasets/maps/sample_rate_16khz/'
 params_location = '../../../results/files/params_activations/'
@@ -31,10 +25,7 @@ intensity = 'F' #  property maps datset, choose "forte" sounds
 pitch_list = np.asarray(['60', '64', '67', '72', '76']) #  pitches to detect
 Np = pitch_list.size
 filename_list =[None]*Np
-
-location = "../../../datasets/maps/sample_rate_16khz/" # load list of files no analyse
-lfiles = gpitch.amtgp.load_filename_list(location + 'filename_list.txt')
-
+lfiles = gpitch.amtgp.load_filename_list(data_location + 'filename_list.txt')
 j = 0
 for pitch in pitch_list:
     for i in lfiles:
@@ -49,7 +40,7 @@ train_data = [None]*Np #  load training data and learned params
 params = [None]*Np
 for i in range(Np):
     N = 32000 # numer of data points to load
-    fs, aux = gpitch.amtgp.wavread(location + final_list[i] + '.wav', start=5000, N=N)
+    fs, aux = gpitch.amtgp.wavread(data_location + final_list[i] + '.wav', start=5000, N=N)
     train_data[i] = aux.copy()
     x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)
     params[i] = np.load(params_location + 'params_act_' + final_list[i] + '.npz')
@@ -69,7 +60,8 @@ for i in range(Np):
     kern_g_list[i] = gpflow.kernels.Matern32(input_dim=1, variance=params[i]['s_act'],
                                              lengthscales=params[i]['l_act'])
 
-fs, y_test = gpitch.amtgp.wavread(test_data_location + 'test_data_5_pitches.wav', mono=False) # load test_data
+test_data_name = test_data_location + 'test_data_5_pitches.wav'
+fs, y_test = gpitch.amtgp.wavread(test_data_name, mono=False) # load test_data
 
 
 Xtest = x.copy()
@@ -105,7 +97,9 @@ y = ytest[0:Ns]
 Z = np.vstack(( (X[::jump].copy()).reshape(-1,1) ,(X[-1].copy()).reshape(-1,1)  ))
 #m = siggp.ModGP(X, y, k_w3, k_loo, k_g1, k_g2, Z)
 k_loo = kern_f_list[1] + kern_f_list[2] + kern_f_list[3] + kern_f_list[4]
-m = gpitch.loogp.LooGP(X, y, kern_f_list[0], k_loo, kern_g_list[0], kern_g_list[0], Z, minibatch_size=Ns/1)
+m = gpitch.loogp.LooGP(X, y,
+                       kern_f_list[0], k_loo, kern_g_list[0], kern_g_list[0],
+                       Z)
 m.kern1.fixed = True
 m.kern2.fixed = True
 m.kern3.fixed = True
