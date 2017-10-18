@@ -12,7 +12,7 @@ import sys
 sys.path.append('../../')
 import gpitch
 
-gpitch.amtgp.init_settings(visible_device='1', interactive=True) #  configure gpu usage and plotting
+gpitch.amtgp.init_settings(visible_device='0', interactive=True) #  configure gpu usage and plotting
 N = 32000 # numer of data points to load
 fs, y = gpitch.amtgp.wavread('../../../datasets/60_1-down.wav', start=5000, N=N) # load two seconds of data
 x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)
