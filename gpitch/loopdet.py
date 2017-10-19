@@ -85,8 +85,14 @@ class LooPDet():
 
         self.qm1 = np.asarray(self.qm1_l).reshape(-1, )
         self.qm2 = np.asarray(self.qm2_l).reshape(-1, )
+        self.qm3 = np.asarray(self.qm3_l).reshape(-1, )
+        self.qm4 = np.asarray(self.qm4_l).reshape(-1, )
+
         self.qv1 = np.asarray(self.qv1_l).reshape(-1, )
         self.qv2 = np.asarray(self.qv2_l).reshape(-1, )
+        self.qv3 = np.asarray(self.qv3_l).reshape(-1, )
+        self.qv4 = np.asarray(self.qv4_l).reshape(-1, )
+
         self.x_pred = np.asarray(self.x_pred_l).reshape(-1, )
         self.y_pred = np.asarray(self.y_pred_l).reshape(-1, )
         self.yhat = logistic(self.qm2)*self.qm1 + logistic(self.qm4)*self.qm3
