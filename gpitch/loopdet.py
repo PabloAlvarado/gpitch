@@ -9,13 +9,12 @@ from gpitch.amtgp import logistic
 
 class LooPDet():
     '''Leave one out pitch detector'''
-    def __init__(self, x, y, kern_comps, kern_acts, ws, dec, hparams, Nw=None, bounded=False, whiten=False):
+    def __init__(self, x, y, kern_comps, kern_acts, ws, dec, Nw=None, bounded=False, whiten=False):
         '''
         x : time vector
         y : audio mixture
         ws : number of samples per windows (window width)
         dec : decimation factor for inducing variables
-        hparams : list of hyperparameters for components and activations
         Nw : number of windows to analyze
         bounded : option to set limits to variational parameters
         whiten : gpflow option
@@ -23,7 +22,6 @@ class LooPDet():
         self.x, self.y = x, y  # data
         self.ws = ws  # analysis window size (samples)
         self.dec = dec
-        self.hparams = hparams
         self.N = x.size
         if Nw == None: self.Nw = int(self.N//self.ws)  # number of windows
         else: self.Nw = Nw
@@ -61,7 +59,7 @@ class LooPDet():
 
     def optimize_windowed(self, disp, maxiter):
         # pass
-        for i in range(Nw):
+        for i in range(self.Nw):
             self.m.X = self.x_l[i].copy()
             self.m.Y = self.y_l[i].copy()
             self.m.Z = self.x_l[i][::self.dec].copy()
@@ -82,6 +80,8 @@ class LooPDet():
             self.qm2_l[i], self.qv2_l[i] = self.m.predict_g1(self.x_l[i])
             self.qm3_l[i], self.qv3_l[i] = self.m.predict_f2(self.x_l[i])
             self.qm4_l[i], self.qv4_l[i] = self.m.predict_g2(self.x_l[i])
+            self.x_pred_l[i] = self.x_l[i].copy()
+            self.y_pred_l[i] = self.y_l[i].copy()
 
         self.qm1 = np.asarray(self.qm1_l).reshape(-1, )
         self.qm2 = np.asarray(self.qm2_l).reshape(-1, )
@@ -92,42 +92,43 @@ class LooPDet():
         self.yhat = logistic(self.qm2)*self.qm1 + logistic(self.qm4)*self.qm3
 
 
+
     def plot_results(self):
         nrows, ncols = 4, 2
         plt.figure(figsize=(ncols*18, nrows*6))
         plt.subplot(nrows, ncols, (1, 2))
         plt.title('data and prediction')
-        plt.plot(self.x, self.y, '.k', mew=1)
-        plt.plot(self.x, self.yhat , lw=2)
+        plt.plot(self.x_pred, self.y_pred, '.k', mew=1)
+        plt.plot(self.x_pred, self.yhat , lw=2)
 
         plt.subplot(nrows, ncols, 3)
         plt.title('component 1')
-        plt.plot(self.x, self.qm1, color='C0', lw=2)
-        plt.fill_between(self.x, self.qm1-2*np.sqrt(self.qv1), self.qm1+2*np.sqrt(self.qv1),
+        plt.plot(self.x_pred, self.qm1, color='C0', lw=2)
+        plt.fill_between(self.x_pred, self.qm1-2*np.sqrt(self.qv1), self.qm1+2*np.sqrt(self.qv1),
                          color='C0', alpha=0.2)
 
         plt.subplot(nrows, ncols, 4)
         plt.title('component 2')
-        plt.plot(self.x, self.qm3, color='C0', lw=2)
-        plt.fill_between(self.x, self.qm3-2*np.sqrt(self.qv3), self.qm3+2*np.sqrt(self.qv3),
+        plt.plot(self.x_pred, self.qm3, color='C0', lw=2)
+        plt.fill_between(self.x_pred, self.qm3-2*np.sqrt(self.qv3), self.qm3+2*np.sqrt(self.qv3),
                          color='C0', alpha=0.2)
 
         plt.subplot(nrows, ncols, 5)
         plt.title('activation 1')
-        plt.plot(self.x, logistic(self.qm2), 'g', lw=2)
-        plt.fill_between(self.x, logistic(self.qm2-2*np.sqrt(self.qv2)),
+        plt.plot(self.x_pred, logistic(self.qm2), 'g', lw=2)
+        plt.fill_between(self.x_pred, logistic(self.qm2-2*np.sqrt(self.qv2)),
                          logistic(self.qm2+2*np.sqrt(self.qv2)), color='g', alpha=0.2)
 
         plt.subplot(nrows, ncols, 6)
         plt.title('activation 2')
-        plt.plot(self.x, logistic(self.qm4), 'g', lw=2)
-        plt.fill_between(self.x, logistic(self.qm4 - 2*np.sqrt(self.qv4)),
+        plt.plot(self.x_pred, logistic(self.qm4), 'g', lw=2)
+        plt.fill_between(self.x_pred, logistic(self.qm4 - 2*np.sqrt(self.qv4)),
                          logistic(self.qm4+2*np.sqrt(self.qv4)), color='g', alpha=0.2)
 
         plt.subplot(nrows, ncols, 7)
         plt.title('source 1')
-        plt.plot(self.x, logistic(self.qm2)*self.qm1, lw=2)
+        plt.plot(self.x_pred, logistic(self.qm2)*self.qm1, lw=2)
 
         plt.subplot(nrows, ncols, 8)
         plt.title('source 2')
-        plt.plot(self.x, logistic(self.qm4)*self.qm3, lw=2)
+        plt.plot(self.x_pred, logistic(self.qm4)*self.qm3, lw=2)
