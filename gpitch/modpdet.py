@@ -142,6 +142,7 @@ class ModPDet():
         return fig, fig_array
 
     def plot_learntprior(self, arg):
+        pass
         # xsample = np.linspace(0, 0.05, 800).reshape(-1,1)
         # Kf = m.model.kern1.compute_K_symm(xsample)
         # Kg = m.model.kern2.compute_K_symm(xsample)
@@ -155,8 +156,6 @@ class ModPDet():
         #
         # plt.figure(), plt.plot(m.x, m.y)
         # plt.figure(), plt.plot(m.F, m.S)
-        pass
-
 
 
 
