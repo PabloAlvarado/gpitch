@@ -76,7 +76,8 @@ kern_act2 = gpflow.kernels.Matern32(input_dim=1, lengthscales=params['l_act2'],
 
 kc = [kern_com1, kern_com2]
 ka = [kern_act1, kern_act2]
-m = gpitch.loopdet.LooPDet(x=x, y=x, kern_comps=kc, kern_acts=ka, ws=250, dec=dec, hparams=params)
+ws = 250 # winsow size in samples
+m = gpitch.loopdet.LooPDet(x=x, y=x, kern_comps=kc, kern_acts=ka, ws=ws, dec=dec, hparams=params)
 
 
 
