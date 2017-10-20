@@ -9,10 +9,10 @@ import gpflow, gpitch
 from gpitch.amtgp import logistic
 
 
-#np.random.seed(29)
+np.random.seed(23)
 gpitch.amtgp.init_settings(visible_device=sys.argv[1], interactive=True) #  confi gpu usage, plot
 fs = 16e3  # generate synthetic data
-N = 1500  # number of samples
+N = 1600  # number of samples
 x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)  # time
 noise_var = 1.e-3  # noise variance
 pitch1 = 440.00  # Hertz, A4 (La)
@@ -59,7 +59,7 @@ qv1 = [np.zeros(z.shape) for i in range(0, Nw)]
 qv2 = [np.zeros(z.shape) for i in range(0, Nw)]
 qv3 = [np.zeros(z.shape) for i in range(0, Nw)]
 qv4 = [np.zeros(z.shape) for i in range(0, Nw)]
-maxiter = 250
+maxiter = 500
 start_time = time.time()
 for i in range(Nw):
     m.X = x_l[i].copy()
@@ -101,49 +101,49 @@ def plot_results():
     ncols = 2
     plt.figure(figsize=(ncols*18, nrows*6))
     plt.subplot(nrows, ncols, (1, 2))
-    plt.title('Mixture data and approximation')
+    plt.title('data and prediction')
     plt.plot(x, y, '.k', mew=1)
     plt.plot(x, yhat, lw=2)
 
     plt.subplot(nrows, ncols, 3)
-    plt.title('Latent quasi-periodic function 1 (A4)')
+    plt.title('component 1')
     plt.plot(x, f1, '.k', mew=1)
     plt.plot(x, qm1, color='C0', lw=2)
     plt.fill_between(x, qm1-2*np.sqrt(qv1), qm1+2*np.sqrt(qv1), color='C0', alpha=0.2)
 
     plt.subplot(nrows, ncols, 4)
-    plt.title('Latent quasi-periodic function 2 (A5)')
+    plt.title('component 2')
     plt.plot(x, f2, '.k', mew=1)
     plt.plot(x, qm3, color='C0', lw=2)
     plt.fill_between(x, qm3-2*np.sqrt(qv3), qm3+2*np.sqrt(qv3), color='C0', alpha=0.2)
 
     plt.subplot(nrows, ncols, 5)
-    plt.title('Latent envelope 1 (A4)')
+    plt.title('activation 1')
     plt.plot(x[::5], logistic(g1[::5]), '.k', mew=1)
     plt.plot(x, logistic(qm2), 'g', lw=2)
     plt.fill_between(x, logistic(qm2-2*np.sqrt(qv2)), logistic(qm2+2*np.sqrt(qv2)),
                      color='g', alpha=0.2)
 
     plt.subplot(nrows, ncols, 6)
-    plt.title('Latent envelope 2 (E5)')
+    plt.title('activation 2')
     plt.plot(x[::5], logistic(g2[::5]), '.k', mew=1)
     plt.plot(x, logistic(qm4), 'g', lw=2)
     plt.fill_between(x, logistic(qm4-2*np.sqrt(qv4)), logistic(qm4+2*np.sqrt(qv4)),
                      color='g', alpha=0.2)
 
     plt.subplot(nrows, ncols, 7)
-    plt.title('Latent source 1 (A4)')
+    plt.title('source 1')
     plt.plot(x, source1, '.k', mew=1)
     plt.plot(x, logistic(qm2)*qm1, lw=2)
 
     plt.subplot(nrows, ncols, 8)
-    plt.title('Latent source 2 (E5)')
+    plt.title('source 2')
     plt.plot(x, source2, '.k', mew=1)
     plt.plot(x, logistic(qm4)*qm3, lw=2)
 
 plot_results()
 plt.tight_layout()
-plt.savefig('../../../results/figures/demos/demo_loogp_toy.png')
+plt.savefig('../../../results/figures/demos/demo_loogp_toy_old.png')
 
 
 
