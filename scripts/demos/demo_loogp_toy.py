@@ -9,7 +9,7 @@ import gpflow, gpitch
 from gpitch.amtgp import logistic
 
 
-np.random.seed(23)
+np.random.seed(29)
 gpitch.amtgp.init_settings(visible_device=sys.argv[1], interactive=True) #  confi gpu usage, plot
 fs = 16e3  # generate synthetic data
 N = 1600  # number of samples
