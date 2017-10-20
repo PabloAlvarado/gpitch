@@ -21,9 +21,9 @@ test_data_location = '../../../datasets/maps/test_data/'
 results_files_location = '../../../results/files/pitch_detection/'
 results_figures_location = '../../../results/figures/pitch_detection/'
 
-intensity = 'F' #  property maps datset, choose "forte" sounds
-pitch_list = np.asarray(['60', '64', '67', '72', '76']) #  pitches to detect
-Np = pitch_list.size
+intensity = 'F'  # property maps datset, choose "forte" sounds
+pitch_list = np.asarray(['60', '64', '67', '72', '76'])  # pitches to detect
+Np = pitch_list.size # number of pitches 
 filename_list =[None]*Np
 lfiles = gpitch.amtgp.load_filename_list(data_location + 'filename_list.txt')
 j = 0

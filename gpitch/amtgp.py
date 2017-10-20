@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 
 def init_settings(visible_device='0', interactive=False):
     '''Initialize usage of GPU and plotting'''
-    os.environ['TF_CPP_MIN_LOG_LEVEL']='1' #  deactivate tf warnings
+    os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings
     os.environ["CUDA_VISIBLE_DEVICES"] = visible_device # configuration use only one GPU
     config = tf.ConfigProto() #Configuration to not to use all the memory
     config.gpu_options.allow_growth = True
@@ -135,11 +135,6 @@ def learnparams(X, S, Nh):
             learntfun = Lorentzian(pstar, x)
             Shat = np.abs(learntfun -  Shat)
             Shat[a:b,] = 0.
-            #plt.subplot(1,Nh,i+1)
-            #plt.plot(x[a:b],S[a:b],'.b', ms = 3)
-            #plt.plot(x[a:b],learntfun[a:b],'g', lw = 1)
-            #plt.axis('off')
-            #plt.ylim([S.min(), S.max()])
     s_s, l_s, f_s = np.hsplit(Pstar[0:count,:], 3)
     return s_s, 1./l_s, f_s/(2.*np.pi),
 
@@ -148,12 +143,10 @@ def logistic(x):
     return 1./(1+ np.exp(-x))
 
 
-
 def Matern12CosineMix(variance, lengthscale, period, Nh):
     '''Write it.'''
     kern_list = [Matern12Cosine(input_dim=1, period=period[i], variance=variance[i], lengthscales=lengthscale[i]) for i in range(0, Nh)]
     return gpflow.kernels.Add(kern_list)
-
 
 
 def myplot():
@@ -177,104 +170,54 @@ def wavread(filename, start=0, N=None, norm=True, mono=True):
     return fs, y
 
 
+def load_pitch_params_data(pitch_list, data_loc, params_loc):
+    '''
+    This function loads the desired pitches and the gets the names of the files in the MAPS dataset
+    corresponding to those pitchescthat pitch. Also returns the learned params and data related to
+    those files.
+    '''
+    intensity = 'F'  # property maps datset, choose "forte" sounds
+    Np = pitch_list.size # number of pitches
+    filename_list =[None]*Np
+    lfiles = load_filename_list(data_loc + 'filename_list.txt')
+    j = 0
+    for pitch in pitch_list:
+        for i in lfiles:
+            if pitch in i:
+                if intensity in i:
+                    filename_list[j] = i
+                    j += 1
+    final_list  = np.asarray(filename_list).reshape(-1, )
+    train_data = [None]*Np #  load training data and learned params
+    params = [None]*Np
+    for i in range(Np):
+        N = 32000 # numer of data points to load
+        fs, aux = wavread(data_loc + final_list[i] + '.wav', start=5000, N=N)
+        train_data[i] = aux.copy()
+        x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)
+        params[i] = np.load(params_loc + 'params_act_' + final_list[i] + '.npz')
+        keys = np.asarray(params[i].keys()).reshape(-1,)
+    return final_list, train_data, params
 
-# Gaussian Process pitch detection using modulated GP
-# class ModPDet():
-#     def __init__(self, x, y, fs, ws, jump):
-#         self.x, self.y = x, y
-#         self.fs, self.ws = fs, ws # sample rate, and window size (samples)
-#         self.jump, self.N = jump, x.size
-#         self.Nw = self.N/self.ws  # number of windows
-#         self.Nh = 10 # number of maximun frequency components in density
-#
-#         # frequency representation data
-#         self.Y = fft(y.reshape(-1,)) #  FFT data
-#         self.S =  2./self.N * np.abs(self.Y[0:self.N/2]) #  spectral density data
-#         self.F = np.linspace(0, fs/2., self.N/2) #  frequency vector
-#
-#         self.s, self.l, self.f = learnparams(X=self.F, S=self.S, Nh=self.Nh) #  Param learning Nh=#harmonics
-#         sig_scale = 1./ (4.*np.sum(self.s)) #rescale (sigma)
-#         self.s *= sig_scale
-#
-#         self.kf = Matern12CosineMix(variance=self.s, lengthscale=self.l, period=1./self.f, Nh=self.s.size)
-#         self.kg = gpflow.kernels.Matern32(input_dim=1, variance=10.*np.random.rand(), lengthscales=10*np.random.rand())
-#
-#         self.x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, self.Nw)] # split data into windows
-#         self.y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, self.Nw)]
-#         self.z = self.x_l[0][::jump].copy()
-#
-#         self.model = modgp.ModGP(self.x_l[0].copy(), self.y_l[0].copy(), self.kf, self.kg, self.z, whiten=True)
-#         self.model.likelihood.noise_var = 1e-7
-#         self.model.likelihood.noise_var.fixed = True
-#         self.model.q_mu1.transform = gpflow.transforms.Logistic(a=-1.0, b=1.0)
-#         self.model.kern1.fixed = True # component kernel
-#         self.model.kern2.fixed = True # activation kernel
-#
-#     def optimize(self, disp, maxiter):
-#
-#         init_list = [np.zeros(self.model.Z.shape) for i in range(0, self.Nw)]  # list to save predictions mean (qm) and variance (qv)
-#         self.qm1 = list(init_list)
-#         self.qm2 = list(init_list)
-#         self.qv1 = list(init_list)
-#         self.qv2 = list(init_list)
-#         self.x_pred = [np.zeros(self.x_l[0].shape) for i in range(0, self.Nw)]
-#         self.y_pred = [np.zeros(self.x_l[0].shape) for i in range(0, self.Nw)]
-#
-#         for i in range(self.Nw):
-#             self.model.X = self.x_l[i].copy()
-#             self.model.Y = self.y_l[i].copy()
-#             self.model.Z = self.x_l[i][::self.jump].copy()
-#             self.model.q_mu1._array = np.zeros(self.model.Z.shape)
-#             self.model.q_mu2._array = np.zeros(self.model.Z.shape)
-#             self.model.q_sqrt1._array = np.expand_dims(np.eye(self.model.Z.size), 2)
-#             self.model.q_sqrt2._array = np.expand_dims(np.eye(self.model.Z.size), 2)
-#             self.model.optimize(disp=disp, maxiter=maxiter)
-#             self.qm1[i], self.qv1[i] = self.model.predict_f(self.x_l[i])
-#             self.qm2[i], self.qv2[i] = self.model.predict_g(self.x_l[i])
-#             self.x_pred[i] = self.x_l[i].copy()
-#             self.y_pred[i] = self.y_l[i].copy()
-#
-#         self.qm1 = np.asarray(self.qm1).reshape(-1, 1)
-#         self.qm2 = np.asarray(self.qm2).reshape(-1, 1)
-#         self.qv1 = np.asarray(self.qv1).reshape(-1, 1)
-#         self.qv2 = np.asarray(self.qv2).reshape(-1, 1)
-#         self.x_pred = np.asarray(self.x_pred).reshape(-1, 1)
-#         self.y_pred = np.asarray(self.y_pred).reshape(-1, 1)
-#
-#
-#     def plot_results(self, zoom_limits):
-#         x = self.x_pred
-#         y = self.y_pred
-#         fig, fig_array = plt.subplots(3, 2, sharex=False, sharey=False)
-#
-#         fig_array[0, 0].set_title('Data')
-#         fig_array[0, 0].plot(x, y, lw=2)
-#         fig_array[0, 1].set_title('Approximation')
-#         fig_array[0, 1].plot(x, logistic(self.qm2)*self.qm1 , lw=2)
-#
-#         fig_array[1, 0].set_title('Component')
-#         fig_array[1, 0].plot(x, self.qm1, color='C0', lw=2)
-#         fig_array[1, 0].fill_between(x[:, 0], self.qm1[:, 0] - 2*np.sqrt(self.qv1[:, 0]),
-#                              self.qm1[:, 0] + 2*np.sqrt(self.qv1[:, 0]), color='C0', alpha=0.2)
-#
-#         fig_array[1, 1].set_title('Component (zoom in)')
-#         fig_array[1, 1].plot(x, self.qm1, color='C0', lw=2)
-#         fig_array[1, 1].fill_between(x[:, 0], self.qm1[:, 0] - 2*np.sqrt(self.qv1[:, 0]),
-#                              self.qm1[:, 0] + 2*np.sqrt(self.qv1[:, 0]), color='C0', alpha=0.2)
-#         fig_array[1, 1].set_xlim(zoom_limits)
-#
-#         fig_array[2, 0].set_title('Activation')
-#         fig_array[2, 0].plot(x, logistic(self.qm2), color='g', lw=2)
-#         fig_array[2, 0].fill_between(x[:, 0], logistic(self.qm2[:, 0] - 2*np.sqrt(self.qv2[:, 0])),
-#                              logistic(self.qm2[:, 0] + 2*np.sqrt(self.qv2[:, 0])), color='g', alpha=0.2)
-#
-#         fig_array[2, 1].set_title('Activation (zoom in)')
-#         fig_array[2, 1].plot(x, logistic(self.qm2), 'g', lw=2)
-#         fig_array[2, 1].fill_between(x[:, 0], logistic(self.qm2[:, 0] - 2*np.sqrt(self.qv2[:, 0])),
-#                              logistic(self.qm2[:, 0] + 2*np.sqrt(self.qv2[:, 0])), color='g', alpha=0.2)
-#         fig_array[2, 1].set_xlim(zoom_limits)
-#
-#         return fig, fig_array
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
