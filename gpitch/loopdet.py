@@ -105,7 +105,7 @@ class LooPDet():
         '''
         Plot infered components and activations
         '''
-        plt.figure(figsize=(self.ncols*18, self.nrows*6))
+        plt.figure(figsize=(18, self.nrows*6))
         plt.subplot(self.nrows, self.ncols, (1, 2))
         plt.title('data and prediction')
         plt.plot(self.x_pred, self.y_pred, '.k', mew=1)
