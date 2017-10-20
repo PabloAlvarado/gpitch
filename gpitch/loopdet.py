@@ -57,8 +57,12 @@ class LooPDet():
         self.m.kern_g1.fixed = True
         self.m.kern_g2.fixed = True
 
+        self.nrows, self.ncols = 4, 2  # number of rows and columns when plotting results
+
     def optimize_windowed(self, disp, maxiter):
-        # pass
+        '''
+        This function call the gpflow optimizer for every window of analysis
+        '''
         for i in range(self.Nw):
             self.m.X = self.x_l[i].copy()
             self.m.Y = self.y_l[i].copy()
@@ -97,44 +101,44 @@ class LooPDet():
         self.y_pred = np.asarray(self.y_pred_l).reshape(-1, )
         self.yhat = logistic(self.qm2)*self.qm1 + logistic(self.qm4)*self.qm3
 
-
-
     def plot_results(self):
-        nrows, ncols = 4, 2
-        plt.figure(figsize=(ncols*18, nrows*6))
-        plt.subplot(nrows, ncols, (1, 2))
+        '''
+        Plot infered components and activations
+        '''
+        plt.figure(figsize=(self.ncols*18, self.nrows*6))
+        plt.subplot(self.nrows, self.ncols, (1, 2))
         plt.title('data and prediction')
         plt.plot(self.x_pred, self.y_pred, '.k', mew=1)
         plt.plot(self.x_pred, self.yhat , lw=2)
 
-        plt.subplot(nrows, ncols, 3)
+        plt.subplot(self.nrows, self.ncols, 3)
         plt.title('component 1')
         plt.plot(self.x_pred, self.qm1, color='C0', lw=2)
         plt.fill_between(self.x_pred, self.qm1-2*np.sqrt(self.qv1), self.qm1+2*np.sqrt(self.qv1),
                          color='C0', alpha=0.2)
 
-        plt.subplot(nrows, ncols, 4)
+        plt.subplot(self.nrows, self.ncols, 4)
         plt.title('component 2')
         plt.plot(self.x_pred, self.qm3, color='C0', lw=2)
         plt.fill_between(self.x_pred, self.qm3-2*np.sqrt(self.qv3), self.qm3+2*np.sqrt(self.qv3),
                          color='C0', alpha=0.2)
 
-        plt.subplot(nrows, ncols, 5)
+        plt.subplot(self.nrows, self.ncols, 5)
         plt.title('activation 1')
         plt.plot(self.x_pred, logistic(self.qm2), 'g', lw=2)
         plt.fill_between(self.x_pred, logistic(self.qm2-2*np.sqrt(self.qv2)),
                          logistic(self.qm2+2*np.sqrt(self.qv2)), color='g', alpha=0.2)
 
-        plt.subplot(nrows, ncols, 6)
+        plt.subplot(self.nrows, self.ncols, 6)
         plt.title('activation 2')
         plt.plot(self.x_pred, logistic(self.qm4), 'g', lw=2)
         plt.fill_between(self.x_pred, logistic(self.qm4 - 2*np.sqrt(self.qv4)),
                          logistic(self.qm4+2*np.sqrt(self.qv4)), color='g', alpha=0.2)
 
-        plt.subplot(nrows, ncols, 7)
+        plt.subplot(self.nrows, self.ncols, 7)
         plt.title('source 1')
         plt.plot(self.x_pred, logistic(self.qm2)*self.qm1, lw=2)
 
-        plt.subplot(nrows, ncols, 8)
+        plt.subplot(self.nrows, self.ncols, 8)
         plt.title('source 2')
         plt.plot(self.x_pred, logistic(self.qm4)*self.qm3, lw=2)

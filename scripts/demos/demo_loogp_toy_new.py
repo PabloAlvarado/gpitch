@@ -10,7 +10,7 @@ from gpitch.amtgp import logistic
 reload(gpitch)
 
 
-#np.random.seed(29)
+np.random.seed(29)
 gpitch.amtgp.init_settings(visible_device=sys.argv[1], interactive=True) #  confi gpu usage, plot
 fs = 16e3  # generate synthetic data
 N = 1600  # number of samples
@@ -43,11 +43,27 @@ dec = 10
 kc = [kper1, kper2]
 ka = [kenv1, kenv2]
 ws = N # winsow size in samples
-m = gpitch.loopdet.LooPDet(x=x, y=y, kern_comps=kc, kern_acts=ka, ws=ws, dec=dec, whiten=True)
-m.optimize_windowed(disp=1, maxiter=100)
-m.plot_results()
+model = gpitch.loopdet.LooPDet(x=x, y=y, kern_comps=kc, kern_acts=ka, ws=ws, dec=dec, whiten=True)
+model.m.likelihood.noise_var
+model.optimize_windowed(disp=1, maxiter=200)
+model.plot_results()
+plt.subplot(m.nrows, m.ncols, 3)  # include toy components and activations
+plt.plot(x, f1, '.k', mew=1)
+plt.subplot(m.nrows, m.ncols, 4)
+plt.plot(x, f2, '.k', mew=1)
+plt.subplot(m.nrows, m.ncols, 5)
+plt.plot(x, logistic(g1), '.k', mew=1)
+plt.subplot(m.nrows, m.ncols, 6)
+plt.plot(x, logistic(g2), '.k', mew=1)
+plt.subplot(m.nrows, m.ncols, 7)
+plt.plot(x, logistic(g1)*f1, '.k', mew=1)
+plt.subplot(m.nrows, m.ncols, 8)
+plt.plot(x, logistic(g2)*f2, '.k', mew=1)
 plt.tight_layout()
 plt.savefig('../../../results/figures/demos/demo_loogp_toy_new.png')
+
+
+
 
 
 
