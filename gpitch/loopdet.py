@@ -142,3 +142,17 @@ class LooPDet():
         plt.plot(self.x_pred, self.qm3, color='C0', lw=2)
         plt.fill_between(self.x_pred, self.qm3-2*np.sqrt(self.qv3), self.qm3+2*np.sqrt(self.qv3),
                          color='C0', alpha=0.2)
+
+    def save_results(self, filename):
+        np.savez_compressed(filename,
+                            x_pred = self.x_pred,
+                            y_pred = self.y_pred,
+                            yhat = self.yhat,
+                            qm1 = self.qm1,
+                            qm2 = self.qm2,
+                            qm3 = self.qm3,
+                            qm4 = self.qm4,
+                            qv1 = self.qv1,
+                            qv2 = self.qv2,
+                            qv3 = self.qv3,
+                            qv4 = self.qv4)
