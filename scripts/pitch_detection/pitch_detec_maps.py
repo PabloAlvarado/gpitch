@@ -18,8 +18,8 @@ gpitch.amtgp.init_settings(visible_device=visible_device, interactive=True) #  c
 data_location = '../../../datasets/maps/sample_rate_16khz/'
 params_location = '../../../results/files/params_activations/'
 test_data_location = '../../../datasets/maps/test_data/'
-results_location = '../../../results/files/pitch_detection/'
-res_fig_location = '../../../results/figures/pitch_detection/'
+results_files_location = '../../../results/files/pitch_detection/'
+results_figures_location = '../../../results/figures/pitch_detection/'
 
 intensity = 'F' #  property maps datset, choose "forte" sounds
 pitch_list = np.asarray(['60', '64', '67', '72', '76']) #  pitches to detect
