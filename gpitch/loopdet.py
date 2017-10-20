@@ -112,16 +112,12 @@ class LooPDet():
         plt.plot(self.x_pred, self.yhat , lw=2)
 
         plt.subplot(self.nrows, self.ncols, 3)
-        plt.title('component 1')
-        plt.plot(self.x_pred, self.qm1, color='C0', lw=2)
-        plt.fill_between(self.x_pred, self.qm1-2*np.sqrt(self.qv1), self.qm1+2*np.sqrt(self.qv1),
-                         color='C0', alpha=0.2)
+        plt.title('source 1')
+        plt.plot(self.x_pred, logistic(self.qm2)*self.qm1, lw=2)
 
         plt.subplot(self.nrows, self.ncols, 4)
-        plt.title('component 2')
-        plt.plot(self.x_pred, self.qm3, color='C0', lw=2)
-        plt.fill_between(self.x_pred, self.qm3-2*np.sqrt(self.qv3), self.qm3+2*np.sqrt(self.qv3),
-                         color='C0', alpha=0.2)
+        plt.title('source 2')
+        plt.plot(self.x_pred, logistic(self.qm4)*self.qm3, lw=2)
 
         plt.subplot(self.nrows, self.ncols, 5)
         plt.title('activation 1')
@@ -136,9 +132,13 @@ class LooPDet():
                          logistic(self.qm4+2*np.sqrt(self.qv4)), color='g', alpha=0.2)
 
         plt.subplot(self.nrows, self.ncols, 7)
-        plt.title('source 1')
-        plt.plot(self.x_pred, logistic(self.qm2)*self.qm1, lw=2)
+        plt.title('component 1')
+        plt.plot(self.x_pred, self.qm1, color='C0', lw=2)
+        plt.fill_between(self.x_pred, self.qm1-2*np.sqrt(self.qv1), self.qm1+2*np.sqrt(self.qv1),
+                         color='C0', alpha=0.2)
 
         plt.subplot(self.nrows, self.ncols, 8)
-        plt.title('source 2')
-        plt.plot(self.x_pred, logistic(self.qm4)*self.qm3, lw=2)
+        plt.title('component 2')
+        plt.plot(self.x_pred, self.qm3, color='C0', lw=2)
+        plt.fill_between(self.x_pred, self.qm3-2*np.sqrt(self.qv3), self.qm3+2*np.sqrt(self.qv3),
+                         color='C0', alpha=0.2)
