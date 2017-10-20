@@ -47,17 +47,17 @@ model = gpitch.loopdet.LooPDet(x=x, y=y, kern_comps=kc, kern_acts=ka, ws=ws, dec
 model.m.likelihood.noise_var
 model.optimize_windowed(disp=1, maxiter=200)
 model.plot_results()
-plt.subplot(m.nrows, m.ncols, 3)  # include toy components and activations
+plt.subplot(model.nrows, model.ncols, 3)  # include toy components and activations
 plt.plot(x, f1, '.k', mew=1)
-plt.subplot(m.nrows, m.ncols, 4)
+plt.subplot(model.nrows, model.ncols, 4)
 plt.plot(x, f2, '.k', mew=1)
-plt.subplot(m.nrows, m.ncols, 5)
+plt.subplot(model.nrows, model.ncols, 5)
 plt.plot(x, logistic(g1), '.k', mew=1)
-plt.subplot(m.nrows, m.ncols, 6)
+plt.subplot(model.nrows, model.ncols, 6)
 plt.plot(x, logistic(g2), '.k', mew=1)
-plt.subplot(m.nrows, m.ncols, 7)
+plt.subplot(model.nrows, model.ncols, 7)
 plt.plot(x, logistic(g1)*f1, '.k', mew=1)
-plt.subplot(m.nrows, m.ncols, 8)
+plt.subplot(model.nrows, model.ncols, 8)
 plt.plot(x, logistic(g2)*f2, '.k', mew=1)
 plt.tight_layout()
 plt.savefig('../../../results/figures/demos/demo_loogp_toy_new.png')
