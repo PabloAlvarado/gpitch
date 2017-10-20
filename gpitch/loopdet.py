@@ -59,7 +59,7 @@ class LooPDet():
 
         self.nrows, self.ncols = 4, 2  # number of rows and columns when plotting results
 
-    def optimize_windowed(self, disp, maxiter):
+    def optimize_windowed(self, disp, maxiter, init_zeros=True):
         '''
         This function call the gpflow optimizer for every window of analysis
         '''
@@ -68,15 +68,16 @@ class LooPDet():
             self.m.Y = self.y_l[i].copy()
             self.m.Z = self.x_l[i][::self.dec].copy()
 
-            self.m.q_mu1._array = np.zeros(self.m.Z.shape)
-            self.m.q_mu2._array = np.zeros(self.m.Z.shape)
-            self.m.q_mu3._array = np.zeros(self.m.Z.shape)
-            self.m.q_mu4._array = np.zeros(self.m.Z.shape)
+            if init_zeros == True:
+                self.m.q_mu1._array = np.zeros(self.m.Z.shape)
+                self.m.q_mu2._array = np.zeros(self.m.Z.shape)
+                self.m.q_mu3._array = np.zeros(self.m.Z.shape)
+                self.m.q_mu4._array = np.zeros(self.m.Z.shape)
 
-            self.m.q_sqrt1._array = np.expand_dims(np.eye(self.m.Z.size), 2)
-            self.m.q_sqrt2._array = np.expand_dims(np.eye(self.m.Z.size), 2)
-            self.m.q_sqrt3._array = np.expand_dims(np.eye(self.m.Z.size), 2)
-            self.m.q_sqrt4._array = np.expand_dims(np.eye(self.m.Z.size), 2)
+                self.m.q_sqrt1._array = np.expand_dims(np.eye(self.m.Z.size), 2)
+                self.m.q_sqrt2._array = np.expand_dims(np.eye(self.m.Z.size), 2)
+                self.m.q_sqrt3._array = np.expand_dims(np.eye(self.m.Z.size), 2)
+                self.m.q_sqrt4._array = np.expand_dims(np.eye(self.m.Z.size), 2)
 
             self.m.optimize(disp=disp, maxiter=maxiter)
 

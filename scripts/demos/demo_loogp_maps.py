@@ -61,12 +61,12 @@ for i in range(len(all_pitches)):
     kern_act1 = gpflow.kernels.Matern32(input_dim=1, lengthscales=params['l_act1'], variance=params['s_act1'])
     kern_act2 = gpflow.kernels.Matern32(input_dim=1, lengthscales=params['l_act2'], variance=params['s_act2'])
     kc, ka = [kern_com1, kern_com2], [kern_act1, kern_act2]
-    maxiter, dec, ws = 100, 160, N  # maxiter, decimation factor, window size in samples
-    model = gpitch.loopdet.LooPDet(x=x, y=y, kern_comps=kc, kern_acts=ka, ws=ws, dec=dec, whiten=True)
+    maxiter, dec, ws = 100, 80, N  # maxiter, decimation factor, window size in samples
+    model = gpitch.loopdet.LooPDet(x=x, y=y, kern_comps=kc, kern_acts=ka, ws=ws, dec=dec, whiten=False)
     model.m.likelihood.noise_var = 1e-4
     model.optimize_windowed(disp=1, maxiter=maxiter)
-    model.m.whiten = False
-    model.optimize_windowed(disp=1, maxiter=maxiter)
+    model.m.whiten = True
+    model.optimize_windowed(disp=1, maxiter=maxiter, init_zeros=False)
     model.save_results('../../../results/files/demos/loogp/results_maps_pitch_'+ pitch_detect[0])
 
 
