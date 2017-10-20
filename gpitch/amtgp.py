@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 
 def init_settings(visible_device='0', interactive=False):
     '''Initialize usage of GPU and plotting'''
-    os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings
+    os.environ['TF_CPP_MIN_LOG_LEVEL']='1' #  deactivate tf warnings
     os.environ["CUDA_VISIBLE_DEVICES"] = visible_device # configuration use only one GPU
     config = tf.ConfigProto() #Configuration to not to use all the memory
     config.gpu_options.allow_growth = True
