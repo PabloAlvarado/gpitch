@@ -57,7 +57,7 @@ plt.plot(x, logistic(g1)*f1, '.k', mew=1)
 plt.subplot(model.nrows, model.ncols, 8)
 plt.plot(x, logistic(g2)*f2, '.k', mew=1)
 plt.tight_layout()
-plt.savefig('../../../results/figures/demos/demo_loogp_toy_new.png')
+plt.savefig('../../../results/figures/demos/demo_loogp_toy.png')
 
 
 
