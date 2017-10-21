@@ -7,7 +7,6 @@ from kernels import Matern12Cosine
 from scipy.fftpack import fft
 import os
 import tensorflow as tf
-from matplotlib import pyplot as plt
 
 def init_settings(visible_device='0', interactive=False):
     '''Initialize usage of GPU and plotting'''
@@ -20,10 +19,6 @@ def init_settings(visible_device='0', interactive=False):
     else:
         sess = tf.Session(config=config)
 
-    # plotting initial configuration
-    plt.rcParams['figure.figsize'] = (18, 6)  # set plot size
-    plt.interactive(True)
-    plt.close('all')
 
 
 def load_filename_list(filename):
@@ -114,7 +109,6 @@ def learnparams(X, S, Nh):
     Np = 3 # number of parameters per Lorentzian
     Pstar = np.zeros((Nh,Np))
     Shat = S.copy()
-    #plt.figure()
     count = 0
     for i in range(0, Nh):
         idx = np.argmax(Shat)
@@ -147,13 +141,6 @@ def Matern12CosineMix(variance, lengthscale, period, Nh):
     '''Write it.'''
     kern_list = [Matern12Cosine(input_dim=1, period=period[i], variance=variance[i], lengthscales=lengthscale[i]) for i in range(0, Nh)]
     return gpflow.kernels.Add(kern_list)
-
-
-def myplot():
-    fig, ax = plt.subplots()
-    fig.subplots_adjust(left=.115, bottom=.12, right=.99, top=.97)
-    fig.set_size_inches(width, height)
-    plt.grid(False)
 
 
 def wavread(filename, start=0, N=None, norm=True, mono=True):

@@ -6,7 +6,6 @@ import modgp
 from scipy.fftpack import fft
 import os
 import tensorflow as tf
-from matplotlib import pyplot as plt
 import amtgp
 
 
@@ -108,38 +107,39 @@ class ModPDet():
 
 
     def plot_results(self, zoom_limits):
-        x = self.x_pred
-        y = self.y_pred
-        fig, fig_array = plt.subplots(3, 2, sharex=False, sharey=False)
-
-        fig_array[0, 0].set_title('Data')
-        fig_array[0, 0].plot(x, y, lw=2)
-        fig_array[0, 1].set_title('Approximation')
-        fig_array[0, 1].plot(x, amtgp.logistic(self.qm2)*self.qm1 , lw=2)
-
-        fig_array[1, 0].set_title('Component')
-        fig_array[1, 0].plot(x, self.qm1, color='C0', lw=2)
-        fig_array[1, 0].fill_between(x[:, 0], self.qm1[:, 0] - 2*np.sqrt(self.qv1[:, 0]),
-                             self.qm1[:, 0] + 2*np.sqrt(self.qv1[:, 0]), color='C0', alpha=0.2)
-
-        fig_array[1, 1].set_title('Component (zoom in)')
-        fig_array[1, 1].plot(x, self.qm1, color='C0', lw=2)
-        fig_array[1, 1].fill_between(x[:, 0], self.qm1[:, 0] - 2*np.sqrt(self.qv1[:, 0]),
-                             self.qm1[:, 0] + 2*np.sqrt(self.qv1[:, 0]), color='C0', alpha=0.2)
-        fig_array[1, 1].set_xlim(zoom_limits)
-
-        fig_array[2, 0].set_title('Activation')
-        fig_array[2, 0].plot(x, amtgp.logistic(self.qm2), color='g', lw=2)
-        fig_array[2, 0].fill_between(x[:, 0], amtgp.logistic(self.qm2[:, 0] - 2*np.sqrt(self.qv2[:, 0])),
-                             amtgp.logistic(self.qm2[:, 0] + 2*np.sqrt(self.qv2[:, 0])), color='g', alpha=0.2)
-
-        fig_array[2, 1].set_title('Activation (zoom in)')
-        fig_array[2, 1].plot(x, amtgp.logistic(self.qm2), 'g', lw=2)
-        fig_array[2, 1].fill_between(x[:, 0], amtgp.logistic(self.qm2[:, 0] - 2*np.sqrt(self.qv2[:, 0])),
-                             amtgp.logistic(self.qm2[:, 0] + 2*np.sqrt(self.qv2[:, 0])), color='g', alpha=0.2)
-        fig_array[2, 1].set_xlim(zoom_limits)
-
-        return fig, fig_array
+        pass
+        # x = self.x_pred
+        # y = self.y_pred
+        # fig, fig_array = plt.subplots(3, 2, sharex=False, sharey=False)
+        #
+        # fig_array[0, 0].set_title('Data')
+        # fig_array[0, 0].plot(x, y, lw=2)
+        # fig_array[0, 1].set_title('Approximation')
+        # fig_array[0, 1].plot(x, amtgp.logistic(self.qm2)*self.qm1 , lw=2)
+        #
+        # fig_array[1, 0].set_title('Component')
+        # fig_array[1, 0].plot(x, self.qm1, color='C0', lw=2)
+        # fig_array[1, 0].fill_between(x[:, 0], self.qm1[:, 0] - 2*np.sqrt(self.qv1[:, 0]),
+        #                      self.qm1[:, 0] + 2*np.sqrt(self.qv1[:, 0]), color='C0', alpha=0.2)
+        #
+        # fig_array[1, 1].set_title('Component (zoom in)')
+        # fig_array[1, 1].plot(x, self.qm1, color='C0', lw=2)
+        # fig_array[1, 1].fill_between(x[:, 0], self.qm1[:, 0] - 2*np.sqrt(self.qv1[:, 0]),
+        #                      self.qm1[:, 0] + 2*np.sqrt(self.qv1[:, 0]), color='C0', alpha=0.2)
+        # fig_array[1, 1].set_xlim(zoom_limits)
+        #
+        # fig_array[2, 0].set_title('Activation')
+        # fig_array[2, 0].plot(x, amtgp.logistic(self.qm2), color='g', lw=2)
+        # fig_array[2, 0].fill_between(x[:, 0], amtgp.logistic(self.qm2[:, 0] - 2*np.sqrt(self.qv2[:, 0])),
+        #                      amtgp.logistic(self.qm2[:, 0] + 2*np.sqrt(self.qv2[:, 0])), color='g', alpha=0.2)
+        #
+        # fig_array[2, 1].set_title('Activation (zoom in)')
+        # fig_array[2, 1].plot(x, amtgp.logistic(self.qm2), 'g', lw=2)
+        # fig_array[2, 1].fill_between(x[:, 0], amtgp.logistic(self.qm2[:, 0] - 2*np.sqrt(self.qv2[:, 0])),
+        #                      amtgp.logistic(self.qm2[:, 0] + 2*np.sqrt(self.qv2[:, 0])), color='g', alpha=0.2)
+        # fig_array[2, 1].set_xlim(zoom_limits)
+        #
+        # return fig, fig_array
 
     def plot_learntprior(self, arg):
         pass
