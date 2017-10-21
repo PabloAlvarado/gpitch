@@ -13,8 +13,8 @@ class ModGP(gpflow.model.Model):
         if minibatch_size is None:
             minibatch_size = X.shape[0]
         self.num_data = X.shape[0]
-        self.X = X
-        self.Y = Y
+        #self.X = X
+        #self.Y = Y
         self.X = MinibatchData(X, minibatch_size, np.random.RandomState(0))
         self.Y = MinibatchData(Y, minibatch_size, np.random.RandomState(0))
         self.Z = gpflow.param.DataHolder(Z, on_shape_change='pass')

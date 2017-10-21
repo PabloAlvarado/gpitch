@@ -11,7 +11,8 @@ def plot_results(results):
     '''
     ncols = 2
     nrows = 5
-    plt.figure(figsize=(18, nrows*6))
+    plt.figure()
+    #plt.figure(figsize=(18, nrows*6))
     plt.subplot(nrows, ncols, (1, 2))
     plt.title('data and prediction')
     plt.plot(results['x_pred'], results['y_pred'], '.k', mew=1)

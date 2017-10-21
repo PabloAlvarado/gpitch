@@ -6,6 +6,7 @@ from gpflow.minibatch import MinibatchData
 import tensorflow as tf
 from likelihoods import LooLik
 jitter = settings.numerics.jitter_level
+float_type = settings.dtypes.float_type
 
 
 class LooGP(gpflow.model.Model):
@@ -22,8 +23,8 @@ class LooGP(gpflow.model.Model):
             minibatch_size = X.shape[0]
         self.num_data = X.shape[0]
 
-        self.X = X
-        self.Y = Y
+        #self.X = X
+        #self.Y = Y
         self.X = MinibatchData(X, minibatch_size, np.random.RandomState(0))
         self.Y = MinibatchData(Y, minibatch_size, np.random.RandomState(0))
         #self.X = gpflow.param.DataHolder(X, on_shape_change='pass')
@@ -56,10 +57,10 @@ class LooGP(gpflow.model.Model):
             KL3 = gauss_kl_white(self.q_mu3, self.q_sqrt3)
             KL4 = gauss_kl_white(self.q_mu4, self.q_sqrt4)
         else:
-            K1 = self.kern_f1.K(self.Z) + np.eye(self.num_inducing) * jitter
-            K2 = self.kern_g1.K(self.Z) + np.eye(self.num_inducing) * jitter
-            K3 = self.kern_f2.K(self.Z) + np.eye(self.num_inducing) * jitter
-            K4 = self.kern_g2.K(self.Z) + np.eye(self.num_inducing) * jitter
+            K1 = self.kern_f1.K(self.Z) + tf.eye(self.num_inducing, dtype=float_type) * jitter
+            K2 = self.kern_g1.K(self.Z) + tf.eye(self.num_inducing, dtype=float_type) * jitter
+            K3 = self.kern_f2.K(self.Z) + tf.eye(self.num_inducing, dtype=float_type) * jitter
+            K4 = self.kern_g2.K(self.Z) + tf.eye(self.num_inducing, dtype=float_type) * jitter
             KL1 = gauss_kl(self.q_mu1, self.q_sqrt1, K1)
             KL2 = gauss_kl(self.q_mu2, self.q_sqrt2, K2)
             KL3 = gauss_kl(self.q_mu3, self.q_sqrt3, K3)
