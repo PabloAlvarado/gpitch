@@ -49,6 +49,7 @@ if init_model:
     model.m.kern_g2.fixed = True
 model.m.likelihood.noise_var = noise_var
 model.optimize_windowed(disp=1, maxiter=maxiter)
+model.save_results('../../../results/files/demos/loogp/results_toy')
 
 
 
