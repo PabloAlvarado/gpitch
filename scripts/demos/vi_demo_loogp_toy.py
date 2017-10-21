@@ -1,80 +1,68 @@
-import time, sys, os
+import sys
 sys.path.append('../../')
-import matplotlib
-if True: matplotlib.use('agg') # define if running code on server (True)
-from matplotlib import pyplot as plt
 import numpy as np
-import tensorflow as tf
-import gpflow, gpitch
+from matplotlib import pyplot as plt
 from gpitch.amtgp import logistic
+plt.interactive(True)
+
+def plot_results(results):
+    '''
+    Plot infered components and activations
+    '''
+    ncols = 2
+    nrows = 5
+    plt.figure()
+    #plt.figure(figsize=(18, nrows*6))
+    plt.subplot(nrows, ncols, (1, 2))
+    plt.title('data and prediction')
+    plt.plot(results['x_pred'], results['y_pred'], '.k', mew=1)
+    plt.plot(results['x_pred'], results['yhat'] , lw=2)
+
+    plt.subplot(nrows, ncols, (3,4))
+    plt.title('source 1, pitch ')
+    plt.plot(results['x_pred'], logistic(results['qm2'])*results['qm1'], lw=2)
+
+    plt.subplot(nrows, ncols, (5,6))
+    plt.title('source 2')
+    plt.plot(results['x_pred'], logistic(results['qm4'])*results['qm3'], lw=2)
+
+    plt.subplot(nrows, ncols, 7)
+    plt.title('activation 1')
+    plt.plot(results['x_pred'], logistic(results['qm2']), 'g', lw=2)
+    plt.fill_between(results['x_pred'], logistic(results['qm2']-2*np.sqrt(results['qv2'])),
+                     logistic(results['qm2']+2*np.sqrt(results['qv2'])), color='g', alpha=0.2)
+
+    plt.subplot(nrows, ncols, 8)
+    plt.title('activation 2')
+    plt.plot(results['x_pred'], logistic(results['qm4']), 'g', lw=2)
+    plt.fill_between(results['x_pred'], logistic(results['qm4'] - 2*np.sqrt(results['qv4'])),
+                     logistic(results['qm4']+2*np.sqrt(results['qv4'])), color='g', alpha=0.2)
+
+    plt.subplot(nrows, ncols, 9)
+    plt.title('component 1')
+    plt.plot(results['x_pred'], results['qm1'], color='C0', lw=2)
+    plt.fill_between(results['x_pred'], results['qm1']-2*np.sqrt(results['qv1']), results['qm1']+2*np.sqrt(results['qv1']),
+                     color='C0', alpha=0.2)
+
+    plt.subplot(nrows, ncols, 10)
+    plt.title('component 2')
+    plt.plot(results['x_pred'], results['qm3'], color='C0', lw=2)
+    plt.fill_between(results['x_pred'], results['qm3']-2*np.sqrt(results['qv3']), results['qm3']+2*np.sqrt(results['qv3']),
+                     color='C0', alpha=0.2)
 
 
-np.random.seed(29)
-gpitch.amtgp.init_settings(visible_device=sys.argv[1], interactive=True) #  confi gpu usage, plot
-fs = 16e3  # generate synthetic data
-N = 1600  # number of samples
-x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)  # time
-noise_var = 1.e-3  # noise variance
-pitch1 = 440.00  # Hertz, A4 (La)
-pitch2 = 659.25  # Hertz, E5 (Mi)
-kenv1 = gpflow.kernels.Matern32(input_dim=1, lengthscales=0.01, variance=10.)
-kenv2 = gpflow.kernels.Matern32(input_dim=1, lengthscales=0.005, variance=10.)
-kper1 = gpflow.kernels.PeriodicKernel(input_dim=1, lengthscales=0.25,
-                                      variance=np.sqrt(0.5), period=1./pitch1)
-kper2 = gpflow.kernels.PeriodicKernel(input_dim=1, lengthscales=0.25,
-                                      variance=np.sqrt(0.5), period=1./pitch2)
-Kenv1 = kenv1.compute_K_symm(x)
-Kenv2 = kenv2.compute_K_symm(x)
-Kper1 = kper1.compute_K_symm(x)
-Kper2 = kper2.compute_K_symm(x)
-f1 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper1).reshape(-1, 1)
-f2 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kper2).reshape(-1, 1)
-f1 /= np.max(np.abs(f1))
-f2 /= np.max(np.abs(f2))
-g1 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kenv1).reshape(-1, 1)
-g2 = np.random.multivariate_normal(np.zeros(x.shape[0]), Kenv2).reshape(-1, 1)
-source1 = gpitch.amtgp.logistic(g1)*f1
-source2 = gpitch.amtgp.logistic(g2)*f2
-mean = source1 + source2
-y = mean + np.random.randn(*mean.shape) * np.sqrt(noise_var)
+results = np.load('../../../results/files/demos/loogp/results_toy.npz')
+plot_results(results)
 
-maxiter, dec, ws = 500, 10, N  # maxiter, decimation factor, window size in samples
-kc, ka = [kper1, kper2], [kenv1, kenv2]
-model = gpitch.loopdet.LooPDet(x=x, y=y, kern_comps=kc, kern_acts=ka, ws=ws, dec=dec, whiten=True)
-model.m.likelihood.noise_var = noise_var
-model.m.likelihood.noise_var.fixed = True
-model.m.kern_f1.fixed = True
-model.m.kern_f2.fixed = True
-model.m.kern_g1.fixed = True
-model.m.kern_g2.fixed = True
-model.optimize_windowed(disp=1, maxiter=maxiter)
-model.plot_results()
-plt.subplot(model.nrows, model.ncols, 3)  # include toy components and activations
-plt.plot(x, f1, '.k', mew=1)
-plt.subplot(model.nrows, model.ncols, 4)
-plt.plot(x, f2, '.k', mew=1)
-plt.subplot(model.nrows, model.ncols, 5)
-plt.plot(x[::5], logistic(g1[::5]), '.k', mew=1)
-plt.subplot(model.nrows, model.ncols, 6)
-plt.plot(x[::5], logistic(g2[::5]), '.k', mew=1)
-plt.subplot(model.nrows, model.ncols, 7)
-plt.plot(x, logistic(g1)*f1, '.k', mew=1)
-plt.subplot(model.nrows, model.ncols, 8)
-plt.plot(x, logistic(g2)*f2, '.k', mew=1)
-plt.tight_layout()
-plt.savefig('../../../results/figures/demos/demo_loogp_toy.png')
-
-
-
-
-
-
-
-
-
-
-
-
+# plt.subplot(5, 2, 7)
+# plt.plot(results['x_pred'], logistic(results['g1']), '.k', mew=1)
+# plt.subplot(5, 2, 8)
+# plt.plot(results['x_pred'],logistic(results['g2']), '.k', mew=1)
+# plt.subplot(5, 2, 9)
+# plt.plot(results['x_pred'], results['f1'], '.k', mew=1)
+# plt.subplot(5, 2, 10)
+# plt.plot(results['x_pred'], results['f2'], '.k', mew=1)
+#plt.tight_layout()
 
 
 

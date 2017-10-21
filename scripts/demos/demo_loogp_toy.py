@@ -7,12 +7,12 @@ from gpitch.amtgp import logistic
 
 
 visible_device = sys.argv[1]  # which gpu to use
-init_model = sys.argv[2].lower() == 'true'  # if true initialize the gpflow model, otherwise reuse existent model
+init_model = sys.argv[2].lower() == '1'  # if true initialize the gpflow model, otherwise reuse existent model
 if init_model:
-    np.random.seed(29)
+    #np.random.seed(29)
     gpitch.amtgp.init_settings(visible_device=visible_device, interactive=True) #  confi gpu usage, plot
     fs = 16e3  # generate synthetic data
-    N = 100  # number of samples
+    N = 1600  # number of samples
     x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)  # time
     noise_var = 1.e-3  # noise variance
     pitch1 = 440.00  # Hertz, A4 (La)
@@ -38,7 +38,7 @@ if init_model:
     mean = source1 + source2
     y = mean + np.random.randn(*mean.shape) * np.sqrt(noise_var)
 
-    maxiter, dec, ws = 100, 10, N  # maxiter, decimation factor, window size in samples
+    maxiter, dec, ws = 250, 10, N//2  # maxiter, decimation factor, window size in samples
     kc, ka = [kper1, kper2], [kenv1, kenv2]
 
     model = gpitch.loopdet.LooPDet(x=x, y=y, kern_comps=kc, kern_acts=ka, ws=ws, dec=dec, whiten=True)
@@ -47,9 +47,25 @@ if init_model:
     model.m.kern_f2.fixed = True
     model.m.kern_g1.fixed = True
     model.m.kern_g2.fixed = True
+
 model.m.likelihood.noise_var = noise_var
-model.optimize_windowed(disp=0, maxiter=maxiter)
-model.save_results('../../../results/files/demos/loogp/results_toy')
+model.optimize_windowed(disp=1, maxiter=maxiter)
+np.savez_compressed('../../../results/files/demos/loogp/results_toy',
+                    x_pred = model.x_pred,
+                    y_pred = model.y_pred,
+                    yhat = model.yhat,
+                    f1 = f1,
+                    f2 = f2,
+                    g1 = g1,
+                    g2 = g2,
+                    qm1 = model.qm1,
+                    qm2 = model.qm2,
+                    qm3 = model.qm3,
+                    qm4 = model.qm4,
+                    qv1 = model.qv1,
+                    qv2 = model.qv2,
+                    qv3 = model.qv3,
+                    qv4 = model.qv4)
 
 
 
