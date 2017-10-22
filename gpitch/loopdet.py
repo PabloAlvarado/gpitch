@@ -107,20 +107,26 @@ class LooPDet():
                             qv4 = self.qv4)
 
 
-    def update_params(self, arg):
-        pass
-        # for i in range(2, self.Nc + 1):  # update component 1
-        #     r1 = tf.reduce_sum(r / getattr(self, 'lengthscale_' + str(i)), 2)
-        #     r2 = tf.reduce_sum(2.*np.pi * getattr(self, 'frequency_' + str(i)) * r , 2)
-        #     k += getattr(self, 'variance_' + str(i)) * tf.exp(-r1) * tf.cos(r2)
-        #
-        # for i in range(2, self.Nc + 1):  # update component 2
-        #     r1 = tf.reduce_sum(r / getattr(self, 'lengthscale_' + str(i)), 2)
-        #     r2 = tf.reduce_sum(2.*np.pi * getattr(self, 'frequency_' + str(i)) * r , 2)
-        #     k += getattr(self, 'variance_' + str(i)) * tf.exp(-r1) * tf.cos(r2)
-        #
-        # # update activation 1
-        # # update activation 2
+    def update_params(self, params):
+    ''''
+    update parameters of graph
+    '''
+    for i in range(self.m.kern_f1.Nc):
+        setattr(self.m.kern_f1, 'variance_' + str(i+1), params['s_com1'][i])
+        setattr(self.m.kern_f1, 'lengthscale_' + str(i+1), params['l_com1'][i])
+        setattr(self.m.kern_f1, 'frequency_' + str(i+1), params['f_com1'][i])
+
+    for i in range(self.m.kern_f2.Nc):
+        setattr(self.m.kern_f2, 'variance_' + str(i+1), params['s_com2'][i])
+        setattr(self.m.kern_f2, 'lengthscale_' + str(i+1), params['l_com2'][i])
+        setattr(self.m.kern_f2, 'frequency_' + str(i+1), params['f_com2'][i])
+
+    setattr(self.m.kern_g1, 'variance', params['s_act1'])
+    setattr(self.m.kern_g1, 'lengthscales', params['l_act1'])
+
+    setattr(self.m.kern_g2, 'variance', params['s_act2'])
+    setattr(self.m.kern_g2, 'lengthscales', params['l_act2'])
+
 
 
     def plot_results(self):
