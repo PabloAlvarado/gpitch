@@ -7,7 +7,7 @@ from gpitch.amtgp import logistic
 
 
 visible_device = sys.argv[1]  # which gpu to use
-init_model = sys.argv[2].lower() == '1'  # if true initialize the gpflow model, otherwise reuse existent model
+init_model = sys.argv[2].lower() == '1'  # if true (1) initialize the gpflow model, otherwise reuse existing model
 if init_model:
     #np.random.seed(29)
     gpitch.amtgp.init_settings(visible_device=visible_device, interactive=True) #  confi gpu usage, plot
@@ -47,25 +47,16 @@ if init_model:
     model.m.kern_f2.fixed = True
     model.m.kern_g1.fixed = True
     model.m.kern_g2.fixed = True
+    model.m.likelihood.noise_var = noise_var
 
-model.m.likelihood.noise_var = noise_var
+else:
+    # write code to modify exisitng model, e.g change data, or hyperparam values, or variational variables
+    pass
+
 model.optimize_windowed(disp=1, maxiter=maxiter)
-np.savez_compressed('../../../results/files/demos/loogp/results_toy',
-                    x_pred = model.x_pred,
-                    y_pred = model.y_pred,
-                    yhat = model.yhat,
-                    f1 = f1,
-                    f2 = f2,
-                    g1 = g1,
-                    g2 = g2,
-                    qm1 = model.qm1,
-                    qm2 = model.qm2,
-                    qm3 = model.qm3,
-                    qm4 = model.qm4,
-                    qv1 = model.qv1,
-                    qv2 = model.qv2,
-                    qv3 = model.qv3,
-                    qv4 = model.qv4)
+loc = '../../../results/files/demos/loogp/'
+model.save_results(loc + 'results_toy')
+np.savez_compressed(loc + 'data_toy', f1 = f1, f2 = f2, g1 = g1, g2 = g2)
 
 
 
