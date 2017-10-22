@@ -63,6 +63,7 @@ else:
     model.x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, model.Nw)] # split data into windows
     model.y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, model.Nw)]
 
+
 model.m.likelihood.noise_var = noise_var
 model.optimize_windowed(disp=1, maxiter=maxiter)
 model.save_results(loc + 'results_toy')

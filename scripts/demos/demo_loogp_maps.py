@@ -64,7 +64,7 @@ if init_model:
         kern_act1 = gpflow.kernels.Matern32(input_dim=1, lengthscales=params['l_act1'], variance=params['s_act1'])
         kern_act2 = gpflow.kernels.Matern32(input_dim=1, lengthscales=params['l_act2'], variance=params['s_act2'])
         kc, ka = [kern_com1, kern_com2], [kern_act1, kern_act2]
-        maxiter, dec, ws = 10, 160, N  # maxiter, decimation factor, window size in samples
+        maxiter, dec, ws = 10, 320, N  # maxiter, decimation factor, window size in samples
         model = gpitch.loopdet.LooPDet(x=x, y=y, kern_comps=kc, kern_acts=ka, ws=ws, dec=dec, whiten=False)
         model.m.likelihood.noise_var = 1e-4
         model.m.kern_f1.fixed = True
