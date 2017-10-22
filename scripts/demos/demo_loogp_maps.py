@@ -6,7 +6,10 @@ import gpflow, gpitch
 from gpitch.amtgp import logistic
 
 
-gpitch.amtgp.init_settings(visible_device=sys.argv[1], interactive=False) #  confi gpu usage, plot
+visible_device = sys.argv[1]  # which gpu to use
+init_model = sys.argv[2].lower() == '1'  # if true (1) initialize the gpflow model, otherwise reuse existing model
+
+gpitch.amtgp.init_settings(visible_device=visible_device, interactive=False) #  confi gpu usage, plot
 data_location = '../../../datasets/maps/sample_rate_16khz/'  # location of data, params, results dir
 params_location = '../../../results/files/params_activations/'
 test_data_location = '../../../datasets/maps/test_data/'

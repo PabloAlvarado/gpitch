@@ -23,19 +23,16 @@ class LooGP(gpflow.model.Model):
             minibatch_size = X.shape[0]
         self.num_data = X.shape[0]
 
-        #self.X = X
-        #self.Y = Y
         self.X = MinibatchData(X, minibatch_size, np.random.RandomState(0))
         self.Y = MinibatchData(Y, minibatch_size, np.random.RandomState(0))
         #self.X = gpflow.param.DataHolder(X, on_shape_change='pass')
         #self.Y = gpflow.param.DataHolder(Y, on_shape_change='pass')
 
         self.Z = gpflow.param.DataHolder(Z, on_shape_change='pass')
-        #self.Z = Z
-        #self.Z = gpflow.param.Param(Z)
 
         self.kern_f1, self.kern_f2  = kf[0], kf[1]
         self.kern_g1, self.kern_g2 = kg[0], kg[1]
+
         self.likelihood = LooLik(version=old_version)
         self.num_inducing = Z.shape[0]
         self.whiten = whiten
@@ -109,30 +106,25 @@ class LooGP(gpflow.model.Model):
     def predict_f1(self, Xnew):
         return gpflow.conditionals.conditional(Xnew, self.Z, self.kern_f1,
                                                self.q_mu1, q_sqrt=self.q_sqrt1,
-                                               full_cov=False,
-                                               whiten=self.whiten)
+                                               full_cov=False, whiten=self.whiten)
 
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_g1(self, Xnew):
         return gpflow.conditionals.conditional(Xnew, self.Z, self.kern_g1,
                                                self.q_mu2, q_sqrt=self.q_sqrt2,
-                                               full_cov=False,
-                                               whiten=self.whiten)
+                                               full_cov=False, whiten=self.whiten)
 
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_f2(self, Xnew):
         return gpflow.conditionals.conditional(Xnew, self.Z, self.kern_f2,
                                                self.q_mu3, q_sqrt=self.q_sqrt3,
-                                               full_cov=False,
-                                               whiten=self.whiten)
+                                               full_cov=False, whiten=self.whiten)
 
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_g2(self, Xnew):
         return gpflow.conditionals.conditional(Xnew, self.Z, self.kern_g2,
                                                self.q_mu4, q_sqrt=self.q_sqrt4,
-                                               full_cov=False,
-                                               whiten=self.whiten)
-
+                                               full_cov=False, whiten=self.whiten)
 
 
 

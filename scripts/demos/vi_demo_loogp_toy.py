@@ -52,16 +52,20 @@ def plot_results(results):
 
 
 results = np.load('../../../results/files/demos/loogp/results_toy.npz')
+data = np.load('../../../results/files/demos/loogp/data_toy.npz')
 plot_results(results)
-
+plt.subplot(5, 2, (3,4))
+plt.plot(results['x_pred'], logistic(data['g1'])*data['f1'], '.k', mew=1)
+plt.subplot(5, 2, (5,6))
+plt.plot(results['x_pred'], logistic(data['g2'])*data['f2'], '.k', mew=1)
 # plt.subplot(5, 2, 7)
-# plt.plot(results['x_pred'], logistic(results['g1']), '.k', mew=1)
+# plt.plot(results['x_pred'][::5], logistic(data['g1'][::5]), '.k', mew=1)
 # plt.subplot(5, 2, 8)
-# plt.plot(results['x_pred'],logistic(results['g2']), '.k', mew=1)
+# plt.plot(results['x_pred'][::5],logistic(data['g2'][::5]), '.k')
 # plt.subplot(5, 2, 9)
-# plt.plot(results['x_pred'], results['f1'], '.k', mew=1)
+# plt.plot(results['x_pred'], data['f1'], '.k')
 # plt.subplot(5, 2, 10)
-# plt.plot(results['x_pred'], results['f2'], '.k', mew=1)
+# plt.plot(results['x_pred'], data['f2'], '.k')
 #plt.tight_layout()
 
 
