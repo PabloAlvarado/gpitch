@@ -56,7 +56,7 @@ pitch_detect = ['60', '64', '67', '72', '76']
 for i in range(len(pitch_detect)):
     results = np.load('../../../results/files/demos/loogp/results_maps_pitch_'+ pitch_detect[i] + '.npz')
     plot_results(results)
-    plt.tight_layout()
+    #plt.tight_layout()
     plt.savefig('../../../results/figures/demos/demo_loogp_maps_' + pitch_detect[i] + '.jpeg')
 
 

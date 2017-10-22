@@ -60,14 +60,14 @@ class LooPDet():
             self.m.X = self.x_l[i].copy()
             self.m.Y = self.y_l[i].copy()
             self.m.Z = self.x_l[i][::self.dec].copy()
-            # self.m.q_mu1 = np.zeros(self.m.Z.shape)
-            # self.m.q_mu2 = np.zeros(self.m.Z.shape)
-            # self.m.q_mu3 = np.zeros(self.m.Z.shape)
-            # self.m.q_mu4 = np.zeros(self.m.Z.shape)
-            # self.m.q_sqrt1 = np.expand_dims(np.eye(self.m.Z.size), 2)
-            # self.m.q_sqrt2 = np.expand_dims(np.eye(self.m.Z.size), 2)
-            # self.m.q_sqrt3 = np.expand_dims(np.eye(self.m.Z.size), 2)
-            # self.m.q_sqrt4 = np.expand_dims(np.eye(self.m.Z.size), 2)
+            self.m.q_mu1 = np.zeros(self.m.Z.shape)
+            self.m.q_mu2 = np.zeros(self.m.Z.shape)
+            self.m.q_mu3 = np.zeros(self.m.Z.shape)
+            self.m.q_mu4 = np.zeros(self.m.Z.shape)
+            self.m.q_sqrt1 = np.expand_dims(np.eye(self.m.Z.size), 2)
+            self.m.q_sqrt2 = np.expand_dims(np.eye(self.m.Z.size), 2)
+            self.m.q_sqrt3 = np.expand_dims(np.eye(self.m.Z.size), 2)
+            self.m.q_sqrt4 = np.expand_dims(np.eye(self.m.Z.size), 2)
 
             self.m.optimize(disp=disp, maxiter=maxiter)
             self.qm1_l[i], self.qv1_l[i] = self.m.predict_f1(self.x_l[i])
@@ -108,24 +108,35 @@ class LooPDet():
 
 
     def update_params(self, params):
-    ''''
-    update parameters of graph
-    '''
-    for i in range(self.m.kern_f1.Nc):
-        setattr(self.m.kern_f1, 'variance_' + str(i+1), params['s_com1'][i])
-        setattr(self.m.kern_f1, 'lengthscale_' + str(i+1), params['l_com1'][i])
-        setattr(self.m.kern_f1, 'frequency_' + str(i+1), params['f_com1'][i])
+        ''''
+        update parameters of graph
+        '''
+        # set values to zero
+        for i in range(self.m.kern_f1.Nc):
+            setattr(self.m.kern_f1, 'variance_' + str(i+1), 0.)
+            setattr(self.m.kern_f1, 'lengthscale_' + str(i+1), 1.)
+            setattr(self.m.kern_f1, 'frequency_' + str(i+1), 0.)
 
-    for i in range(self.m.kern_f2.Nc):
-        setattr(self.m.kern_f2, 'variance_' + str(i+1), params['s_com2'][i])
-        setattr(self.m.kern_f2, 'lengthscale_' + str(i+1), params['l_com2'][i])
-        setattr(self.m.kern_f2, 'frequency_' + str(i+1), params['f_com2'][i])
+        for i in range(self.m.kern_f2.Nc):
+            setattr(self.m.kern_f2, 'variance_' + str(i+1), 0.)
+            setattr(self.m.kern_f2, 'lengthscale_' + str(i+1), 1.)
+            setattr(self.m.kern_f2, 'frequency_' + str(i+1), 0.)
 
-    setattr(self.m.kern_g1, 'variance', params['s_act1'])
-    setattr(self.m.kern_g1, 'lengthscales', params['l_act1'])
+        for i in range(params['s_com1'].size):
+            setattr(self.m.kern_f1, 'variance_' + str(i+1), params['s_com1'][i])
+            setattr(self.m.kern_f1, 'lengthscale_' + str(i+1), params['l_com1'][i])
+            setattr(self.m.kern_f1, 'frequency_' + str(i+1), params['f_com1'][i])
 
-    setattr(self.m.kern_g2, 'variance', params['s_act2'])
-    setattr(self.m.kern_g2, 'lengthscales', params['l_act2'])
+        for i in range(params['s_com2'].size):
+            setattr(self.m.kern_f2, 'variance_' + str(i+1), params['s_com2'][i])
+            setattr(self.m.kern_f2, 'lengthscale_' + str(i+1), params['l_com2'][i])
+            setattr(self.m.kern_f2, 'frequency_' + str(i+1), params['f_com2'][i])
+
+        setattr(self.m.kern_g1, 'variance', params['s_act1'])
+        setattr(self.m.kern_g1, 'lengthscales', params['l_act1'])
+
+        setattr(self.m.kern_g2, 'variance', params['s_act2'])
+        setattr(self.m.kern_g2, 'lengthscales', params['l_act2'])
 
 
 
