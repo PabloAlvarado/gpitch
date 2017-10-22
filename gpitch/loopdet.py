@@ -91,6 +91,38 @@ class LooPDet():
         self.y_pred = np.asarray(self.y_pred_l).reshape(-1, )
         self.yhat = logistic(self.qm2)*self.qm1 + logistic(self.qm4)*self.qm3
 
+
+    def save_results(self, filename):
+        np.savez_compressed(filename,
+                            x_pred = self.x_pred,
+                            y_pred = self.y_pred,
+                            yhat = self.yhat,
+                            qm1 = self.qm1,
+                            qm2 = self.qm2,
+                            qm3 = self.qm3,
+                            qm4 = self.qm4,
+                            qv1 = self.qv1,
+                            qv2 = self.qv2,
+                            qv3 = self.qv3,
+                            qv4 = self.qv4)
+
+
+    def update_params(self, arg):
+        pass
+        # for i in range(2, self.Nc + 1):  # update component 1
+        #     r1 = tf.reduce_sum(r / getattr(self, 'lengthscale_' + str(i)), 2)
+        #     r2 = tf.reduce_sum(2.*np.pi * getattr(self, 'frequency_' + str(i)) * r , 2)
+        #     k += getattr(self, 'variance_' + str(i)) * tf.exp(-r1) * tf.cos(r2)
+        #
+        # for i in range(2, self.Nc + 1):  # update component 2
+        #     r1 = tf.reduce_sum(r / getattr(self, 'lengthscale_' + str(i)), 2)
+        #     r2 = tf.reduce_sum(2.*np.pi * getattr(self, 'frequency_' + str(i)) * r , 2)
+        #     k += getattr(self, 'variance_' + str(i)) * tf.exp(-r1) * tf.cos(r2)
+        #
+        # # update activation 1
+        # # update activation 2
+
+
     def plot_results(self):
         '''
         Plot infered components and activations
@@ -133,17 +165,3 @@ class LooPDet():
         # plt.plot(self.x_pred, self.qm3, color='C0', lw=2)
         # plt.fill_between(self.x_pred, self.qm3-2*np.sqrt(self.qv3), self.qm3+2*np.sqrt(self.qv3),
         #                  color='C0', alpha=0.2)
-
-    def save_results(self, filename):
-        np.savez_compressed(filename,
-                            x_pred = self.x_pred,
-                            y_pred = self.y_pred,
-                            yhat = self.yhat,
-                            qm1 = self.qm1,
-                            qm2 = self.qm2,
-                            qm3 = self.qm3,
-                            qm4 = self.qm4,
-                            qv1 = self.qv1,
-                            qv2 = self.qv2,
-                            qv3 = self.qv3,
-                            qv4 = self.qv4)

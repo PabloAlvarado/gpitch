@@ -7,20 +7,21 @@ from gpitch.amtgp import logistic
 
 active_device = sys.argv[1]
 init_model = sys.argv[2].lower() == '1'  # if true (1) initialize the gpflow model, otherwise reuse existing model
-gpitch.amtgp.init_settings(visible_device=active_device, interactive=False) #  confi gpu usage, plot
-
-data_location = '../../../datasets/maps/sample_rate_16khz/'  # location of data, params, results dir
-params_location = '../../../results/files/params_activations/'
-test_data_location = '../../../datasets/maps/test_data/'
-results_files_location = '../../../results/files/pitch_detection/'
-results_figures_location = '../../../results/figures/pitch_detection/'
-test_data_name = test_data_location + 'test_data_5_pitches.wav'
-fs, y = gpitch.amtgp.wavread(test_data_name, mono=False) # load test_data
-N = y.size
-x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)
-all_pitches = ['60', '64', '67', '72', '76']
 
 if init_model:
+    gpitch.amtgp.init_settings(visible_device=active_device, interactive=False) #  confi gpu usage, plot
+    data_location = '../../../datasets/maps/sample_rate_16khz/'  # location of data, params, results dir
+    params_location = '../../../results/files/params_activations/'
+    test_data_location = '../../../datasets/maps/test_data/'
+    results_files_location = '../../../results/files/pitch_detection/'
+    results_figures_location = '../../../results/figures/pitch_detection/'
+
+    test_data_name = test_data_location + 'test_data_5_pitches.wav'
+    fs, y = gpitch.amtgp.wavread(test_data_name, mono=False) # load test_data
+    N = y.size
+    x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)
+
+    all_pitches = ['60', '64', '67', '72', '76']
     for i in range(len(all_pitches)):
         aux = list(all_pitches)
         aux.pop(i)
@@ -55,30 +56,24 @@ if init_model:
                   'l_com2' : np.vstack(l_com_op),
                   's_com2' : np.vstack(s_com_op),
                   'f_com2' : np.vstack(f_com_op)}
-        if i == 0:
-            kern_com1 = gpitch.kernels.MaternSpecMix(input_dim=1, variances=params['s_com1'],
-                                                     lengthscales=params['l_com1'],
-                                                     frequencies=params['f_com1'])
-            kern_com2 = gpitch.kernels.MaternSpecMix(input_dim=1, variances=params['s_com2'],
-                                                     lengthscales=params['l_com2'],
-                                                     frequencies=params['f_com2'])
-            kern_act1 = gpflow.kernels.Matern32(input_dim=1, lengthscales=params['l_act1'], variance=params['s_act1'])
-            kern_act2 = gpflow.kernels.Matern32(input_dim=1, lengthscales=params['l_act2'], variance=params['s_act2'])
-            kc, ka = [kern_com1, kern_com2], [kern_act1, kern_act2]
-            maxiter, dec, ws = 10, 320, N  # maxiter, decimation factor, window size in samples
-            model = gpitch.loopdet.LooPDet(x=x, y=y, kern_comps=kc, kern_acts=ka, ws=ws, dec=dec, whiten=False)
-            model.m.likelihood.noise_var = 1e-4
-            model.m.kern_f1.fixed = True
-            model.m.kern_f2.fixed = True
-            model.m.kern_g1.fixed = True
-            model.m.kern_g2.fixed = True
-            model.m.likelihood.noise_var.fixed = True
-        else:
-            # update hyperparms to detect new pitch
-            pass
 
+        kern_com1 = gpitch.amtgp.Matern12CosineMix(variance=params['s_com1'], lengthscale=params['l_com1'],
+                                                   period=1./params['f_com1'], Nh=params['s_com1'].size)
+        kern_com2 = gpitch.amtgp.Matern12CosineMix(variance=params['s_com2'], lengthscale=params['l_com2'],
+                                                   period=1./params['f_com2'], Nh=params['s_com2'].size)
+        kern_act1 = gpflow.kernels.Matern32(input_dim=1, lengthscales=params['l_act1'], variance=params['s_act1'])
+        kern_act2 = gpflow.kernels.Matern32(input_dim=1, lengthscales=params['l_act2'], variance=params['s_act2'])
+        kc, ka = [kern_com1, kern_com2], [kern_act1, kern_act2]
+        maxiter, dec, ws = 10, 320, N  # maxiter, decimation factor, window size in samples
+        model = gpitch.loopdet.LooPDet(x=x, y=y, kern_comps=kc, kern_acts=ka, ws=ws, dec=dec, whiten=False)
+        model.m.likelihood.noise_var = 1e-4
+        model.m.kern_f1.fixed = True
+        model.m.kern_f2.fixed = True
+        model.m.kern_g1.fixed = True
+        model.m.kern_g2.fixed = True
+        model.m.likelihood.noise_var.fixed = True
         model.optimize_windowed(disp=1, maxiter=maxiter)
-        model.save_results('../../../results/files/demos/loogp/results_maps_pitch_'+ pitch_detect[0])
+        model.save_results('../../../results/files/demos/loogp/results_maps_keep_pitch_'+ pitch_detect[0])
 
 
 
