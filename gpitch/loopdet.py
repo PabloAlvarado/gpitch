@@ -111,7 +111,7 @@ class LooPDet():
         ''''
         update parameters of graph
         '''
-        # set values to zero
+        # init all param values to zero or one
         for i in range(self.m.kern_f1.Nc):
             setattr(self.m.kern_f1, 'variance_' + str(i+1), 0.)
             setattr(self.m.kern_f1, 'lengthscale_' + str(i+1), 1.)
@@ -122,6 +122,7 @@ class LooPDet():
             setattr(self.m.kern_f2, 'lengthscale_' + str(i+1), 1.)
             setattr(self.m.kern_f2, 'frequency_' + str(i+1), 0.)
 
+        # upload new params values
         for i in range(params['s_com1'].size):
             setattr(self.m.kern_f1, 'variance_' + str(i+1), params['s_com1'][i])
             setattr(self.m.kern_f1, 'lengthscale_' + str(i+1), params['l_com1'][i])
