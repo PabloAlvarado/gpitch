@@ -124,7 +124,7 @@ class MaternSpecMix(gpflow.kernels.Kern):
 
         for i in range(2, self.Nc + 1):
             r1 = tf.reduce_sum(r / getattr(self, 'lengthscale_' + str(i)), 2)
-            r2 = tf.reduce_sum(2.*np.pi * i * getattr(self, 'frequency_' + str(i)) * r , 2)
+            r2 = tf.reduce_sum(2.*np.pi * getattr(self, 'frequency_' + str(i)) * r , 2)
             k += getattr(self, 'variance_' + str(i)) * tf.exp(-r1) * tf.cos(r2)
         return k
 
