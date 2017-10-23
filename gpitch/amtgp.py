@@ -10,7 +10,7 @@ import tensorflow as tf
 
 def init_settings(visible_device='0', interactive=False):
     '''Initialize usage of GPU and plotting'''
-    os.environ['TF_CPP_MIN_LOG_LEVEL']='0' #  deactivate tf warnings
+    os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings
     os.environ["CUDA_VISIBLE_DEVICES"] = visible_device # configuration use only one GPU
     config = tf.ConfigProto() #Configuration to not to use all the memory
     config.gpu_options.allow_growth = True
@@ -131,6 +131,20 @@ def learnparams(X, S, Nh):
             Shat[a:b,] = 0.
     s_s, l_s, f_s = np.hsplit(Pstar[0:count,:], 3)
     return s_s, 1./l_s, f_s/(2.*np.pi),
+
+
+def init_com_params(y, fs, Nh, scaled=True):
+    N = y.size
+    Y = fft(y.reshape(-1,)) #  FFT data
+    S =  2./N * np.abs(Y[0:N//2]) #  spectral density data
+    F = np.linspace(0, fs/2., N//2) #  frequency vector
+
+    s, l, f = learnparams(X=F, S=S, Nh=Nh) #  Param learning Nh=#harmonics
+    if scaled:
+        sig_scale = 1./ (4.*np.sum(s)) #rescale (sigma)
+        s *= sig_scale
+    params = [s, l, f]
+    return params, Y, S, F
 
 
 def logistic(x):

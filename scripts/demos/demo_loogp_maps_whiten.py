@@ -34,11 +34,11 @@ if init_model:  # init model (build graph only once)
     kern_act2 = gpflow.kernels.Matern32(1)
     kc, ka = [kern_com1, kern_com2], [kern_act1, kern_act2]
     dec, ws = 160, N  # maxiter, decimation factor, window size in samples
-    model = gpitch.loopdet.LooPDet(x=x, y=y, kern_comps=kc, kern_acts=ka, ws=ws, dec=dec, whiten=False)
-    model.m.likelihood.noise_var = 1e-3
+    model = gpitch.loopdet.LooPDet(x=x, y=y, kern_comps=kc, kern_acts=ka, ws=ws, dec=dec, whiten=True)
+    model.m.likelihood.noise_var = 1e-7
     model.m.kern_f1.fixed = True
     model.m.kern_f2.fixed = True
-    model.m.kern_g1.fixed = True
+    model.m.kern_g1.fixed = False
     model.m.kern_g2.fixed = False
     model.m.likelihood.noise_var.fixed = True
 
@@ -78,7 +78,7 @@ for i in range(len(all_pitches)):
               'f_com2' : np.vstack(f_com_op)}
 
     model.update_params(params)  # update hyperparms to detect specific pitch
-    maxiter = 50
+    maxiter = 25
     print('detecting pitch ' +  pitch_detect[0])
     model.optimize_windowed(disp=0, maxiter=maxiter)
     model.save_results('../../../results/files/demos/loogp/results_maps_pitch_'+ pitch_detect[0])

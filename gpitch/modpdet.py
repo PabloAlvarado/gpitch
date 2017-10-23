@@ -7,46 +7,27 @@ from scipy.fftpack import fft
 import os
 import tensorflow as tf
 import amtgp
-
+import kernels
 
 class ModPDet():
     '''Gaussian Process pitch detection using modulated GP'''
-    def __init__(self, x, y, fs, ws, jump, Nw=None, bounded=False, whiten=False):
+
+    def __init__(self, x, y, kern_com, kern_act, ws, dec, Nw=None, bounded=False, whiten=False):
         self.x, self.y = x, y
-        self.fs, self.ws = fs, ws # sample rate, and window size (samples)
-        self.jump, self.N = jump, x.size
-        if Nw == None:
-            self.Nw = self.N/self.ws  # number of windows
-        else:
-            self.Nw = 1
-        self.Nh = 10 # number of maximun frequency components in density
+        self.ws = ws # sample rate, and window size (samples)
+        self.dec, self.N = dec, x.size
+        if Nw == None: self.Nw = self.N/self.ws  # number of windows
+        else: self.Nw = 1
         self.bounded = bounded #  bound inducing variables for f_m to be (-1, 1)
-        self.whiten = whiten
-
-        # frequency representation data
-        self.Y = fft(y.reshape(-1,)) #  FFT data
-        self.S =  2./self.N * np.abs(self.Y[0:self.N/2]) #  spectral density data
-        self.F = np.linspace(0, fs/2., self.N/2) #  frequency vector
-
-        self.s, self.l, self.f = amtgp.learnparams(X=self.F, S=self.S, Nh=self.Nh) #  Param learning Nh=#harmonics
-        sig_scale = 1./ (4.*np.sum(self.s)) #rescale (sigma)
-        self.s *= sig_scale
-
-        self.kf = amtgp.Matern12CosineMix(variance=self.s, lengthscale=self.l, period=1./self.f, Nh=self.s.size)
-        self.kg = gpflow.kernels.Matern32(input_dim=1, variance=10.*np.random.rand(), lengthscales=10.*np.random.rand())
-
         self.x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, self.Nw)] # split data into windows
         self.y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, self.Nw)]
-        self.z = self.x_l[0][::jump].copy()
+        self.z = self.x_l[0][::dec].copy()
+        self.model = modgp.ModGP(self.x_l[0].copy(), self.y_l[0].copy(), kern_com, kern_act, self.z, whiten=whiten)
+        self.model.likelihood.noise_var.transform = gpflow.transforms.Logistic(a=0., b=1e-1)
 
-        self.model = modgp.ModGP(self.x_l[0].copy(), self.y_l[0].copy(), self.kf, self.kg, self.z, whiten=self.whiten)
-        self.model.likelihood.noise_var = 1e-7
-        self.model.likelihood.noise_var.fixed = True
         if self.bounded:
             self.model.q_mu1.transform = gpflow.transforms.Logistic(a=-1.0, b=1.0)
             self.model.q_mu2.transform = gpflow.transforms.Logistic(a=-8.0, b=8.0)
-        self.model.kern1.fixed = True # component kernel
-        self.model.kern2.fixed = True # activation kernel
 
         init_list = [None for i in range(0, self.Nw)]  # list to save predictions mean (qm) and variance (qv)
         self.qm1_l = list(init_list)
@@ -63,16 +44,17 @@ class ModPDet():
         self.x_pred = np.asarray(self.x_pred_l).reshape(-1, 1)
         self.y_pred = np.asarray(self.y_pred_l).reshape(-1, 1)
 
-    def optimize(self, disp, maxiter, reinit_variational_params=True):
+    def optimize_windowed(self, disp, maxiter, init_zero=True):
         for i in range(self.Nw):
             self.model.X = self.x_l[i].copy()
             self.model.Y = self.y_l[i].copy()
-            self.model.Z = self.x_l[i][::self.jump].copy()
-            if reinit_variational_params:
-                self.model.q_mu1._array = np.zeros(self.model.Z.shape)
-                self.model.q_mu2._array = np.zeros(self.model.Z.shape)
-                self.model.q_sqrt1._array = np.expand_dims(np.eye(self.model.Z.size), 2)
-                self.model.q_sqrt2._array = np.expand_dims(np.eye(self.model.Z.size), 2)
+            self.model.Z = self.x_l[i][::self.dec].copy()
+            if init_zero:
+                self.model.q_mu1 = np.zeros(self.model.Z.shape)
+                self.model.q_mu2 = np.zeros(self.model.Z.shape)
+                self.model.q_sqrt1 = np.expand_dims(np.eye(self.model.Z.size), 2)
+                self.model.q_sqrt2 = np.expand_dims(np.eye(self.model.Z.size), 2)
+
             self.model.optimize(disp=disp, maxiter=maxiter)
             self.qm1_l[i], self.qv1_l[i] = self.model.predict_f(self.x_l[i])
             self.qm2_l[i], self.qv2_l[i] = self.model.predict_g(self.x_l[i])
@@ -87,22 +69,22 @@ class ModPDet():
         self.y_pred = np.asarray(self.y_pred_l).reshape(-1, 1)
 
     def optimize_restart(self, maxiter, restarts=10):
-        init_hyper = [np.zeros((restarts,)) for _ in range(0, 2)] #  save initial hyperparmas values
-        learnt_hyper = [np.zeros((restarts,)) for _ in range(0, 2)] #   save learnt hyperparams values
+        init_hyper = [np.zeros((restarts,)) for _ in range(0, 3)] #  save initial hyperparmas values
+        learnt_hyper = [np.zeros((restarts,)) for _ in range(0, 3)] #   save learnt hyperparams values
         mse = np.zeros((restarts,)) # save mse error for each restart
         for r in range(0, restarts):
-            self.model.kern2.lengthscales = 10.*np.random.rand()
-            self.model.kern2.variance = 10.*np.random.rand()
-            self.model.whiten = False
-            self.model.kern1.fixed = True # component kernel
-            self.model.kern2.fixed = False # activation kernel
+            self.model.kern2.lengthscales = 1.*np.random.rand()
+            self.model.kern2.variance = 15.*np.random.rand()
+            self.model.likelihood.noise_var = 0.1*np.random.rand()
             init_hyper[0][r] = self.model.kern2.lengthscales.value
             init_hyper[1][r] = self.model.kern2.variance.value
-            self.optimize(disp=0, maxiter=maxiter)
+            init_hyper[2][r] = self.model.likelihood.noise_var.value
+            self.optimize_windowed(disp=0, maxiter=maxiter)
             learnt_hyper[0][r] = self.model.kern2.lengthscales.value
             learnt_hyper[1][r] = self.model.kern2.variance.value
+            learnt_hyper[2][r] = self.model.likelihood.noise_var.value
             mse[r] = (1./self.N)*np.sum((self.y_pred - amtgp.logistic(self.qm2)*self.qm1)**2)
-            print('| len: %8.8f, %8.8f | sig: %8.8f, %8.8f | mse: %8.8f |' % (init_hyper[0][r], learnt_hyper[0][r], init_hyper[1][r], learnt_hyper[1][r], mse[r]) )
+            print('| len: %8.8f, %8.8f | sig: %8.8f, %8.8f | noise_var: %8.8f, %8.8f |' % (init_hyper[0][r], learnt_hyper[0][r], init_hyper[1][r], learnt_hyper[1][r], init_hyper[2][r], learnt_hyper[2][r]) )
         return init_hyper, learnt_hyper, mse
 
 

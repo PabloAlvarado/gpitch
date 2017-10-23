@@ -20,10 +20,12 @@ def plot_results(results):
 
     plt.subplot(nrows, ncols, (3,4))
     plt.title('source 1, pitch ' +  pitch_detect[i])
+    plt.ylim([-1., 1.])
     plt.plot(results['x_pred'], logistic(results['qm2'])*results['qm1'], lw=2)
 
     plt.subplot(nrows, ncols, (5,6))
     plt.title('source 2')
+    plt.ylim([-1., 1.])
     plt.plot(results['x_pred'], logistic(results['qm4'])*results['qm3'], lw=2)
 
     plt.subplot(nrows, ncols, 7)
