@@ -156,7 +156,7 @@ def init_com_params(y, fs, Nh, ideal_f0, scaled=True):
     if scaled:
         sig_scale = 1./ (4.*np.sum(S_star)) #rescale (sigma)
         S_star *= sig_scale
-    return F_star, S_star
+    return F_star, S_star, F, Y, Ss
 
 
 def logistic(x):
