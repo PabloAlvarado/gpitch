@@ -21,7 +21,8 @@ class ModPDet():
         self.bounded = bounded #  bound inducing variables for f_m to be (-1, 1)
         self.x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, self.Nw)] # split data into windows
         self.y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, self.Nw)]
-        self.z = self.x_l[0][::dec].copy()
+        #self.z = self.x_l[0][::dec].copy()
+        self.z = np.vstack(( self.x_l[0][::dec].copy(), self.x_l[0][-1].copy() ))
         self.model = modgp.ModGP(self.x_l[0].copy(), self.y_l[0].copy(), kern_com, kern_act, self.z, whiten=whiten)
         self.model.likelihood.noise_var.transform = gpflow.transforms.Logistic(a=0., b=1e-1)
 
@@ -48,7 +49,8 @@ class ModPDet():
         for i in range(self.Nw):
             self.model.X = self.x_l[i].copy()
             self.model.Y = self.y_l[i].copy()
-            self.model.Z = self.x_l[i][::self.dec].copy()
+            #self.model.Z = self.x_l[i][::self.dec].copy()
+            self.model.Z = np.vstack(( self.x_l[i][::self.dec].copy(), self.x_l[i][-1].copy() ))
             if init_zero:
                 self.model.q_mu1 = np.zeros(self.model.Z.shape)
                 self.model.q_mu2 = np.zeros(self.model.Z.shape)
@@ -69,22 +71,50 @@ class ModPDet():
         self.y_pred = np.asarray(self.y_pred_l).reshape(-1, 1)
 
     def optimize_restart(self, maxiter, restarts=10):
-        init_hyper = [np.zeros((restarts,)) for _ in range(0, 3)] #  save initial hyperparmas values
-        learnt_hyper = [np.zeros((restarts,)) for _ in range(0, 3)] #   save learnt hyperparams values
+        init_hyper = [np.zeros((restarts,)) for _ in range(0, 5)] #  save initial hyperparmas values
+        learnt_hyper = [np.zeros((restarts,)) for _ in range(0, 5)] #   save learnt hyperparams values
         mse = np.zeros((restarts,)) # save mse error for each restart
         for r in range(0, restarts):
+
+            self.model.kern1.lengthscales = 0.1*np.random.rand()
+            #for i in range(self.model.kern1.Nc): # generate a param object for each  var, and freq, they must be (Nc,) arrays.
+            #    setattr(self.model.kern1, 'variance_' + str(i+1), 0.25*np.random.rand() )
+            #    setattr(self.model.kern1, 'frequency_' + str(i+1), (i+1)*self.model.kern1.ideal_f0 + np.sqrt(5)*np.random.randn()  )
+
             self.model.kern2.lengthscales = 1.*np.random.rand()
             self.model.kern2.variance = 15.*np.random.rand()
+
             self.model.likelihood.noise_var = 0.1*np.random.rand()
+
             init_hyper[0][r] = self.model.kern2.lengthscales.value
             init_hyper[1][r] = self.model.kern2.variance.value
             init_hyper[2][r] = self.model.likelihood.noise_var.value
-            self.optimize_windowed(disp=0, maxiter=maxiter)
+            init_hyper[3][r] = self.model.kern1.lengthscales.value
+            # init_hyper[0][r] = self.model.kern1.variance_1.value
+            # init_hyper[1][r] = self.model.kern1.variance_2.value
+            # init_hyper[2][r] = self.model.kern1.variance_3.value
+            # init_hyper[3][r] = self.model.kern1.variance_4.value
+            # init_hyper[4][r] = self.model.kern1.variance_5.value
+            self.optimize_windowed(disp=1, maxiter=maxiter)
+            # learnt_hyper[0][r] = self.model.kern1.variance_1.value
+            # learnt_hyper[1][r] = self.model.kern1.variance_2.value
+            # learnt_hyper[2][r] = self.model.kern1.variance_3.value
+            # learnt_hyper[3][r] = self.model.kern1.variance_4.value
+            # learnt_hyper[4][r] = self.model.kern1.variance_5.value
             learnt_hyper[0][r] = self.model.kern2.lengthscales.value
             learnt_hyper[1][r] = self.model.kern2.variance.value
             learnt_hyper[2][r] = self.model.likelihood.noise_var.value
+            learnt_hyper[3][r] = self.model.kern1.lengthscales.value
             mse[r] = (1./self.N)*np.sum((self.y_pred - amtgp.logistic(self.qm2)*self.qm1)**2)
-            print('| len: %8.8f, %8.8f | sig: %8.8f, %8.8f | noise_var: %8.8f, %8.8f |' % (init_hyper[0][r], learnt_hyper[0][r], init_hyper[1][r], learnt_hyper[1][r], init_hyper[2][r], learnt_hyper[2][r]) )
+            print('| len: %4.4f, %4.4f | sig: %4.4f, %4.4f | noise_var: %4.4f, %4.4f | l_com: %4.4f, %4.4f |' % (init_hyper[0][r], learnt_hyper[0][r],
+                                                                                                                 init_hyper[1][r], learnt_hyper[1][r],
+                                                                                                                 init_hyper[2][r], learnt_hyper[2][r],
+                                                                                                                 init_hyper[3][r], learnt_hyper[3][r]) )
+            #print('| v1: %4.4f, %4.4f | v2: %4.4f, %4.4f | v3: %4.4f, %4.4f | v4: %4.4f, %4.4f | v5: %4.4f, %4.4f | ' % (init_hyper[0][r], learnt_hyper[0][r],
+            #                                                                                                             init_hyper[1][r], learnt_hyper[1][r],
+        #                                                                                                                 init_hyper[2][r], learnt_hyper[2][r],
+        #                                                                                                                 init_hyper[3][r], learnt_hyper[3][r],
+        #                                                                                                                 init_hyper[4][r], learnt_hyper[4][r]))
         return init_hyper, learnt_hyper, mse
 
 

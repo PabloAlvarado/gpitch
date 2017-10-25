@@ -5,6 +5,7 @@ import gpflow
 import modgp
 from kernels import Matern12Cosine
 from scipy.fftpack import fft
+from scipy import signal
 import os
 import tensorflow as tf
 
@@ -133,18 +134,29 @@ def learnparams(X, S, Nh):
     return s_s, 1./l_s, f_s/(2.*np.pi),
 
 
-def init_com_params(y, fs, Nh, scaled=True):
+def init_com_params(y, fs, Nh, ideal_f0, scaled=True):
     N = y.size
     Y = fft(y.reshape(-1,)) #  FFT data
     S =  2./N * np.abs(Y[0:N//2]) #  spectral density data
     F = np.linspace(0, fs/2., N//2) #  frequency vector
+    win =  signal.hann(6)
+    Ss = signal.convolve(S, win, mode='same') / sum(win)
+    #Ss /= np.max(Ss)
 
-    s, l, f = learnparams(X=F, S=S, Nh=Nh) #  Param learning Nh=#harmonics
+    F_star = np.zeros((Nh,))
+    S_star = np.zeros((Nh,))
+    for i in range(Nh):
+        S_hat = Ss.copy()
+        S_hat[F <= (i+0.5)*ideal_f0] = 0.
+        S_hat[F >= (i+1.5)*ideal_f0] = 0.
+        idx_max = np.argmax(S_hat)
+        F_star[i] = F[idx_max]
+        S_star[i] = Ss[idx_max]
+
     if scaled:
-        sig_scale = 1./ (4.*np.sum(s)) #rescale (sigma)
-        s *= sig_scale
-    params = [s, l, f]
-    return params, Y, S, F
+        sig_scale = 1./ (4.*np.sum(S_star)) #rescale (sigma)
+        S_star *= sig_scale
+    return F_star, S_star
 
 
 def logistic(x):
