@@ -8,6 +8,7 @@ from scipy.fftpack import fft
 from scipy import signal
 import os
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 def init_settings(visible_device='0', interactive=False):
     '''Initialize usage of GPU and plotting'''
@@ -145,13 +146,17 @@ def init_com_params(y, fs, Nh, ideal_f0, scaled=True):
 
     F_star = np.zeros((Nh,))
     S_star = np.zeros((Nh,))
+
+    f0 = ideal_f0
     for i in range(Nh):
         S_hat = Ss.copy()
-        S_hat[F <= (i+0.5)*ideal_f0] = 0.
-        S_hat[F >= (i+1.5)*ideal_f0] = 0.
+        S_hat[F <= (i+0.5)*f0] = 0.
+        S_hat[F >= (i+1.5)*f0] = 0.
         idx_max = np.argmax(S_hat)
         F_star[i] = F[idx_max]
         S_star[i] = Ss[idx_max]
+        if i == 0:
+            f0 = F_star[i].copy()  # update value of natural frequency
 
     if scaled:
         sig_scale = 1./ (4.*np.sum(S_star)) #rescale (sigma)
