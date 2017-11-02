@@ -139,7 +139,8 @@ class LooPDet():
         setattr(self.m.kern_g2, 'variance', params['s_act2'])
         setattr(self.m.kern_g2, 'lengthscales', params['l_act2'])
 
-
+    def learnparams(self, xtrain, ytrain):
+        pass
 
     def plot_results(self):
         '''

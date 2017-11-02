@@ -148,8 +148,7 @@ class MaternSpecMixSL(gpflow.kernels.Kern):
     '''
     Matern spectral mixture kernel with single lengthscale.
     '''
-
-    def __init__(self, input_dim, lengthscales=None, variances=None, frequencies=None, ideal_f0=None, Nc=1):
+    def __init__(self, Nc, input_dim=1, lengthscales=None, variances=None, frequencies=None, ideal_f0=None):
         gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
         self.ARD = False
         self.ideal_f0 = ideal_f0
