@@ -135,12 +135,12 @@ def learnparams(X, S, Nh):
     return s_s, 1./l_s, f_s/(2.*np.pi),
 
 
-def init_com_params(y, fs, Nh, ideal_f0, scaled=True):
+def init_com_params(y, fs, Nh, ideal_f0, scaled=True, win_size=6):
     N = y.size
     Y = fft(y.reshape(-1,)) #  FFT data
     S =  2./N * np.abs(Y[0:N//2]) #  spectral density data
     F = np.linspace(0, fs/2., N//2) #  frequency vector
-    win =  signal.hann(6)
+    win =  signal.hann(win_size)
     Ss = signal.convolve(S, win, mode='same') / sum(win)
     #Ss /= np.max(Ss)
 
@@ -191,7 +191,7 @@ def wavread(filename, start=0, N=None, norm=True, mono=True):
 def load_pitch_params_data(pitch_list, data_loc, params_loc):
     '''
     This function loads the desired pitches and the gets the names of the files in the MAPS dataset
-    corresponding to those pitchescthat pitch. Also returns the learned params and data related to
+    corresponding to those pitches. Also returns the learned params and data related to
     those files.
     '''
     intensity = 'F'  # property maps datset, choose "forte" sounds
@@ -218,7 +218,11 @@ def load_pitch_params_data(pitch_list, data_loc, params_loc):
     return final_list, train_data, params
 
 
+def midi2frec(midi):
+    return 2.**( (midi - 69.)/12. ) * 440.
 
+def freq2midi(freq):
+    return int(69. + 12. * np.log2(freq / 440.))
 
 
 
