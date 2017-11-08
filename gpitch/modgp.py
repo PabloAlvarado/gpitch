@@ -8,24 +8,21 @@ float_type = settings.dtypes.float_type
 
 
 class ModGP(gpflow.model.Model):
-    def __init__(self, x, y, kern_com, kern_act, z, whiten=True,
-                 minibatch_size=None):
+    def __init__(self, x, y, z, kern_com, kern_act, whiten=True, minibatch_size=None):
         gpflow.model.Model.__init__(self)
 
         if minibatch_size is None:
             minibatch_size = x.shape[0]
-        self.num_data = x.shape[0]
 
+        self.num_data = x.shape[0]
         self.x = MinibatchData(x, minibatch_size, np.random.RandomState(0))
         self.y = MinibatchData(y, minibatch_size, np.random.RandomState(0))
-        self.z = gpflow.param.DataHolder(z, on_shape_change='pass')
-
+        self.z = gpflow.param.Param(z)
         self.kern_com = kern_com
         self.kern_act = kern_act
         self.likelihood = ModLik()
         self.num_inducing = z.shape[0]
         self.whiten = whiten
-
         # initialize variational parameters
         self.q_mu_com = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))
         self.q_mu_act = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))
@@ -78,6 +75,20 @@ class ModGP(gpflow.model.Model):
 
         return tf.reduce_sum(var_exp) * scale - KL
 
+
+    def predict_all(self, xnew):
+        """
+        method introduced by Pablo A. Alvarado
+        """
+        mean_f, var_f = self.predict_com(xnew)  # predict component
+        mean_g, var_g = self.predict_act(xnew)  # predict activation
+        mean_f = mean_f.reshape(-1, )  # reshape arrays in order to be easier plot variances
+        var_f = var_f.reshape(-1, )
+        mean_g = mean_g.reshape(-1, )
+        var_g = var_g.reshape(-1, )
+        x_plot = xnew.reshape(-1, ).copy()
+        return mean_f, var_f, mean_g, var_g, x_plot
+
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_com(self, xnew):
         return gpflow.conditionals.conditional(xnew, self.z, self.kern_com,
@@ -93,11 +104,6 @@ class ModGP(gpflow.model.Model):
                                                whiten=self.whiten)
 
 
-"""
-________________________________________________________________________________
-This methods correspond to optimization using SVI
-________________________________________________________________________________
-"""
 
 
 

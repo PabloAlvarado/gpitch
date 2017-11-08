@@ -2,6 +2,7 @@ import gpflow
 import tensorflow as tf
 import numpy as np
 import itertools
+from gpflow.param import transforms
 
 
 def mvhermgauss(means, covs, H, D):
@@ -43,7 +44,7 @@ class LooLik(gpflow.likelihoods.Likelihood):
     '''Leave One Out likelihood'''
     def __init__(self, version):
         gpflow.likelihoods.Likelihood.__init__(self)
-        self.noise_var = gpflow.param.Param(1.0)
+        self.variance = gpflow.param.Param(1.0, transforms.positive)
         self.version = version
     def logp(self, F, Y):
         f1, g1 = F[:, 0], F[:, 1]
@@ -52,7 +53,7 @@ class LooLik(gpflow.likelihoods.Likelihood):
         sigma_g1 = 1./(1 + tf.exp(-g1))  # squash g to be positive
         sigma_g2 = 1./(1 + tf.exp(-g2))  # squash g to be positive
         mean = sigma_g1 * f1 + sigma_g2 * f2
-        return gpflow.densities.gaussian(y, mean, self.noise_var).reshape(-1, 1)
+        return gpflow.densities.gaussian(y, mean, self.variance).reshape(-1, 1)
 
     def variational_expectations(self, Fmu, Fvar, Y):
         old_version = self.version
@@ -67,7 +68,7 @@ class LooLik(gpflow.likelihoods.Likelihood):
             sigma_g1 = 1./(1 + tf.exp(-g1))  # squash g to be positive
             sigma_g2 = 1./(1 + tf.exp(-g2))  # squash g to be positive
             mean =  sigma_g1 * f1 + sigma_g2 * f2
-            evaluations = gpflow.densities.gaussian(y, mean, self.noise_var)
+            evaluations = gpflow.densities.gaussian(y, mean, self.variance)
             evaluations = tf.transpose(tf.reshape(evaluations, tf.pack([tf.size(w),
                                                                 tf.shape(Fmu)[0]])))
             return tf.matmul(evaluations, w)
@@ -95,13 +96,13 @@ class LooLik(gpflow.likelihoods.Likelihood):
             E3, E4 = hermgauss1d(mean_g2, var_g2, H)
 
             # compute log-lik expectations under variational distribution
-            var_exp = -0.5*((1./self.noise_var)*(Y**2 -
+            var_exp = -0.5*((1./self.variance)*(Y**2 -
                        2.*Y*(mean_f1*E1 + mean_f2*E3) +
                       (var_f1 + mean_f1**2)*E2 +
                       2.* mean_f1*E1 * mean_f2*E3 +
                       (var_f2 + mean_f2**2)*E4) +
                       np.log(2.*np.pi) +
-                      tf.log(self.noise_var))
+                      tf.log(self.variance))
             return var_exp
 
 
@@ -109,14 +110,14 @@ class ModLik(gpflow.likelihoods.Likelihood):
     '''Modulated GP likelihood'''
     def __init__(self):
         gpflow.likelihoods.Likelihood.__init__(self)
-        self.noise_var = gpflow.param.Param(1.0)
+        self.variance = gpflow.param.Param(1.0, transforms.positive)
 
     def logp(self, F, Y):
         f, g = F[:, 0], F[:, 1]
         y = Y[:, 0]
         sigma_g = 1./(1 + tf.exp(-g))  # squash g to be positive
         mean = f * sigma_g
-        return gpflow.densities.gaussian(y, mean, self.noise_var).reshape(-1, 1)
+        return gpflow.densities.gaussian(y, mean, self.variance).reshape(-1, 1)
 
     # variational expectations function, Pablo Alvarado implementation
     def variational_expectations(self, Fmu, Fvar, Y):
@@ -138,9 +139,9 @@ class ModLik(gpflow.likelihoods.Likelihood):
         E2 = tf.reshape(tf.matmul(evaluations**2, gh_w), shape)
 
         # compute log-lik expectations under variational distribution
-        var_exp = -0.5*((1./self.noise_var)*(Y**2 - 2.*Y*mean_f*E1 +
+        var_exp = -0.5*((1./self.variance)*(Y**2 - 2.*Y*mean_f*E1 +
                   (var_f + mean_f**2)*E2) + np.log(2.*np.pi) +
-                  tf.log(self.noise_var))
+                  tf.log(self.variance))
         return var_exp
 
     # # variational expectations function, gpflow modulated_GP version
@@ -154,7 +155,7 @@ class ModLik(gpflow.likelihoods.Likelihood):
     #     y = tf.tile(Y, [H**D, 1])[:, 0]
     #     sigma_g = 1./(1 + tf.exp(-g))  # squash g to be positive
     #     mean = f * sigma_g
-    #     evaluations = gpflow.densities.gaussian(y, mean, self.noise_var)
+    #     evaluations = gpflow.densities.gaussian(y, mean, self.variance)
     #     evaluations = tf.transpose(tf.reshape(evaluations, tf.pack([tf.size(w),
     #                                tf.shape(Fmu)[0]])))
     #     n_var_exp = tf.matmul(evaluations, w)
