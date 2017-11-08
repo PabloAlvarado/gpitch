@@ -2,6 +2,11 @@
   <dictionary name="paad">
     <words>
       <w>datasets</w>
+      <w>filen</w>
+      <w>lengthscale</w>
+      <w>matern</w>
+      <w>tensorflow</w>
+      <w>xlim</w>
     </words>
   </dictionary>
 </component>

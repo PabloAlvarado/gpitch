@@ -92,79 +92,77 @@ class Inharmonic(gpflow.kernels.Kern):
         return var
 
 
+# class MaternSpecMix(gpflow.kernels.Kern):
+#     '''
+#     Matern spectral mixture kernel.
+#     '''
+#
+#     def __init__(self, input_dim, lengthscales=None, variances=None, frequencies=None, ideal_f0=None, Nc=1):
+#         gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
+#         self.ARD = False
+#         if ideal_f0 == None:
+#             self.Nc = lengthscales.size
+#             for i in range(self.Nc): # generate a param object for each len, var, and freq, they must be (Nc,) arrays.
+#                 setattr(self, 'lengthscale_' + str(i+1), Param(lengthscales[i], transforms.positive ) )
+#                 setattr(self, 'variance_' + str(i+1), Param(variances[i],transforms.positive ) )
+#                 setattr(self, 'frequency_' + str(i+1), Param(frequencies[i], transforms.positive ) )
+#
+#         else:
+#             self.Nc = Nc
+#             for i in range(Nc): # generate a param object for each len, var, and freq, they must be (Nc,) arrays.
+#                 setattr(self, 'lengthscale_' + str(i+1), Param(0.25, transforms.Logistic(0., .5) ) )
+#                 setattr(self, 'variance_' + str(i+1), Param(0.125, transforms.Logistic(0., 0.25) ) )
+#                 setattr(self, 'frequency_' + str(i+1), Param((i+1)*ideal_f0, transforms.positive ) )
+#
+#     def K(self, X, X2=None, presliced=False):
+#         if not presliced:
+#             X, X2 = self._slice(X, X2)
+#         if X2 is None:
+#             X2 = X
+#
+#         # Introduce dummy dimension so we can use broadcasting
+#         f = tf.expand_dims(X, 1)  # now N x 1 x D
+#         f2 = tf.expand_dims(X2, 0)  # now 1 x M x D
+#         r = tf.sqrt(tf.square(f - f2 +  1e-12))
+#
+#         r1 = tf.reduce_sum(r / self.lengthscale_1, 2)
+#         r2 = tf.reduce_sum(2.*np.pi * self.frequency_1 * r , 2)
+#         k = self.variance_1 * tf.exp(-r1) * tf.cos(r2)
+#
+#         for i in range(2, self.Nc + 1):
+#             r1 = tf.reduce_sum(r / getattr(self, 'lengthscale_' + str(i)), 2)
+#             r2 = tf.reduce_sum(2.*np.pi * getattr(self, 'frequency_' + str(i)) * r , 2)
+#             k += getattr(self, 'variance_' + str(i)) * tf.exp(-r1) * tf.cos(r2)
+#         return k
+#
+#
+#     def Kdiag(self, X):
+#         var = tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance_1))
+#         for i in range(2, self.Nc + 1):
+#             var += tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(getattr(self, 'variance_' + str(i))))
+#         return var
+
+
+
 class MaternSpecMix(gpflow.kernels.Kern):
-    '''
-    Matern spectral mixture kernel.
-    '''
-
-    def __init__(self, input_dim, lengthscales=None, variances=None, frequencies=None, ideal_f0=None, Nc=1):
-        gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
-        self.ARD = False
-        if ideal_f0 == None:
-            self.Nc = lengthscales.size
-            for i in range(self.Nc): # generate a param object for each len, var, and freq, they must be (Nc,) arrays.
-                setattr(self, 'lengthscale_' + str(i+1), Param(lengthscales[i], transforms.positive ) )
-                setattr(self, 'variance_' + str(i+1), Param(variances[i],transforms.positive ) )
-                setattr(self, 'frequency_' + str(i+1), Param(frequencies[i], transforms.positive ) )
-
-        else:
-            self.Nc = Nc
-            for i in range(Nc): # generate a param object for each len, var, and freq, they must be (Nc,) arrays.
-                setattr(self, 'lengthscale_' + str(i+1), Param(0.25, transforms.Logistic(0., .5) ) )
-                setattr(self, 'variance_' + str(i+1), Param(0.125, transforms.Logistic(0., 0.25) ) )
-                setattr(self, 'frequency_' + str(i+1), Param((i+1)*ideal_f0, transforms.positive ) )
-
-    def K(self, X, X2=None, presliced=False):
-        if not presliced:
-            X, X2 = self._slice(X, X2)
-        if X2 is None:
-            X2 = X
-
-        # Introduce dummy dimension so we can use broadcasting
-        f = tf.expand_dims(X, 1)  # now N x 1 x D
-        f2 = tf.expand_dims(X2, 0)  # now 1 x M x D
-        r = tf.sqrt(tf.square(f - f2 +  1e-12))
-
-        r1 = tf.reduce_sum(r / self.lengthscale_1, 2)
-        r2 = tf.reduce_sum(2.*np.pi * self.frequency_1 * r , 2)
-        k = self.variance_1 * tf.exp(-r1) * tf.cos(r2)
-
-        for i in range(2, self.Nc + 1):
-            r1 = tf.reduce_sum(r / getattr(self, 'lengthscale_' + str(i)), 2)
-            r2 = tf.reduce_sum(2.*np.pi * getattr(self, 'frequency_' + str(i)) * r , 2)
-            k += getattr(self, 'variance_' + str(i)) * tf.exp(-r1) * tf.cos(r2)
-        return k
-
-
-    def Kdiag(self, X):
-        var = tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance_1))
-        for i in range(2, self.Nc + 1):
-            var += tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(getattr(self, 'variance_' + str(i))))
-        return var
-
-
-
-class MaternSpecMixSL(gpflow.kernels.Kern):
-    '''
+    """
     Matern spectral mixture kernel with single lengthscale.
-    '''
-    def __init__(self, Nc, input_dim=1, lengthscales=None, variances=None, frequencies=None, ideal_f0=None):
+    """
+    def __init__(self, Nc, input_dim=1, lengthscales=None, variances=None, frequencies=None):
         gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
         self.ARD = False
-        self.ideal_f0 = ideal_f0
-        if ideal_f0 == None:
-            self.lengthscales = Param(lengthscales, transforms.Logistic(0., 1.0) )
-            self.Nc = variances.size
-            for i in range(self.Nc): # generate a param object for each  var, and freq, they must be (Nc,) arrays.
-                setattr(self, 'variance_' + str(i+1), Param(variances[i], transforms.Logistic(0., 0.25) ) )
-                setattr(self, 'frequency_' + str(i+1), Param(frequencies[i], transforms.positive ) )
+        self.Nc = Nc
 
-        else:
-            self.lengthscales = Param(0.05, transforms.Logistic(0., 0.1) )
-            self.Nc = Nc
-            for i in range(Nc): # generate a param object for each len, var, and freq, they must be (Nc,) arrays.
-                setattr(self, 'variance_' + str(i+1), Param(0.125, transforms.Logistic(0., 0.25) ) )
-                setattr(self, 'frequency_' + str(i+1), Param((i+1)*ideal_f0, transforms.positive ) )
+        if lengthscales == None:
+            lengthscales = 0.05
+            variances = 0.125*np.ones((Nc, 1))
+            frequencies = 1.*np.arange(1, Nc+1)
+
+        self.lengthscales = Param(lengthscales, transforms.Logistic(0., 0.1) )
+        for i in range(self.Nc): # generate a param object for each  var, and freq, they must be (Nc,) arrays.
+            setattr(self, 'variance_' + str(i+1), Param(variances[i], transforms.Logistic(0., 0.25) ) )
+            setattr(self, 'frequency_' + str(i+1), Param(frequencies[i], transforms.positive ) )
+
 
     def K(self, X, X2=None, presliced=False):
         if not presliced:

@@ -1,18 +1,14 @@
 import numpy as np
-import scipy as sp
-from scipy.io import wavfile as wav
 import gpflow
 import modgp
-from scipy.fftpack import fft
-import os
-import tensorflow as tf
 import amtgp
-import kernels
 
-class ModPDet():
-    '''Gaussian Process pitch detection using modulated GP'''
 
-    def __init__(self, x, y, kern_com, kern_act, ws, dec, Nw=None, bounded=False, whiten=False):
+class ModPDet:
+    """
+    Gaussian process pitch detection using modulated GP
+    """
+    def __init__(self, x, y, ker_com, ker_act, ws, dec, Nw=None, bounded=False, whiten=True):
         self.x, self.y = x, y
         self.ws = ws # sample rate, and window size (samples)
         self.dec, self.N = dec, x.size
@@ -21,10 +17,10 @@ class ModPDet():
         self.bounded = bounded #  bound inducing variables for f_m to be (-1, 1)
         self.x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, self.Nw)] # split data into windows
         self.y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, self.Nw)]
-        #self.z = self.x_l[0][::dec].copy()
         self.z = np.vstack(( self.x_l[0][::dec].copy(), self.x_l[0][-1].copy() ))
-        self.model = modgp.ModGP(self.x_l[0].copy(), self.y_l[0].copy(), kern_com, kern_act, self.z, whiten=whiten)
-        self.model.likelihood.noise_var.transform = gpflow.transforms.Logistic(a=0., b=1e-1)
+
+        # initialize modulated GP model and unfix component parameters
+        self.model = modgp.ModGP(self.x_l[0].copy(), self.y_l[0].copy(), ker_com, ker_act, self.z, whiten=whiten)
 
         if self.bounded:
             self.model.q_mu1.transform = gpflow.transforms.Logistic(a=-1.0, b=1.0)
@@ -95,7 +91,7 @@ class ModPDet():
             # init_hyper[2][r] = self.model.kern1.variance_3.value
             # init_hyper[3][r] = self.model.kern1.variance_4.value
             # init_hyper[4][r] = self.model.kern1.variance_5.value
-            self.optimize_windowed(disp=1, maxiter=maxiter)
+            self.optimize_windowed(disp=0, maxiter=maxiter)
             # learnt_hyper[0][r] = self.model.kern1.variance_1.value
             # learnt_hyper[1][r] = self.model.kern1.variance_2.value
             # learnt_hyper[2][r] = self.model.kern1.variance_3.value
@@ -116,6 +112,70 @@ class ModPDet():
         #                                                                                                                 init_hyper[3][r], learnt_hyper[3][r],
         #                                                                                                                 init_hyper[4][r], learnt_hyper[4][r]))
         return init_hyper, learnt_hyper, mse
+
+
+    def optimize(self, maxiter=10, restarts=1):
+
+        self.model.likelihood.noise_var.transform = gpflow.transforms.Logistic(a=0., b=1e-1)  # bound noise variance
+        self.model.likelihood.noise_var.fixed = False
+        self.model.kern2.fixed = False  # unfix params of kernel for activation
+        self.model.kern1.fixed = True  # set component kernel to only variances fixed
+        self.model.kern1.lengthscales.fixed = False
+        self.model.kern1.frequency_1.fixed = False
+        self.model.kern1.frequency_2.fixed = False
+        self.model.kern1.frequency_3.fixed = False
+        self.model.kern1.frequency_4.fixed = False
+        self.model.kern1.frequency_5.fixed = False
+        self.model.kern1.frequency_6.fixed = False
+        self.model.kern1.frequency_7.fixed = False
+        self.model.kern1.frequency_8.fixed = False
+        self.model.kern1.frequency_9.fixed = False
+        self.model.kern1.frequency_10.fixed = False
+        self.model.kern1.frequency_11.fixed = False
+        self.model.kern1.frequency_12.fixed = False
+        self.model.kern1.frequency_13.fixed = False
+        self.model.kern1.frequency_14.fixed = False
+        self.model.kern1.frequency_15.fixed = False
+
+        init_hyper, learnt_hyper, mse = self.optimize_restart(maxiter=maxiter, restarts=restarts)
+
+        self.model.kern2.lengthscales = learnt_hyper[0].mean().copy()
+        self.model.kern2.variance = learnt_hyper[1].mean().copy()
+        self.model.likelihood.noise_var = learnt_hyper[2].mean().copy()
+        self.model.kern1.lengthscales = learnt_hyper[3].mean().copy()
+        self.model.optimize(disp=0, maxiter=maxiter)
+
+        self.model.kern1.fixed = True
+        self.model.kern2.fixed = True
+        self.model.likelihood.noise_var.fixed = True
+
+        self.model.kern1.variance_1.fixed = False
+        self.model.kern1.variance_2.fixed = False
+        self.model.kern1.variance_3.fixed = False
+        self.model.kern1.variance_4.fixed = False
+        self.model.kern1.variance_5.fixed = False
+        self.model.kern1.variance_6.fixed = False
+        self.model.kern1.variance_7.fixed = False
+        self.model.kern1.variance_8.fixed = False
+        self.model.kern1.variance_9.fixed = False
+        self.model.kern1.variance_10.fixed = False
+        self.model.kern1.variance_11.fixed = False
+        self.model.kern1.variance_12.fixed = False
+        self.model.kern1.variance_13.fixed = False
+        self.model.kern1.variance_14.fixed = False
+        self.model.kern1.variance_15.fixed = False
+
+        self.model.optimize(disp=0, maxiter=10)
+
+    def predict_all(self, x):
+        mean_f, var_f = self.model.predict_f(x)  # predict component
+        mean_g, var_g = self.model.predict_g(x)  # predict activation
+        mean_f = mean_f.reshape(-1, )  # reshape arrays in order to be easier plot variances
+        var_f = var_f.reshape(-1, )
+        mean_g = mean_g.reshape(-1, )
+        var_g = var_g.reshape(-1, )
+        x_plot = x.reshape(-1, ).copy()
+        return mean_f, var_f, mean_g, var_g, x_plot
 
 
     def plot_results(self, zoom_limits):

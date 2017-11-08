@@ -23,14 +23,12 @@ def init_settings(visible_device='0', interactive=False):
 
 
 
-def load_filename_list(filename):
-    file = open(filename, "r")
-    list_files =  file.readlines()
-    list_files = np.asarray(list_files).reshape(-1,)
-    for i in range(list_files.size):
-        list_files[i] = list_files[i].strip('.wav\n')
-    file.close()
-    return list_files
+def load_filenames(directory, lstrip=None, rstrip=None):
+    filen = np.asarray(sorted(os.listdir(directory)))  # file names
+    for i in range(filen.size):
+        filen[i] = filen[i].replace(rstrip, '')
+        filen[i] = filen[i].replace(lstrip, '')
+    return filen
 
 
 def Lorentzian(p, x):

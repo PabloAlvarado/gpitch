@@ -3,12 +3,12 @@ sys.path.append('../../')
 import numpy as np
 import tensorflow as tf
 import gpflow, gpitch
-from gpitch.amtgp import logistic
+from gpitch.amtgp import logistic, init_com_params
 
 
 class LooPDet():
     '''Leave one out pitch detector'''
-    def __init__(self, x, y, kern_comps, kern_acts, ws, dec, Nw=None, bounded=False, whiten=False):
+    def __init__(self, x, y, ker_com, ker_act, plist, ws, dec, Nw=None, bounded=False, whiten=True):
         '''
         x : time vector
         y : audio mixture
@@ -27,6 +27,7 @@ class LooPDet():
         self.Nh = 10 # number of maximun frequency components in density
         self.bounded = bounded #  bound inducing variables for f_m to be (-1, 1)
         self.whiten = whiten
+        self.plist = plist  # list of pitches to detect
 
         self.x_l = [x[i*ws:(i+1)*ws].copy() for i in range(0, self.Nw)] # split data into windows
         self.y_l = [y[i*ws:(i+1)*ws].copy() for i in range(0, self.Nw)]
@@ -47,8 +48,8 @@ class LooPDet():
         self.yhat = self.qm1.copy()
 
         self.z = self.x_l[0][::dec].copy()  # inducing variables
-        self.m = gpitch.loogp.LooGP(self.x_l[0].copy(), self.y_l[0].copy(), [kern_comps[0], kern_comps[1]],
-                                    [kern_acts[0], kern_acts[1]], self.z, whiten=self.whiten)  # init model
+        self.m = gpitch.loogp.LooGP(self.x_l[0].copy(), self.y_l[0].copy(), [ker_com[0], ker_com[1]],
+                                    [ker_act[0], ker_act[1]], self.z, whiten=self.whiten)  # init model
         self.m.likelihood.noise_var = 1e-3
         self.nrows, self.ncols = 4, 2  # number of rows and columns when plotting results
 
@@ -139,8 +140,72 @@ class LooPDet():
         setattr(self.m.kern_g2, 'variance', params['s_act2'])
         setattr(self.m.kern_g2, 'lengthscales', params['l_act2'])
 
-    def learnparams(self, xtrain, ytrain):
-        pass
+
+    def learnparams(self, xtrain, ytrain, fs, Nh, run_training=True):
+        Np = ytrain.shape[1]  # number of pitches to learn
+        params = [None]*Np
+        if run_training:
+            for i in range(Np):
+                ideal_f0 = gpitch.amtgp.midi2frec(int(self.plist[i]))  # Init comp params 4 each pitch
+                params[i] = init_com_params(y=ytrain[:,i], fs=fs, Nh=Nh, ideal_f0=ideal_f0, win_size=6)
+
+
+                # m.model.kern1.fixed = True
+                # m.model.kern1.lengthscales.fixed = False
+                # m.model.kern1.lengthscales.transform = gpflow.transforms.Logistic(0., 0.1)
+                # m.model.kern1.frequency_1.fixed = False
+                # m.model.kern1.frequency_2.fixed = False
+                # m.model.kern1.frequency_3.fixed = False
+                # m.model.kern1.frequency_4.fixed = False
+                # m.model.kern1.frequency_5.fixed = False
+                # m.model.kern1.frequency_6.fixed = False
+                # m.model.kern1.frequency_7.fixed = False
+                # m.model.kern1.frequency_8.fixed = False
+                # m.model.kern1.frequency_9.fixed = False
+                # m.model.kern1.frequency_10.fixed = False
+                # m.model.kern1.frequency_11.fixed = False
+                # m.model.kern1.frequency_12.fixed = False
+                # m.model.kern1.frequency_13.fixed = False
+                # m.model.kern1.frequency_14.fixed = False
+                # m.model.kern1.frequency_15.fixed = False
+                # m.model.kern2.fixed = False
+                # m.model.likelihood.noise_var.fixed = False
+                #
+                # maxiter, restarts = 500, 3
+                # init_hyper, learnt_hyper, mse = m.optimize_restart(maxiter=maxiter, restarts=restarts)
+                #
+                # m.model.kern2.lengthscales = learnt_hyper[0].mean().copy()
+                # m.model.kern2.variance = learnt_hyper[1].mean().copy()
+                # m.model.likelihood.noise_var = learnt_hyper[2].mean().copy()
+                # m.model.kern1.lengthscales = learnt_hyper[3].mean().copy()
+                # m.model.optimize(disp=1, maxiter=250)
+                #
+                # m.model.kern1.fixed = True
+                # m.model.kern2.fixed = True
+                # m.model.likelihood.noise_var.fixed = True
+                #
+                # m.model.kern1.variance_1.fixed = False
+                # m.model.kern1.variance_2.fixed = False
+                # m.model.kern1.variance_3.fixed = False
+                # m.model.kern1.variance_4.fixed = False
+                # m.model.kern1.variance_5.fixed = False
+                # m.model.kern1.variance_6.fixed = False
+                # m.model.kern1.variance_7.fixed = False
+                # m.model.kern1.variance_8.fixed = False
+                # m.model.kern1.variance_9.fixed = False
+                # m.model.kern1.variance_10.fixed = False
+                # m.model.kern1.variance_11.fixed = False
+                # m.model.kern1.variance_12.fixed = False
+                # m.model.kern1.variance_13.fixed = False
+                # m.model.kern1.variance_14.fixed = False
+                # m.model.kern1.variance_15.fixed = False
+                #
+                # m.model.optimize(disp=1, maxiter=10)
+        else:
+            pass  # load learned parameters
+        return params
+
+
 
     def plot_results(self):
         '''
