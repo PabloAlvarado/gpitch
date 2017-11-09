@@ -20,7 +20,8 @@ class ModPDet:
         self.z = np.vstack(( self.x_l[0][::dec].copy(), self.x_l[0][-1].copy() ))
 
         # initialize modulated GP model and unfix component parameters
-        self.model = modgp.ModGP(self.x_l[0].copy(), self.y_l[0].copy(), ker_com, ker_act, self.z, whiten=whiten)
+        self.model = modgp.ModGP(x=self.x_l[0].copy(), y=self.y_l[0].copy(), kern_com=ker_com, kern_act= ker_act, z=self.z, whiten=whiten)
+
 
         if self.bounded:
             self.model.q_mu1.transform = gpflow.transforms.Logistic(a=-1.0, b=1.0)
@@ -43,19 +44,18 @@ class ModPDet:
 
     def optimize_windowed(self, disp, maxiter, init_zero=True):
         for i in range(self.Nw):
-            self.model.X = self.x_l[i].copy()
-            self.model.Y = self.y_l[i].copy()
-            #self.model.Z = self.x_l[i][::self.dec].copy()
-            self.model.Z = np.vstack(( self.x_l[i][::self.dec].copy(), self.x_l[i][-1].copy() ))
+            self.model.x = self.x_l[i].copy()
+            self.model.y = self.y_l[i].copy()
+            self.model.z = np.vstack(( self.x_l[i][::self.dec].copy(), self.x_l[i][-1].copy() ))
             if init_zero:
-                self.model.q_mu1 = np.zeros(self.model.Z.shape)
-                self.model.q_mu2 = np.zeros(self.model.Z.shape)
-                self.model.q_sqrt1 = np.expand_dims(np.eye(self.model.Z.size), 2)
-                self.model.q_sqrt2 = np.expand_dims(np.eye(self.model.Z.size), 2)
+                self.model.q_mu1 = np.zeros(self.model.z.shape)
+                self.model.q_mu2 = np.zeros(self.model.z.shape)
+                self.model.q_sqrt1 = np.expand_dims(np.eye(self.model.z.size), 2)
+                self.model.q_sqrt2 = np.expand_dims(np.eye(self.model.z.size), 2)
 
             self.model.optimize(disp=disp, maxiter=maxiter)
-            self.qm1_l[i], self.qv1_l[i] = self.model.predict_f(self.x_l[i])
-            self.qm2_l[i], self.qv2_l[i] = self.model.predict_g(self.x_l[i])
+            self.qm1_l[i], self.qv1_l[i] = self.model.predict_com(self.x_l[i])
+            self.qm2_l[i], self.qv2_l[i] = self.model.predict_act(self.x_l[i])
             self.x_pred_l[i] = self.x_l[i].copy()
             self.y_pred_l[i] = self.y_l[i].copy()
 
@@ -70,47 +70,28 @@ class ModPDet:
         init_hyper = [np.zeros((restarts,)) for _ in range(0, 5)] #  save initial hyperparmas values
         learnt_hyper = [np.zeros((restarts,)) for _ in range(0, 5)] #   save learnt hyperparams values
         mse = np.zeros((restarts,)) # save mse error for each restart
+
         for r in range(0, restarts):
+            self.model.kern_com.lengthscales = 0.1*np.random.rand()
+            self.model.kern_act.lengthscales = 1.*np.random.rand()
+            self.model.kern_act.variance = 15.*np.random.rand()
+            self.model.likelihood.variance = 0.1*np.random.rand()
 
-            self.model.kern1.lengthscales = 0.1*np.random.rand()
-            #for i in range(self.model.kern1.Nc): # generate a param object for each  var, and freq, they must be (Nc,) arrays.
-            #    setattr(self.model.kern1, 'variance_' + str(i+1), 0.25*np.random.rand() )
-            #    setattr(self.model.kern1, 'frequency_' + str(i+1), (i+1)*self.model.kern1.ideal_f0 + np.sqrt(5)*np.random.randn()  )
+            init_hyper[0][r] = self.model.kern_act.lengthscales.value
+            init_hyper[1][r] = self.model.kern_act.variance.value
+            init_hyper[2][r] = self.model.likelihood.variance.value
+            init_hyper[3][r] = self.model.kern_com.lengthscales.value
 
-            self.model.kern2.lengthscales = 1.*np.random.rand()
-            self.model.kern2.variance = 15.*np.random.rand()
-
-            self.model.likelihood.noise_var = 0.1*np.random.rand()
-
-            init_hyper[0][r] = self.model.kern2.lengthscales.value
-            init_hyper[1][r] = self.model.kern2.variance.value
-            init_hyper[2][r] = self.model.likelihood.noise_var.value
-            init_hyper[3][r] = self.model.kern1.lengthscales.value
-            # init_hyper[0][r] = self.model.kern1.variance_1.value
-            # init_hyper[1][r] = self.model.kern1.variance_2.value
-            # init_hyper[2][r] = self.model.kern1.variance_3.value
-            # init_hyper[3][r] = self.model.kern1.variance_4.value
-            # init_hyper[4][r] = self.model.kern1.variance_5.value
             self.optimize_windowed(disp=0, maxiter=maxiter)
-            # learnt_hyper[0][r] = self.model.kern1.variance_1.value
-            # learnt_hyper[1][r] = self.model.kern1.variance_2.value
-            # learnt_hyper[2][r] = self.model.kern1.variance_3.value
-            # learnt_hyper[3][r] = self.model.kern1.variance_4.value
-            # learnt_hyper[4][r] = self.model.kern1.variance_5.value
-            learnt_hyper[0][r] = self.model.kern2.lengthscales.value
-            learnt_hyper[1][r] = self.model.kern2.variance.value
-            learnt_hyper[2][r] = self.model.likelihood.noise_var.value
-            learnt_hyper[3][r] = self.model.kern1.lengthscales.value
+            learnt_hyper[0][r] = self.model.kern_act.lengthscales.value
+            learnt_hyper[1][r] = self.model.kern_act.variance.value
+            learnt_hyper[2][r] = self.model.likelihood.variance.value
+            learnt_hyper[3][r] = self.model.kern_com.lengthscales.value
             mse[r] = (1./self.N)*np.sum((self.y_pred - amtgp.logistic(self.qm2)*self.qm1)**2)
             print('| len: %4.4f, %4.4f | sig: %4.4f, %4.4f | noise_var: %4.4f, %4.4f | l_com: %4.4f, %4.4f |' % (init_hyper[0][r], learnt_hyper[0][r],
                                                                                                                  init_hyper[1][r], learnt_hyper[1][r],
                                                                                                                  init_hyper[2][r], learnt_hyper[2][r],
                                                                                                                  init_hyper[3][r], learnt_hyper[3][r]) )
-            #print('| v1: %4.4f, %4.4f | v2: %4.4f, %4.4f | v3: %4.4f, %4.4f | v4: %4.4f, %4.4f | v5: %4.4f, %4.4f | ' % (init_hyper[0][r], learnt_hyper[0][r],
-            #                                                                                                             init_hyper[1][r], learnt_hyper[1][r],
-        #                                                                                                                 init_hyper[2][r], learnt_hyper[2][r],
-        #                                                                                                                 init_hyper[3][r], learnt_hyper[3][r],
-        #                                                                                                                 init_hyper[4][r], learnt_hyper[4][r]))
         return init_hyper, learnt_hyper, mse
 
 
