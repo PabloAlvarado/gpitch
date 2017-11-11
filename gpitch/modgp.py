@@ -78,7 +78,11 @@ class ModGP(gpflow.model.Model):
 
     def predict_all(self, xnew):
         """
-        method introduced by Pablo A. Alvarado
+        method introduced by Pablo A. Alvarado (11/11/2017)
+
+        This method call all the decorators needed to compute the prediction over the latent
+        component and activation. It also reshape the arrays to make easier to plot the intervals of
+        confidency.
         """
         mean_f, var_f = self.predict_com(xnew)  # predict component
         mean_g, var_g = self.predict_act(xnew)  # predict activation
@@ -88,6 +92,25 @@ class ModGP(gpflow.model.Model):
         var_g = var_g.reshape(-1, )
         x_plot = xnew.reshape(-1, ).copy()
         return mean_f, var_f, mean_g, var_g, x_plot
+
+    def fixed_msmkern_params(self, freq=True, var=True):
+        """
+        method introduced by Pablo A. Alvarado (11/11/2017)
+
+        This methods fixes or unfixes all the params associated to the frequencies and variacnes of
+        the matern specrtal mixture kernel.
+        """
+        Nc = self.kern_com.Nc
+        flist = [None]*Nc
+        for i in range(Nc):
+            flist[i] = 'self.kern_com.frequency_' + str(i + 1) + '.fixed = ' + str(freq)
+            exec(flist[i])
+
+        for i in range(Nc):
+            flist[i] = 'self.kern_com.variance_' + str(i + 1) + '.fixed = ' + str(var)
+            exec(flist[i])
+
+
 
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_com(self, xnew):
