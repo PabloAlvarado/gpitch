@@ -7,6 +7,7 @@ import tensorflow as tf
 from likelihoods import LooLik
 jitter = settings.numerics.jitter_level
 float_type = settings.dtypes.float_type
+import time
 
 
 class LooGP(gpflow.model.Model):
@@ -21,6 +22,8 @@ class LooGP(gpflow.model.Model):
 
         if minibatch_size is None:
             minibatch_size = X.shape[0]
+
+        self.minibatch_size = minibatch_size
         self.num_data = X.shape[0]
 
         self.X = MinibatchData(X, minibatch_size, np.random.RandomState(0))
@@ -101,6 +104,52 @@ class LooGP(gpflow.model.Model):
             tf.cast(tf.shape(self.X)[0], settings.dtypes.float_type)
 
         return tf.reduce_sum(var_exp) * scale - KL
+
+
+    def predict_all(self, xnew):
+        """
+        method introduced by Pablo A. Alvarado (14/11/2017)
+
+        This method call all the decorators needed to compute the prediction over the latent
+        components and activations. It also reshape the arrays to make easier to plot the
+        intervals of confidency.
+        """
+        mean_f1, var_f1 = self.predict_f1(xnew)
+        mean_g1, var_g1 = self.predict_g1(xnew)
+        mean_f2, var_f2 = self.predict_f2(xnew)
+        mean_g2, var_g2 = self.predict_g2(xnew)
+        mean_f1, var_f1 = mean_f1.reshape(-1,), var_f1.reshape(-1,)
+        mean_g1, var_g1 = mean_g1.reshape(-1,), var_g1.reshape(-1,)
+        mean_f2, var_f2 = mean_f2.reshape(-1,), var_f2.reshape(-1,)
+        mean_g2, var_g2 = mean_g2.reshape(-1,), var_g2.reshape(-1,)
+        mean_f = [mean_f1, mean_f2]
+        mean_g = [mean_g1, mean_g2]
+        var_f = [var_f1, var_f2]
+        var_g = [var_g1, var_g2]
+        return mean_f, var_f, mean_g, var_g
+
+    def optimize_svi(self, maxiter, learning_rate):
+        """
+        method introduced by Pablo A. Alvarado (14/11/2017)
+
+        This method uses stochastic variational inference for maximizing the ELBO.
+        """
+        st = time.time()
+        self.logt = []
+        self.logx = []
+        self.logf = []
+        def logger(x):
+            if (logger.i % 10) == 0:
+                self.logx.append(x)
+                self.logf.append(self._objective(x)[0])
+                self.logt.append(time.time() - st)
+            logger.i += 1
+        logger.i = 1
+        self.X.minibatch_size = self.minibatch_size
+        self.Y.minibatch_size = self.minibatch_size
+
+        self.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate),
+                   maxiter=maxiter, callback=logger)
 
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_f1(self, Xnew):

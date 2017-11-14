@@ -21,8 +21,8 @@ Np = pitchlist.size  # number of pitches to analyze
 
 for i in range(Np):
     midi = pitchlist[i]
-    filename = '../../../../../datasets/fender/train/m_' + str(midi) + '.wav'
-    N = 16000 # number of data points to load
+    filename = '../../../../../datasets/rwc/011PFNOM_pitch_' + str(midi) + '.wav'
+    N = 8000 # number of data points to load
     y, fs = soundfile.read(filename, frames=N)  # Load data
     y = y.reshape(-1,1)
     x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)
@@ -34,7 +34,7 @@ for i in range(Np):
     # Define kernels for component and activation, and generate model object ("sigmoid model")
     kern_com = gpitch.kernels.MaternSpecMix(input_dim=1, lengthscales=0.1, variances=S_star,
                                             frequencies=F_star, Nc=Nc)
-    kern_act = gpflow.kernels.Matern32(input_dim=1, lengthscales=1., variance=10.)
+    kern_act = gpflow.kernels.Matern32(input_dim=1, lengthscales=0.25, variance=10.)
     dec = 160  # decimation factor
     minibatch_size = 200
     z = np.vstack((x[::dec].copy(), x[-1].copy()))
@@ -69,6 +69,6 @@ for i in range(Np):
 
 
     m.logf = logf
-    pickle.dump(m, open("save_model_pitch_" + midi + ".p", "wb"))
+    pickle.dump(m, open("save_model_rwc_pitch_" + midi + ".p", "wb"))
 
     tf.reset_default_graph()
