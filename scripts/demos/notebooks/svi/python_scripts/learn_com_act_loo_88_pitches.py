@@ -15,6 +15,9 @@ from gpitch import myplots
 active_device = sys.argv[1]  # configure gpu usage and plotting
 gpitch.amtgp.init_settings(visible_device = active_device, interactive=True)
 
+tf.reset_default_graph()
+
+
 
 # plt.close('all')
 # plt.interactive(True)
