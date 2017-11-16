@@ -18,7 +18,6 @@ gpitch.amtgp.init_settings(visible_device = active_device, interactive=True)
 tf.reset_default_graph()
 
 
-
 # plt.close('all')
 # plt.interactive(True)
 # plt.rcParams['figure.figsize'] = (16, 5)  # set plot size
