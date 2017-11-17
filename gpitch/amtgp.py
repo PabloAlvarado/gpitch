@@ -11,6 +11,32 @@ import fnmatch
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
+
+def peakd(arg):
+    '''
+    peak detector using peakutils (webpage). The function returns the H peaks with highest
+    energy.
+    '''
+    thres = 0.003/max(S)
+    min_dist = 0.8*np.argmin(np.abs(F - ideal_f0))
+    idx = peakutils.indexes(S, thres=thres, min_dist=min_dist)
+    F_star, S_star = F[idx], S[idx]
+    var_scale = S_star.sum()
+    S_star /= 4.*var_scale
+
+    aux1 = np.flip(np.sort(S_star), 0)
+    aux2 = np.flip(np.argsort(S_star), 0)
+    maxh = 20
+    print aux1.size
+    if aux1.size > maxh :
+        vvec = aux1[0:maxh]
+        idxf = aux2[0:maxh]
+    else :
+        vvec = aux1
+        idxf = aux2
+    ## Do not forget to normalize to sum 0.25 the final list of variances
+    return F_star[idxf], vvec
+
 def init_settings(visible_device='0', interactive=False):
     '''Initialize usage of GPU and plotting'''
     os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings

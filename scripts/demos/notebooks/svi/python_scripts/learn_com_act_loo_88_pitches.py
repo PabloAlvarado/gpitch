@@ -30,13 +30,13 @@ for i in range(Np):
     y, fs = gpitch.amtgp.wavread(dirloc + filel[i], start=5000, N=N)  # load data
 
 
-#
-#     # Define model
-#     Nc = 10
-#     ideal_f0 = gpitch.amtgp.midi2frec(int(midi))
-#     F_star, S_star, F, Y, S = gpitch.amtgp.init_com_params(y=y, fs=fs, Nh=Nc,
-#                                                            ideal_f0=ideal_f0,
-#                                                            scaled=True)
+
+    # Define model
+    Nc = 10
+    ideal_f0 = gpitch.amtgp.midi2frec(int(midi))
+    F_star, S_star, F, Y, S = gpitch.amtgp.init_com_params(y=y, fs=fs, Nh=Nc,
+                                                           ideal_f0=ideal_f0,
+                                                           scaled=True)
 #     # Define kernels for component, activation, generate model object (sigmoid model)
 #     kern_com = gpitch.kernels.MaternSpecMix(input_dim=1, lengthscales=0.1,
 #                                             variances=S_star, frequencies=F_star,
