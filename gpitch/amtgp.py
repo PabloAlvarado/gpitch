@@ -7,6 +7,7 @@ from kernels import Matern12Cosine
 from scipy.fftpack import fft
 from scipy import signal
 import os
+import fnmatch
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
@@ -23,12 +24,12 @@ def init_settings(visible_device='0', interactive=False):
 
 
 
-def load_filenames(directory, lstrip=None, rstrip=None):
-    filen = np.asarray(sorted(os.listdir(directory)))  # file names
-    for i in range(filen.size):
-        filen[i] = filen[i].replace(rstrip, '')
-        filen[i] = filen[i].replace(lstrip, '')
-    return filen
+def load_filenames(directory, pattern, bounds):
+    auxl = fnmatch.filter(os.listdir(directory), pattern)
+    filel = [fnmatch.filter(auxl, '*_M' + str(pitch) + '_*')[0]
+             for pitch in range(bounds[0], bounds[1]) ]
+    filel =  np.asarray(filel).reshape(-1,)
+    return filel
 
 
 def Lorentzian(p, x):
@@ -183,7 +184,7 @@ def wavread(filename, start=0, N=None, norm=True, mono=True):
     if N == None:
     	N = y.size
     y = y[start: N + start].reshape(-1, 1) # select data subset
-    return fs, y
+    return y, fs
 
 
 def load_pitch_params_data(pitch_list, data_loc, params_loc):

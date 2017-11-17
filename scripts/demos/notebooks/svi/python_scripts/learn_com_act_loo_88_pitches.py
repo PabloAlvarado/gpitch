@@ -17,20 +17,19 @@ gpitch.amtgp.init_settings(visible_device = active_device, interactive=True)
 
 tf.reset_default_graph()
 
+dirloc = '../../../../../../datasets/maps/sample_rate_16khz/'
+filel = gpitch.amtgp.load_filenames(directory=dirloc, pattern='*F*', bounds=[21, 109])
+Np = filel.size  # number of pitches to analyze
 
-# plt.close('all')
-# plt.interactive(True)
-# plt.rcParams['figure.figsize'] = (16, 5)  # set plot size
-# pitchlist = np.asarray(['60', '64', '67'])
-# Np = pitchlist.size  # number of pitches to analyze
-#
-# for i in range(Np):
-#     midi = pitchlist[i]
-#     filename = '../../../../../datasets/rwc/011PFNOM_pitch_' + str(midi) + '.wav'
-#     N = 8000 # number of data points to load
-#     y, fs = soundfile.read(filename, frames=N)  # Load data
-#     y = y.reshape(-1,1)
-#     x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)
+fs = 16e3  # sample frequency
+N = 16000  # number of data points to load
+x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)  # time vector
+
+for i in range(Np):
+    print(filel[i])
+    y, fs = gpitch.amtgp.wavread(dirloc + filel[i], start=5000, N=N)  # load data
+
+
 #
 #     # Define model
 #     Nc = 10
