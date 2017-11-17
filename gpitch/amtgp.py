@@ -10,32 +10,43 @@ import os
 import fnmatch
 import tensorflow as tf
 import matplotlib.pyplot as plt
+import peakutils
 
-
-def peakd(arg):
+def init_com_params2(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
     '''
     peak detector using peakutils (webpage). The function returns the H peaks with highest
     energy.
     '''
-    thres = 0.003/max(S)
+    N = y.size
+    Y = fft(y.reshape(-1,)) #  FFT data
+    S =  2./N * np.abs(Y[0:N//2]) #  spectral density data
+    F = np.linspace(0, fs/2., N//2) #  frequency vector
+
+    win =  signal.hann(win_size)
+    Ss = signal.convolve(S, win, mode='same') / sum(win)
+
+    thres = 0.003/max(Ss)
     min_dist = 0.8*np.argmin(np.abs(F - ideal_f0))
-    idx = peakutils.indexes(S, thres=thres, min_dist=min_dist)
-    F_star, S_star = F[idx], S[idx]
-    var_scale = S_star.sum()
-    S_star /= 4.*var_scale
+    idx = peakutils.indexes(Ss, thres=thres, min_dist=min_dist)
+
+    F_star, S_star = F[idx], Ss[idx]
 
     aux1 = np.flip(np.sort(S_star), 0)
     aux2 = np.flip(np.argsort(S_star), 0)
-    maxh = 20
-    print aux1.size
+
     if aux1.size > maxh :
         vvec = aux1[0:maxh]
         idxf = aux2[0:maxh]
     else :
         vvec = aux1
         idxf = aux2
+
+    if scaled:
+        sig_scale = 1./ (4.*np.sum(vvec)) #rescale (sigma)
+        vvec *= sig_scale
     ## Do not forget to normalize to sum 0.25 the final list of variances
-    return F_star[idxf], vvec
+    return F_star[idxf], vvec, F, Ss, thres
+
 
 def init_settings(visible_device='0', interactive=False):
     '''Initialize usage of GPU and plotting'''
@@ -47,7 +58,6 @@ def init_settings(visible_device='0', interactive=False):
         sess = tf.InteractiveSession(config=config)
     else:
         sess = tf.Session(config=config)
-
 
 
 def load_filenames(directory, pattern, bounds):
