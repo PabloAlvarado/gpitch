@@ -1,4 +1,5 @@
 import numpy as np
+import time
 import gpflow
 from gpflow import settings
 from gpflow.minibatch import MinibatchData
@@ -14,6 +15,7 @@ class ModGP(gpflow.model.Model):
         if minibatch_size is None:
             minibatch_size = x.shape[0]
 
+        self.minibatch_size = minibatch_size
         self.num_data = x.shape[0]
         self.x = MinibatchData(x, minibatch_size, np.random.RandomState(0))
         self.y = MinibatchData(y, minibatch_size, np.random.RandomState(0))
@@ -111,6 +113,27 @@ class ModGP(gpflow.model.Model):
             exec(flist[i])
 
 
+    def optimize_svi(self, maxiter, learning_rate):
+        """
+        method introduced by Pablo A. Alvarado (20/11/2017)
+        This method uses stochastic variational inference for maximizing the ELBO.
+        """
+        st = time.time()
+        self.logt = []
+        self.logx = []
+        self.logf = []
+        def logger(x):
+            if (logger.i % 10) == 0:
+                self.logx.append(x)
+                self.logf.append(self._objective(x)[0])
+                self.logt.append(time.time() - st)
+            logger.i += 1
+        logger.i = 1
+        self.x.minibatch_size = self.minibatch_size
+        self.y.minibatch_size = self.minibatch_size
+
+        self.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate),
+                   maxiter=maxiter, callback=logger)
 
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_com(self, xnew):

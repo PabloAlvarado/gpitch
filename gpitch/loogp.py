@@ -131,7 +131,6 @@ class LooGP(gpflow.model.Model):
     def optimize_svi(self, maxiter, learning_rate):
         """
         method introduced by Pablo A. Alvarado (14/11/2017)
-
         This method uses stochastic variational inference for maximizing the ELBO.
         """
         st = time.time()
