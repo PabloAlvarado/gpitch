@@ -49,6 +49,18 @@ all_mean_g = [None]*Np
 all_var_f = [None]*Np
 all_var_g = [None]*Np
 
+# init kernels (component kernel with 20 components by default)
+# init model
+# fix component kernerls
+# unfix activation kernels and noise variance
+# run loop:
+#   update values of hyperparams (background kernels only need to be defined once)
+#   init values of variational distributions
+#   optimize
+#   predict
+#   save results on list
+#   go back to the top of loop
+
 a, b = 0, Ntest
 for i in range(Np):
     print('Analysing pitch ' + str(midi[i]))
