@@ -69,15 +69,14 @@ for i in range(Np):
     #   update hyperparams for pitch do detect (com and act kernel)
     #   init values of variational distributions
 
-    mloo.optimize_svi(maxiter=maxiter, learning_rate=learning_rate)  # optimize
+    #mloo.optimize_svi(maxiter=maxiter, learning_rate=learning_rate)  # optimize
+    mloo.optimize(disp = 0, maxiter=maxiter)  # optimize
     mean_f, var_f, mean_g, var_g = mloo.predict_all(x)  # predict
 
     all_mean_f[i] = list(mean_f)  # save results on list
     all_mean_g[i] = list(mean_g)
     all_var_f[i] = list(var_f)
     all_var_g[i] = list(var_g)
-
-    tf.reset_default_graph()  # reset graph
 
 
 piano_roll = np.zeros((Np, Ntest))
