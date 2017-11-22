@@ -58,6 +58,9 @@ ka = [ker_act_pitch, ker_act_bg]
 mloo = gpitch.loogp.LooGP(X=x, Y=y, kf=kc, kg=ka, Z=z, minibatch_size=mbs)  # init model
 
 # fix component kernerls
+# mloo.kern_f1.fixed = True
+# mloo.kern_f2.fixed = True
+
 # unfix activation kernels and noise variance
 # run loop:
 #   update values of hyperparams (background kernels only need to be defined once)
@@ -73,10 +76,10 @@ for i in range(Np):
     kf = [m[i].kern_com, m_bg.kern_com]
     kg = [m[i].kern_act, m_bg.kern_act]
 
-    mloo = gpitch.loogp.LooGP(X=x, Y=y, kf=kf, kg=kg, Z=z, minibatch_size=mbs)
+    #mloo = gpitch.loogp.LooGP(X=x, Y=y, kf=kf, kg=kg, Z=z, minibatch_size=mbs)
 
-    mloo.kern_f1.fixed = True
-    mloo.kern_f2.fixed = True
+    # mloo.kern_f1.fixed = True
+    # mloo.kern_f2.fixed = True
 
     mloo.optimize_svi(maxiter=maxiter, learning_rate=learning_rate)
 
