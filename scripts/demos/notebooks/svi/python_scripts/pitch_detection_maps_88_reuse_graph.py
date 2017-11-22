@@ -37,7 +37,7 @@ Ntest = y.size
 x = np.linspace(0, (Ntest-1.)/fs, Ntest).reshape(-1, 1)
 
 dec = 160  # decimation level
-maxiter = 1  # max number of iterations
+maxiter = 100  # max number of iterations
 mbs = 200  # mini batch size
 learning_rate = 0.01  # learning rate
 z = x[::dec].copy()  # inducing points
@@ -70,7 +70,7 @@ for i in range(Np):
     #   init values of variational distributions
 
     #mloo.optimize_svi(maxiter=maxiter, learning_rate=learning_rate)  # optimize
-    mloo.optimize(disp = 0, maxiter=maxiter)  # optimize
+    mloo.optimize(disp=0, maxiter=maxiter)  # optimize
     mean_f, var_f, mean_g, var_g = mloo.predict_all(x)  # predict
 
     all_mean_f[i] = list(mean_f)  # save results on list
