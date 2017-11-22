@@ -150,6 +150,9 @@ class LooGP(gpflow.model.Model):
         self.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate),
                    maxiter=maxiter, callback=logger)
 
+        self.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate),
+                   maxiter=maxiter, callback=logger)
+
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_f1(self, Xnew):
         return gpflow.conditionals.conditional(Xnew, self.Z, self.kern_f1,

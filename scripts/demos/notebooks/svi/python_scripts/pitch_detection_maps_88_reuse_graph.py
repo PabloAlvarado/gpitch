@@ -37,7 +37,7 @@ Ntest = y.size
 x = np.linspace(0, (Ntest-1.)/fs, Ntest).reshape(-1, 1)
 
 dec = 160  # decimation level
-maxiter = 2000  # max number of iterations
+maxiter = 1  # max number of iterations
 mbs = 200  # mini batch size
 learning_rate = 0.01  # learning rate
 z = x[::dec].copy()  # inducing points
@@ -57,40 +57,27 @@ ka = [ker_act_pitch, ker_act_bg]
 
 mloo = gpitch.loogp.LooGP(X=x, Y=y, kf=kc, kg=ka, Z=z, minibatch_size=mbs)  # init model
 
-# fix component kernerls
-# mloo.kern_f1.fixed = True
-# mloo.kern_f2.fixed = True
+mloo.kern_f1.fixed = True  # fix only component kernels
+mloo.kern_f2.fixed = True
+mloo.kern_g1.fixed = False
+mloo.kern_g2.fixed = False
+mloo.likelihood.variance.fixed = False
 
-# unfix activation kernels and noise variance
-# run loop:
-#   update values of hyperparams (background kernels only need to be defined once)
-#   init values of variational distributions
-#   optimize
-#   predict
-#   save results on list
-#   go back to the top of loop
-
-a, b = 0, Ntest
 for i in range(Np):
     print('Analysing pitch ' + str(midi[i]))
-    kf = [m[i].kern_com, m_bg.kern_com]
-    kg = [m[i].kern_act, m_bg.kern_act]
 
-    #mloo = gpitch.loogp.LooGP(X=x, Y=y, kf=kf, kg=kg, Z=z, minibatch_size=mbs)
+    #   update hyperparams for pitch do detect (com and act kernel)
+    #   init values of variational distributions
 
-    # mloo.kern_f1.fixed = True
-    # mloo.kern_f2.fixed = True
+    mloo.optimize_svi(maxiter=maxiter, learning_rate=learning_rate)  # optimize
+    mean_f, var_f, mean_g, var_g = mloo.predict_all(x)  # predict
 
-    mloo.optimize_svi(maxiter=maxiter, learning_rate=learning_rate)
-
-    mean_f, var_f, mean_g, var_g = mloo.predict_all(x[a:b])
-
-    all_mean_f[i] = list(mean_f)
+    all_mean_f[i] = list(mean_f)  # save results on list
     all_mean_g[i] = list(mean_g)
     all_var_f[i] = list(var_f)
     all_var_g[i] = list(var_g)
 
-    tf.reset_default_graph()
+    tf.reset_default_graph()  # reset graph
 
 
 piano_roll = np.zeros((Np, Ntest))
@@ -100,6 +87,40 @@ for i in range(Np):
 
 pickle.dump(piano_roll, open( pickleloc + "piano_roll_maps_88_more_iterations.p", "wb"))
 
-# plt.figure()
-# plt.imshow(piano_roll, aspect='auto')
-# plt.colorbar()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
