@@ -18,7 +18,7 @@ from scipy import signal
 
 
 visible_device = sys.argv[1]  # configure gpu usage
-gpitch.amtgp.init_settings(visible_device=visible_device, interactive=True)
+gpitch.amtgp.init_settings(visible_device=visible_device, interactive=False)
 
 pickleloc = '../../../../../../results/files/svi/script/'  # location saved models
 bounds = [21, 109]
@@ -53,8 +53,8 @@ all_var_f = [None]*Np
 all_var_g = [None]*Np
 
 a, b = 0, Ntest
+print('Analysing pitch ' + str(midi[i]))
 for i in range(Np):
-    print('Analysing pitch ' + str(midi[i]))
     kf = [m[i].kern_com, m_bg.kern_com]
     kg = [m[i].kern_act, m_bg.kern_act]
 

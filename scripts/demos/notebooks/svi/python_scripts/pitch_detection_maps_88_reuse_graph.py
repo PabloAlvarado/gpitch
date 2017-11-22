@@ -18,39 +18,45 @@ from scipy import signal
 
 
 visible_device = sys.argv[1]  # configure gpu usage
-gpitch.amtgp.init_settings(visible_device=visible_device, interactive=True)
+gpitch.amtgp.init_settings(visible_device=visible_device, interactive=False)
 
 pickleloc = '../../../../../../results/files/svi/script/'  # location saved models
-bounds = [21, 109]
-midi = np.asarray([str(i) for i in range(bounds[0], bounds[1])]).reshape(-1,)
+filename = '../../../../../../datasets/maps/test_data/segment4-down.wav'  # loc test data
 
+bounds = [21, 109]  # pitches to detect
+midi = np.asarray([str(i) for i in range(bounds[0], bounds[1])]).reshape(-1,)  # midi list
 Np = midi.size
 fs = 16e3
-m = [pickle.load(open(pickleloc + "maps_pitch_" + midi[i] + ".p", "rb")) for i in range(Np)]
-N = m[0].x.value.size
-x = m[0].x.value.copy()
 
-filename = '../../../../../../datasets/maps/test_data/segment4-down.wav'
-ytest, fs = soundfile.read(filename)
-ytest = ytest.reshape(-1, 1)
-Ntest = ytest.size
-xtest = np.linspace(0, (Ntest-1.)/fs, Ntest).reshape(-1, 1)
-
-dec = 160
-maxiter = 2000
-minibatch_size = 200
-learning_rate = 0.01
-ztest = xtest[::dec].copy()
-
+m = [pickle.load(open(pickleloc +"maps_pitch_"+ midi[i] + ".p", "rb")) for i in range(Np)]
 m_bg = pickle.load(open(pickleloc + "maps_background.p", "rb")) # load background model
 
-all_mean_f = [None]*Np
+y, fs = soundfile.read(filename)
+y = y.reshape(-1, 1)
+Ntest = y.size
+x = np.linspace(0, (Ntest-1.)/fs, Ntest).reshape(-1, 1)
+
+dec = 160  # decimation level
+maxiter = 2000  # max number of iterations
+mbs = 200  # mini batch size
+learning_rate = 0.01  # learning rate
+z = x[::dec].copy()  # inducing points
+
+all_mean_f = [None]*Np  # lists to save results prediction for the 88 notes
 all_mean_g = [None]*Np
 all_var_f = [None]*Np
 all_var_g = [None]*Np
 
-# init kernels (component kernel with 20 components by default)
-# init model
+Nh = 20  # max number of harmonic for the component kernels
+ker_com_pitch = gpitch.kernels.MaternSpecMix(Nc=Nh)  # init kernels
+ker_act_pitch = gpflow.kernels.Matern32(input_dim=1, lengthscales=0.1, variance=10.)
+ker_com_bg = m_bg.kern_com
+ker_act_bg = m_bg.kern_act
+kc = [ker_com_pitch, ker_com_bg]
+ka = [ker_act_pitch, ker_act_bg]
+
+mloo = gpitch.loogp.LooGP(X=x, Y=y, kf=kc, kg=ka, Z=z, minibatch_size=mbs)  # init model
+
 # fix component kernerls
 # unfix activation kernels and noise variance
 # run loop:
@@ -67,15 +73,14 @@ for i in range(Np):
     kf = [m[i].kern_com, m_bg.kern_com]
     kg = [m[i].kern_act, m_bg.kern_act]
 
-    mloo = gpitch.loogp.LooGP(X=xtest, Y=ytest, kf=kf, kg=kg, Z=ztest,
-                              minibatch_size=minibatch_size)
+    mloo = gpitch.loogp.LooGP(X=x, Y=y, kf=kf, kg=kg, Z=z, minibatch_size=mbs)
 
     mloo.kern_f1.fixed = True
     mloo.kern_f2.fixed = True
 
     mloo.optimize_svi(maxiter=maxiter, learning_rate=learning_rate)
 
-    mean_f, var_f, mean_g, var_g = mloo.predict_all(xtest[a:b])
+    mean_f, var_f, mean_g, var_g = mloo.predict_all(x[a:b])
 
     all_mean_f[i] = list(mean_f)
     all_mean_g[i] = list(mean_g)

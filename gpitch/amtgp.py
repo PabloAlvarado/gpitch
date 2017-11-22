@@ -51,7 +51,7 @@ def init_com_params(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
 
 def init_settings(visible_device='0', interactive=False):
     '''Initialize usage of GPU and plotting'''
-    os.environ['TF_CPP_MIN_LOG_LEVEL']='2' #  deactivate tf warnings
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0' #  deactivate tf warnings (default 0)
     os.environ["CUDA_VISIBLE_DEVICES"] = visible_device # configuration use only one GPU
     config = tf.ConfigProto() #Configuration to not to use all the memory
     config.gpu_options.allow_growth = True
