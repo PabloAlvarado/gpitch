@@ -153,6 +153,35 @@ class LooGP(gpflow.model.Model):
         self.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate),
                    maxiter=maxiter, callback=logger)
 
+
+
+    def update_params_graph(self, dic_par_com, dic_par_act):
+        ''''
+        update parameters of 'pitch to be detected' kernel in order to reuse the graph.
+        INPUT:
+            params; dictionary containing the arrays for the new parameters. 'var_act_1',
+            'len_act_1' and 'len_com_1' are scalars, whereas 'var_com_1' and 'fre_com_1'
+            are arrays with dimension (Nc, 1).
+        '''
+        self.kern_g1.lengthscales = 0.1  # init all param values to zero or one
+        self.kern_g1_variance = 0.
+        self.kern_f1.lengthscales = 0.1
+        for i in range(self.kern_f1.Nc):
+            setattr(self.kern_f1, 'variance_' + str(i+1), 0.)
+            setattr(self.kern_f1, 'frequency_' + str(i+1), 0.)
+
+        # upload new params values
+        self.kern_g1.variance = dic_par_act['model.kern_act.variance']
+        self.kern_g1.lengthscales = dic_par_act['model.kern_act.lengthscales']
+        self.kern_f1.lengthscales = dic_par_com['model.kern_com.lengthscales']
+        for i in range((len(dic_par_com) - 1)/2):
+            setattr(self.kern_f1, 'variance_' + str(i+1), dic_par_com['model.kern_com.variance_' + str(i+1)])
+            setattr(self.kern_f1, 'frequency_' + str(i+1), dic_par_com['model.kern_com.frequency_' + str(i+1)])
+
+
+
+
+
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_f1(self, Xnew):
         return gpflow.conditionals.conditional(Xnew, self.Z, self.kern_f1,
