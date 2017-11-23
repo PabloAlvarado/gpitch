@@ -16,7 +16,6 @@ from scipy import signal
 from scipy.fftpack import fft, ifft, ifftshift
 from scipy import signal
 
-
 visible_device = sys.argv[1]  # configure gpu usage
 gpitch.amtgp.init_settings(visible_device=visible_device, interactive=False)
 
@@ -62,11 +61,15 @@ m.kern_f2.fixed = True
 m.kern_g1.fixed = False
 m.kern_g2.fixed = False
 m.likelihood.variance.fixed = False
+m.likelihood.variance = m_bg.likelihood.variance.value.copy()  # noise learned background
+
+Adam_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
 
 for i in range(Np):
     print('Analysing pitch ' + str(midi[i]))
-    params = 1.  # create dictionary of new hyperparams
-    m.update_params_graph(params)  # update hyperparams
+    dpc = models[i].kern_com.get_parameter_dict().copy()  # dictionary params component
+    dpa = models[i].kern_act.get_parameter_dict().copy() # dictionary params activation
+    m.update_params_graph(dic_par_com=dpc, dic_par_act=dpa)  # update hyperparams
 
     m.q_mu1 = np.zeros(m.Z.shape)  # init values of variational parameters
     m.q_mu2 = np.zeros(m.Z.shape)
@@ -77,31 +80,24 @@ for i in range(Np):
     m.q_sqrt3 = np.expand_dims(np.eye(m.Z.size), 2)
     m.q_sqrt4 = np.expand_dims(np.eye(m.Z.size), 2)
 
-    m.optimize(disp=0, maxiter=maxiter)  # optimize
+    #m.optimize(disp=0, maxiter=maxiter)  # optimize
     #
-    #m.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate),
-                # maxiter=maxiter)
+    m.optimize(method=Adam_optimizer, maxiter=maxiter)
     #m.optimize_svi(maxiter=maxiter, learning_rate=learning_rate)  # optimize
 
-    mean_f, var_f, mean_g, var_g = m.predict_all(x)  # predict
-    all_mean_f[i] = list(mean_f)  # save results on list
-    all_mean_g[i] = list(mean_g)
-    all_var_f[i] = list(var_f)
-    all_var_g[i] = list(var_g)
-
-piano_roll = np.zeros((Np, Ntest))
-for i in range(Np):
-    source = logistic(all_mean_g[i][0]) * all_mean_f[i][0]
-    piano_roll[i, :] = source.copy()
-
-pickle.dump(piano_roll, open( pickleloc + "piano_roll_maps_88_more_iterations.p",
-            "wb"))
-
-
-
-
-
-
+#     mean_f, var_f, mean_g, var_g = m.predict_all(x)  # predict
+#     all_mean_f[i] = list(mean_f)  # save results on list
+#     all_mean_g[i] = list(mean_g)
+#     all_var_f[i] = list(var_f)
+#     all_var_g[i] = list(var_g)
+#
+# piano_roll = np.zeros((Np, Ntest))
+# for i in range(Np):
+#     source = logistic(all_mean_g[i][0]) * all_mean_f[i][0]
+#     piano_roll[i, :] = source.copy()
+#
+# pickle.dump(piano_roll, open( pickleloc + "piano_roll_maps_88_more_iterations.p",
+#             "wb"))
 
 
 
