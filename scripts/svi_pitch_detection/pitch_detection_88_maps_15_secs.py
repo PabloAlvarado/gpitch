@@ -25,7 +25,7 @@ gpitch.amtgp.init_settings(visible_device=visible_device, interactive=False)
 
 #pickleloc = '../../../results/files/svi/script/'  # location saved models
 pickleloc = '/import/c4dm-04/alvarado/results/files/svi/script/'  # location saved models
-filename = '../../../datasets/maps/test_data/segment4-down.wav'  # loc test dat
+filename = '../../../datasets/maps/test_data/MAPS_MUS-bach_846_AkPnBcht_mono.wav'  # loc test dat
 bounds = [21, 109]  # pitches to detect
 midi = np.asarray([str(i) for i in range(bounds[0], bounds[1])]).reshape(-1,)  # list
 Np = midi.size
@@ -36,12 +36,13 @@ m_bg = pickle.load(open(pickleloc + "maps_background.p", "rb")) # load backgroun
 
 y, fs = soundfile.read(filename)
 y = y.reshape(-1, 1)
+y /= np.max(np.abs(y))
 Ntest = y.size
 x = np.linspace(0, (Ntest-1.)/fs, Ntest).reshape(-1, 1)
 
-dec = 320  # decimation level
+dec = 1120  # decimation level
 maxiter = 1000  # max number of iterations
-mbs = 3200  # mini batch size
+mbs = 500  # mini batch size
 learning_rate = 0.01  # learning rate
 z = x[::dec].copy()  # inducing points
 
@@ -62,9 +63,9 @@ m.kern_g2.fixed = False
 m.likelihood.variance.fixed = False
 m.likelihood.variance = m_bg.likelihood.variance.value.copy()  # noise learned background
 
-Adam_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+#Adam_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
 
-print('Analysing pitch ' + str(midi[pitch]))
+print('Analysing 15 seconds of audio to detect pitch ' + str(midi[pitch]))
 dpc = models.kern_com.get_parameter_dict().copy()  # dictionary params component
 dpa = models.kern_act.get_parameter_dict().copy() # dictionary params activation
 m.update_params_graph(dic_par_com=dpc, dic_par_act=dpa)  # update hyperparams
@@ -79,8 +80,9 @@ m.q_sqrt3 = np.expand_dims(np.eye(m.Z.size), 2)
 m.q_sqrt4 = np.expand_dims(np.eye(m.Z.size), 2)
 
 #m.optimize(disp=0, maxiter=maxiter)  # optimize
-m.optimize(method=Adam_optimizer, maxiter=maxiter)
-#m.optimize_svi(maxiter=maxiter, learning_rate=learning_rate)  # optimize
+#m.optimize(method=Adam_optimizer, maxiter=maxiter)
+m.optimize_svi(maxiter=maxiter, learning_rate=learning_rate)  # optimize
 
-prediction = m.predict_all(x)  # predict
-pickle.dump(prediction, open( pickleloc + "loo88/prediction_pitch_" + str(midi[pitch]) + ".p", "wb"))
+a, b = 0, 32000
+prediction = m.predict_all(x[a:b])  # predict
+pickle.dump(prediction, open( pickleloc + "loo88/prediction_pitch_15_secs" + str(midi[pitch]) + ".p", "wb"))
