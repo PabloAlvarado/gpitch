@@ -2,7 +2,7 @@
 
 
 visible_device=0
-for i in {0..88}
+for i in {0..22}
 do
   python pitch_detection_88_maps_15_secs.py $visible_device $i
 done

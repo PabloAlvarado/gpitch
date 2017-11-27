@@ -65,7 +65,7 @@ m.likelihood.variance = m_bg.likelihood.variance.value.copy()  # noise learned b
 
 #Adam_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
 
-print('Analysing 15 seconds of audio to detect pitch ' + str(midi[pitch]))
+print('Se ise, detecting pitch ' + str(midi[pitch]))
 dpc = models.kern_com.get_parameter_dict().copy()  # dictionary params component
 dpa = models.kern_act.get_parameter_dict().copy() # dictionary params activation
 m.update_params_graph(dic_par_com=dpc, dic_par_act=dpa)  # update hyperparams
@@ -83,6 +83,6 @@ m.q_sqrt4 = np.expand_dims(np.eye(m.Z.size), 2)
 #m.optimize(method=Adam_optimizer, maxiter=maxiter)
 m.optimize_svi(maxiter=maxiter, learning_rate=learning_rate)  # optimize
 
-a, b = 0, 32000
-prediction = m.predict_all(x[a:b])  # predict
+prediction = m.predict_all(x[::40].copy())  # predict
+
 pickle.dump(prediction, open( pickleloc + "loo88/prediction_pitch_15_secs" + str(midi[pitch]) + ".p", "wb"))
