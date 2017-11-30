@@ -40,7 +40,7 @@ y /= np.max(np.abs(y))
 Ntest = y.size
 x = np.linspace(0, (Ntest-1.)/fs, Ntest).reshape(-1, 1)
 
-dec = 1120  # decimation level
+dec = 500  # decimation level
 maxiter = 1000  # max number of iterations
 mbs = 500  # mini batch size
 learning_rate = 0.01  # learning rate
@@ -65,7 +65,7 @@ m.likelihood.variance = m_bg.likelihood.variance.value.copy()  # noise learned b
 
 #Adam_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
 
-print('Se ise, detecting pitch ' + str(midi[pitch]))
+print('Nos vemos manana rey, detecting pitch ' + str(midi[pitch]))
 dpc = models.kern_com.get_parameter_dict().copy()  # dictionary params component
 dpa = models.kern_act.get_parameter_dict().copy() # dictionary params activation
 m.update_params_graph(dic_par_com=dpc, dic_par_act=dpa)  # update hyperparams
