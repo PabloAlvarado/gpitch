@@ -93,7 +93,7 @@ class ModGP(gpflow.model.Model):
         l_act_mean = []
         l_act_var = []
         for i in range(len(xnew)):
-            print('predicting window ' + str(i + 1) + ' of ' + str(len(xnew)))
+            #print('predicting window ' + str(i + 1) + ' of ' + str(len(xnew)))
             mean_f, var_f = self.predict_com(xnew[i])  # predict component
             mean_g, var_g = self.predict_act(xnew[i])  # predict activation
             l_com_mean.append(mean_f)
