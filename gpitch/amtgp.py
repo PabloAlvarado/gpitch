@@ -9,8 +9,24 @@ from scipy import signal
 import os
 import fnmatch
 import tensorflow as tf
-import matplotlib.pyplot as plt
 import peakutils
+import soundfile
+
+
+def find_ideal_f0(string):
+    ideal_f0 = 0.
+    for i in range(21, 89):
+        if string.find('M' + str(i)) is not -1:
+            ideal_f0 = midi2frec(i)
+    return ideal_f0
+
+def readaudio(fname, frames, start=0):
+    y, fs = soundfile.read(fname, frames=frames, start=start)  # load data and sample freq
+    y = y.reshape(-1, 1)
+    y += -y.mean()  # move data to have zero mean and bounded between (-1, 1)
+    y /= np.max(np.abs(y))
+    x = np.linspace(0, (frames-1.)/fs, frames).reshape(-1, 1)  # time vector
+    return x, y, fs
 
 
 def init_com_params(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
@@ -45,7 +61,6 @@ def init_com_params(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
     if scaled:
         sig_scale = 1./ (4.*np.sum(vvec)) #rescale (sigma)
         vvec *= sig_scale
-    ## Do not forget to normalize to sum 0.25 the final list of variances
     return F_star[idxf], vvec, F, Ss, thres
 
 

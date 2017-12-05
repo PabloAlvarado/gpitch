@@ -84,14 +84,28 @@ class ModGP(gpflow.model.Model):
         This method call all the decorators needed to compute the prediction over the latent
         component and activation. It also reshape the arrays to make easier to plot the intervals of
         confidency.
+
+        INPUT
+        xnew : list of array to use for prediction
         """
-        mean_f, var_f = self.predict_com(xnew)  # predict component
-        mean_g, var_g = self.predict_act(xnew)  # predict activation
-        mean_f = mean_f.reshape(-1, )  # reshape arrays in order to be easier plot variances
-        var_f = var_f.reshape(-1, )
-        mean_g = mean_g.reshape(-1, )
-        var_g = var_g.reshape(-1, )
-        x_plot = xnew.reshape(-1, ).copy()
+        l_com_mean = []  # list to storage predictions
+        l_com_var = []
+        l_act_mean = []
+        l_act_var = []
+        for i in range(len(xnew)):
+            print('predicting window ' + str(i + 1) + ' of ' + str(len(xnew)))
+            mean_f, var_f = self.predict_com(xnew[i])  # predict component
+            mean_g, var_g = self.predict_act(xnew[i])  # predict activation
+            l_com_mean.append(mean_f)
+            l_com_var.append(var_f)
+            l_act_mean.append(mean_g)
+            l_act_var.append(var_g)
+
+        com_mean = np.asarray(l_com_mean).reshape(-1,)
+        act_mean = np.asarray(l_act_mean).reshape(-1,)
+        com_var = np.asarray(l_com_var).reshape(-1,)
+        act_var = np.asarray(l_act_var).reshape(-1,)
+        x_plot = np.asarray(xnew).reshape(-1,)
         return mean_f, var_f, mean_g, var_g, x_plot
 
     def fixed_msmkern_params(self, freq=True, var=True):

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+
+visible_device=1
+for fname in $(ls ../../../datasets/yoshii_data/training_data/)
+do
+python ss_amt.py $visible_device $fname
+done
