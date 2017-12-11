@@ -101,10 +101,10 @@ class ModGP(gpflow.model.Model):
             l_act_mean.append(mean_g)
             l_act_var.append(var_g)
 
-        com_mean = np.asarray(l_com_mean).reshape(-1,)
-        act_mean = np.asarray(l_act_mean).reshape(-1,)
-        com_var = np.asarray(l_com_var).reshape(-1,)
-        act_var = np.asarray(l_act_var).reshape(-1,)
+        mean_f = np.asarray(l_com_mean).reshape(-1,)
+        mean_g = np.asarray(l_act_mean).reshape(-1,)
+        var_f = np.asarray(l_com_var).reshape(-1,)
+        var_g = np.asarray(l_act_var).reshape(-1,)
         x_plot = np.asarray(xnew).reshape(-1,)
         return mean_f, var_f, mean_g, var_g, x_plot
 
