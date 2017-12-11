@@ -10,7 +10,7 @@ import gpitch
 
 visible_device = sys.argv[1]  # gpu to use
 namefile = sys.argv[2].strip('.wav')  # file to analize
-dataloc = '../../../datasets/yoshii_data/training_data/'  # location of training data
+dataloc = '../../../datasets/ss_amt/training_data/'  # location of training data
 audioname = dataloc + namefile + '.wav'  # load data
 gpitch.amtgp.init_settings(visible_device=visible_device, interactive=False)  # set gpu
 
@@ -26,11 +26,13 @@ ideal_f0 = gpitch.amtgp.find_ideal_f0(namefile)  # get ideal f0 from file name
 icom = gpitch.amtgp.init_com_params(y=y, fs=fs, maxh=maxh, ideal_f0=ideal_f0, scaled=True,
                                     win_size=10)  # init component parameters
 Nc = icom[0].size  # number of harmonics per component
+y_init = np.zeros((1600, 1))  # generate 100ms of silence at the begining of data
+y_final = np.vstack((y_init, y[0:-1600]))
 ker_com = gpitch.kernels.MaternSpecMix(input_dim=1, lengthscales=0.1, frequencies=icom[0],
                                        variances=icom[1], Nc=Nc)  # define comp kernel
 ker_act = gpflow.kernels.Matern32(input_dim=1, lengthscales=1., variance=10.)  # def act k
 z = np.vstack((x[::dec].copy(), x[-1].copy()))
-m = gpitch.modgp.ModGP(x=x, y=y, z=z, kern_com=ker_com, kern_act=ker_act, whiten=True,
+m = gpitch.modgp.ModGP(x=x, y=y_final, z=z, kern_com=ker_com, kern_act=ker_act, whiten=True,
                        minibatch_size=minibatch_size)
 m.kern_com.fixed = True # Set all parameters free to optimize, but variances of component
 m.kern_com.lengthscales.fixed = False
