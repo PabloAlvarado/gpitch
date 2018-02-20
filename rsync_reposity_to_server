@@ -1,9 +1,0 @@
-#!/bin/bash
-
-while true
-do
-rsync -a --delete ~/Dropbox/sheffield_visit/code/gpitch paad3@frank.eecs.qmul.ac.uk:sheffield_visit/code_paper/
-echo -n "rsync to server, time "
-date '+%T'
-sleep 0.0
-done

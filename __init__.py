@@ -1,4 +1,4 @@
-from . import amtgp
+from amtgp import *
 from . import kernels
 from . import likelihoods
 from . import loogp

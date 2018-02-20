@@ -1,9 +1,0 @@
-#!/bin/bash
-
-
-module load cuda/8.0-cudnn5.1
-source activate tf
-for i in $(cat ~/sheffield_visit/code_paper/datasets/maps/sample_rate_16khz/filename_list.txt)
-do
-python com_learn_params_ml.py $i
-done

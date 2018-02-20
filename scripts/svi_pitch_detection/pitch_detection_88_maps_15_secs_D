@@ -1,8 +1,0 @@
-#!/bin/bash
-
-
-visible_device=1
-for i in {66..87}
-do
-  python pitch_detection_88_maps_15_secs.py $visible_device $i
-done
