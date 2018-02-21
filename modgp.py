@@ -35,8 +35,8 @@ class ModGP(gpflow.model.Model):
     @property
     def build_prior_kl(self):
         if self.whiten:
-            kl1 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_com, self.q_sqrt_com)
-            kl2 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_act, self.q_sqrt_act)
+            kl1 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_com, self.q_sqrt_com, K=None)
+            kl2 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_act, self.q_sqrt_act, K=None)
         else:
             k1 = self.kern_com.K(self.z) + tf.eye(self.num_inducing, dtype=float_type) * settings.numerics.jitter_level
             k2 = self.kern_act.K(self.z) + tf.eye(self.num_inducing, dtype=float_type) * settings.numerics.jitter_level
