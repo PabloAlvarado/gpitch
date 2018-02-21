@@ -128,7 +128,7 @@ class ModGP(gpflow.model.Model):
             flist[i] = 'self.kern_com.variance_' + str(i + 1) + '.fixed = ' + str(var)
             exec(flist[i])
 
-    def optimize_svi(self, maxiter, learning_rate):
+    def optimize_svi(self, maxiter, learning_rate=0.001):
         """
         method introduced by Pablo A. Alvarado (20/11/2017)
         This method uses stochastic variational inference for maximizing the ELBO.

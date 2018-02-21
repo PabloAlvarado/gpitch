@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8201b6fe-cbbb-4bfb-8bfc-0ef0ee62a352" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modgp.py" afterPath="$PROJECT_DIR$/modgp.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -28,8 +29,8 @@
       <file leaf-file-name="modgp.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modgp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2133">
-              <caret line="79" column="99" lean-forward="false" selection-start-line="79" selection-start-column="99" selection-end-line="79" selection-end-column="99" />
+            <state relative-caret-position="189">
+              <caret line="124" column="26" lean-forward="true" selection-start-line="124" selection-start-column="26" selection-end-line="124" selection-end-column="26" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -66,8 +67,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="1972" />
-    <option name="y" value="-1091" />
+    <option name="x" value="52" />
+    <option name="y" value="-11" />
     <option name="width" value="1869" />
     <option name="height" value="1092" />
   </component>
@@ -157,7 +158,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1972" y="-1091" width="1869" height="1092" extended-state="6" />
+    <frame x="52" y="-11" width="1869" height="1092" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16474465" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -236,8 +237,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modgp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2133">
-          <caret line="79" column="99" lean-forward="false" selection-start-line="79" selection-start-column="99" selection-end-line="79" selection-end-column="99" />
+        <state relative-caret-position="189">
+          <caret line="124" column="26" lean-forward="true" selection-start-line="124" selection-start-column="26" selection-end-line="124" selection-end-column="26" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
