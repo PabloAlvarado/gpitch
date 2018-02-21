@@ -16,23 +16,10 @@
       <file leaf-file-name="modgp.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modgp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="172">
-              <caret line="66" column="43" lean-forward="true" selection-start-line="66" selection-start-column="43" selection-end-line="66" selection-end-column="43" />
+            <state relative-caret-position="756">
+              <caret line="28" column="76" lean-forward="false" selection-start-line="28" selection-start-column="76" selection-end-line="28" selection-end-column="76" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
-                <element signature="e#330#1333#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/anaconda2/lib/python2.7/site-packages/gpflow-0.5-py2.7.egg/gpflow/__init__.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="405">
-              <caret line="15" column="14" lean-forward="true" selection-start-line="15" selection-start-column="14" selection-end-line="15" selection-end-column="14" />
-              <folding>
-                <element signature="e#606#644#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -41,6 +28,9 @@
     </leaf>
   </component>
   <component name="FindInProjectRecents">
+    <findStrings>
+      <find>float_ty</find>
+    </findStrings>
     <replaceStrings>
       <replace>build_prior_kl</replace>
       <replace>kl1</replace>
@@ -203,11 +193,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modgp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="172">
-          <caret line="66" column="43" lean-forward="true" selection-start-line="66" selection-start-column="43" selection-end-line="66" selection-end-column="43" />
+        <state relative-caret-position="756">
+          <caret line="28" column="76" lean-forward="false" selection-start-line="28" selection-start-column="76" selection-end-line="28" selection-end-column="76" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
-            <element signature="e#330#1333#0" expanded="false" />
           </folding>
         </state>
       </provider>

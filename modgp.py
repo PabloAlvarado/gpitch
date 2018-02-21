@@ -12,11 +12,10 @@ class ModGP(gpflow.model.Model):
     def __init__(self, x, y, z, kern_com, kern_act, whiten=True, minibatch_size=None):
         gpflow.model.Model.__init__(self)
 
-        self.logf = []
-
         if minibatch_size is None:
             minibatch_size = x.shape[0]
 
+        self.logf = []
         self.minibatch_size = minibatch_size
         self.num_data = x.shape[0]
         self.x = MinibatchData(x, minibatch_size, np.random.RandomState(0))
@@ -27,11 +26,9 @@ class ModGP(gpflow.model.Model):
         self.likelihood = ModLik()
         self.num_inducing = z.shape[0]
         self.whiten = whiten
-        # initialize variational parameters
-        self.q_mu_com = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))
+        self.q_mu_com = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))  # initialize variational parameters
         self.q_mu_act = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))
-        q_sqrt = np.array([np.eye(self.num_inducing)
-                           for _ in range(1)]).swapaxes(0, 2)
+        q_sqrt = np.array([np.eye(self.num_inducing) for _ in range(1)]).swapaxes(0, 2)
         self.q_sqrt_com = gpflow.param.Param(q_sqrt.copy())
         self.q_sqrt_act = gpflow.param.Param(q_sqrt.copy())
 
