@@ -15,7 +15,7 @@ class ModGP(gpflow.model.Model):
 
         if minibatch_size is None:
             minibatch_size = x.shape[0]
-
+        self.logf = []
         self.minibatch_size = minibatch_size
         self.num_data = x.shape[0]
         self.x = MinibatchData(x, minibatch_size, np.random.RandomState(0))
@@ -29,8 +29,7 @@ class ModGP(gpflow.model.Model):
         # initialize variational parameters
         self.q_mu_com = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))
         self.q_mu_act = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))
-        q_sqrt = np.array([np.eye(self.num_inducing)
-                           for _ in range(1)]).swapaxes(0, 2)
+        q_sqrt = np.array([np.eye(self.num_inducing) for _ in range(1)]).swapaxes(0, 2)
         self.q_sqrt_com = gpflow.param.Param(q_sqrt.copy())
         self.q_sqrt_act = gpflow.param.Param(q_sqrt.copy())
 
@@ -127,7 +126,7 @@ class ModGP(gpflow.model.Model):
         method introduced by Pablo A. Alvarado (20/11/2017)
         This method uses stochastic variational inference for maximizing the ELBO.
         """
-        self.logf = []
+
         def logger(x):
             if (logger.i % 10) == 0:
                 self.logf.append(self._objective(x)[0])
