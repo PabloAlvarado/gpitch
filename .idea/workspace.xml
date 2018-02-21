@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8201b6fe-cbbb-4bfb-8bfc-0ef0ee62a352" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modgp.py" afterPath="$PROJECT_DIR$/modgp.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -29,8 +28,8 @@
       <file leaf-file-name="modgp.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modgp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="918">
-              <caret line="138" column="63" lean-forward="false" selection-start-line="138" selection-start-column="63" selection-end-line="138" selection-end-column="63" />
+            <state relative-caret-position="520">
+              <caret line="124" column="48" lean-forward="true" selection-start-line="124" selection-start-column="48" selection-end-line="124" selection-end-column="48" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
                 <element signature="e#331#1339#0" expanded="false" />
@@ -38,7 +37,6 @@
                 <element signature="e#2059#2995#0" expanded="false" />
                 <element signature="e#3038#4242#0" expanded="false" />
                 <element signature="e#4309#4872#0" expanded="false" />
-                <element signature="e#4934#5477#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -218,7 +216,6 @@
             <element signature="e#2059#2995#0" expanded="false" />
             <element signature="e#3038#4242#0" expanded="false" />
             <element signature="e#4309#4872#0" expanded="false" />
-            <element signature="e#4934#5477#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -249,8 +246,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modgp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="918">
-          <caret line="138" column="63" lean-forward="false" selection-start-line="138" selection-start-column="63" selection-end-line="138" selection-end-column="63" />
+        <state relative-caret-position="520">
+          <caret line="124" column="48" lean-forward="true" selection-start-line="124" selection-start-column="48" selection-end-line="124" selection-end-column="48" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
             <element signature="e#331#1339#0" expanded="false" />
@@ -258,7 +255,6 @@
             <element signature="e#2059#2995#0" expanded="false" />
             <element signature="e#3038#4242#0" expanded="false" />
             <element signature="e#4309#4872#0" expanded="false" />
-            <element signature="e#4934#5477#0" expanded="false" />
           </folding>
         </state>
       </provider>

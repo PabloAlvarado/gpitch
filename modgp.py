@@ -115,7 +115,6 @@ class ModGP(gpflow.model.Model):
         method introduced by Pablo A. Alvarado (20/11/2017)
         This method uses stochastic variational inference for maximizing the ELBO.
         """
-
         def logger(x):
             if (logger.i % 10) == 0:
                 self.logf.append(self._objective(x)[0])
@@ -123,8 +122,8 @@ class ModGP(gpflow.model.Model):
         logger.i = 1
         self.x.minibatch_size = self.minibatch_size
         self.y.minibatch_size = self.minibatch_size
-
-        self.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate), maxiter=maxiter, callback=logger)
+        method = tf.train.AdamOptimizer(learning_rate=learning_rate)
+        self.optimize(method=method, maxiter=maxiter, callback=logger)
 
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_com(self, xnew):
