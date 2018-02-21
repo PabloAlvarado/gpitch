@@ -11,6 +11,17 @@ float_type = settings.dtypes.float_type
 
 class ModGP(gpflow.model.Model):
     def __init__(self, x, y, z, kern_com, kern_act, whiten=True, minibatch_size=None):
+        """
+        Constructor.
+        :param x:
+        :param y:
+        :param z:
+        :param kern_com:
+        :param kern_act:
+        :param whiten:
+        :param minibatch_size:
+        """
+
         gpflow.model.Model.__init__(self)
 
         if minibatch_size is None:
@@ -34,6 +45,10 @@ class ModGP(gpflow.model.Model):
         self.logf = []  # used for store values when using svi
 
     def build_prior_kl(self):
+        """
+        compute KL divergences.
+        :return:
+        """
         if self.whiten:
             kl1 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_com, self.q_sqrt_com)
             kl2 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_act, self.q_sqrt_act)
@@ -45,6 +60,10 @@ class ModGP(gpflow.model.Model):
         return kl1 + kl2
 
     def build_likelihood(self):
+        """
+        Compute the objective function
+        :return:
+        """
         kl = self.build_prior_kl()  # Get prior kl.
 
         # Get conditionals
@@ -59,7 +78,6 @@ class ModGP(gpflow.model.Model):
 
         scale = tf.cast(self.num_data, settings.dtypes.float_type) / \
             tf.cast(tf.shape(self.x)[0], settings.dtypes.float_type)  # re-scale for minibatch size
-
         return tf.reduce_sum(var_exp) * scale - kl
 
     def predict_all(self, xnew):

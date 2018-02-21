@@ -28,15 +28,10 @@
       <file leaf-file-name="modgp.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modgp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="520">
-              <caret line="124" column="48" lean-forward="true" selection-start-line="124" selection-start-column="48" selection-end-line="124" selection-end-column="48" />
+            <state relative-caret-position="2133">
+              <caret line="79" column="99" lean-forward="false" selection-start-line="79" selection-start-column="99" selection-end-line="79" selection-end-column="99" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
-                <element signature="e#331#1339#0" expanded="false" />
-                <element signature="e#1379#2017#0" expanded="false" />
-                <element signature="e#2059#2995#0" expanded="false" />
-                <element signature="e#3038#4242#0" expanded="false" />
-                <element signature="e#4309#4872#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -211,11 +206,6 @@
           <caret line="35" column="29" lean-forward="true" selection-start-line="35" selection-start-column="29" selection-end-line="35" selection-end-column="29" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
-            <element signature="e#331#1339#0" expanded="false" />
-            <element signature="e#1379#2017#0" expanded="false" />
-            <element signature="e#2059#2995#0" expanded="false" />
-            <element signature="e#3038#4242#0" expanded="false" />
-            <element signature="e#4309#4872#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -246,15 +236,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modgp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="520">
-          <caret line="124" column="48" lean-forward="true" selection-start-line="124" selection-start-column="48" selection-end-line="124" selection-end-column="48" />
+        <state relative-caret-position="2133">
+          <caret line="79" column="99" lean-forward="false" selection-start-line="79" selection-start-column="99" selection-end-line="79" selection-end-column="99" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
-            <element signature="e#331#1339#0" expanded="false" />
-            <element signature="e#1379#2017#0" expanded="false" />
-            <element signature="e#2059#2995#0" expanded="false" />
-            <element signature="e#3038#4242#0" expanded="false" />
-            <element signature="e#4309#4872#0" expanded="false" />
           </folding>
         </state>
       </provider>
