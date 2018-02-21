@@ -13,6 +13,8 @@ class ModGP(gpflow.model.Model):
     def __init__(self, x, y, z, kern_com, kern_act, whiten=True, minibatch_size=None):
         gpflow.model.Model.__init__(self)
 
+        self.logf = []
+
         if minibatch_size is None:
             minibatch_size = x.shape[0]
 
@@ -34,7 +36,6 @@ class ModGP(gpflow.model.Model):
         self.q_sqrt_com = gpflow.param.Param(q_sqrt.copy())
         self.q_sqrt_act = gpflow.param.Param(q_sqrt.copy())
 
-
     def build_prior_KL(self):
         if self.whiten:
             KL1 = gpflow.kullback_leiblers.gauss_kl_white(self.q_mu_com,
@@ -51,7 +52,6 @@ class ModGP(gpflow.model.Model):
             KL2 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_act,
                                                     self.q_sqrt_act, K2)
         return KL1 + KL2
-
 
     def build_likelihood(self):
         # Get prior KL.
@@ -80,7 +80,6 @@ class ModGP(gpflow.model.Model):
 
         return tf.reduce_sum(var_exp) * scale - KL
 
-
     def predict_all(self, xnew):
         """
         method introduced by Pablo A. Alvarado (11/11/2017)
@@ -97,7 +96,7 @@ class ModGP(gpflow.model.Model):
         l_act_mean = []
         l_act_var = []
         for i in range(len(xnew)):
-            #print('predicting window ' + str(i + 1) + ' of ' + str(len(xnew)))
+            # print('predicting window ' + str(i + 1) + ' of ' + str(len(xnew)))
             mean_f, var_f = self.predict_com(xnew[i])  # predict component
             mean_g, var_g = self.predict_act(xnew[i])  # predict activation
             l_com_mean.append(mean_f)
@@ -112,7 +111,6 @@ class ModGP(gpflow.model.Model):
         x_plot = np.asarray(xnew).reshape(-1,)
         return mean_f, var_f, mean_g, var_g, x_plot
 
-
     def fixed_msmkern_params(self, freq=True, var=True):
         """
         method introduced by Pablo A. Alvarado (11/11/2017)
@@ -120,23 +118,22 @@ class ModGP(gpflow.model.Model):
         This methods fixes or unfixes all the params associated to the frequencies and variacnes of
         the matern specrtal mixture kernel.
         """
-        Nc = self.kern_com.Nc
-        flist = [None]*Nc
-        for i in range(Nc):
+        nc = self.kern_com.Nc
+        flist = [None]*nc
+        for i in range(nc):
             flist[i] = 'self.kern_com.frequency_' + str(i + 1) + '.fixed = ' + str(freq)
             exec(flist[i])
 
-        for i in range(Nc):
+        for i in range(nc):
             flist[i] = 'self.kern_com.variance_' + str(i + 1) + '.fixed = ' + str(var)
             exec(flist[i])
-
 
     def optimize_svi(self, maxiter, learning_rate):
         """
         method introduced by Pablo A. Alvarado (20/11/2017)
         This method uses stochastic variational inference for maximizing the ELBO.
         """
-        self.logf = []
+
         def logger(x):
             if (logger.i % 10) == 0:
                 self.logf.append(self._objective(x)[0])
@@ -146,8 +143,7 @@ class ModGP(gpflow.model.Model):
         self.y.minibatch_size = self.minibatch_size
 
         self.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate),
-                   maxiter=maxiter, callback=logger)
-
+                      maxiter=maxiter, callback=logger)
 
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_com(self, xnew):
@@ -155,7 +151,6 @@ class ModGP(gpflow.model.Model):
                                                self.q_mu_com, q_sqrt=self.q_sqrt_com,
                                                full_cov=False,
                                                whiten=self.whiten)
-
 
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_act(self, xnew):
