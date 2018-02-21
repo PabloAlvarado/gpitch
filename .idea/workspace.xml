@@ -13,18 +13,6 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="modgp.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/modgp.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="274">
-              <caret line="128" column="0" lean-forward="true" selection-start-line="128" selection-start-column="0" selection-end-line="128" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="amtgp.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/amtgp.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -37,15 +25,29 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="modgp.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/modgp.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3013">
+              <caret line="135" column="82" lean-forward="false" selection-start-line="135" selection-start-column="82" selection-end-line="135" selection-end-column="82" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
     </leaf>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
       <find>float_ty</find>
+      <find>KL</find>
     </findStrings>
     <replaceStrings>
-      <replace>build_prior_kl</replace>
       <replace>kl1</replace>
+      <replace>build_prior_kl</replace>
+      <replace>kl</replace>
       <replace>k1</replace>
       <replace>k2</replace>
     </replaceStrings>
@@ -218,8 +220,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modgp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="274">
-          <caret line="128" column="0" lean-forward="true" selection-start-line="128" selection-start-column="0" selection-end-line="128" selection-end-column="0" />
+        <state relative-caret-position="3013">
+          <caret line="135" column="82" lean-forward="false" selection-start-line="135" selection-start-column="82" selection-end-line="135" selection-end-column="82" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
