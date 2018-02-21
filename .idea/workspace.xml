@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8201b6fe-cbbb-4bfb-8bfc-0ef0ee62a352" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/gpitch.iml" afterPath="$PROJECT_DIR$/.idea/gpitch.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modgp.py" afterPath="$PROJECT_DIR$/modgp.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -14,33 +16,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/__init__.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="189">
-              <caret line="7" column="0" lean-forward="true" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#19#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="modgp.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modgp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="189">
-              <caret line="7" column="0" lean-forward="true" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
+            <state relative-caret-position="270">
+              <caret line="10" column="0" lean-forward="true" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
-                <element signature="e#329#1308#0" expanded="false" />
-                <element signature="e#1349#2257#0" expanded="false" />
-                <element signature="e#2300#3593#0" expanded="false" />
-                <element signature="e#3637#4840#0" expanded="false" />
-                <element signature="e#4908#5471#0" expanded="false" />
-                <element signature="e#5534#6118#0" expanded="false" />
-                <element signature="e#6217#6500#0" expanded="false" />
-                <element signature="e#6599#6882#0" expanded="false" />
+                <element signature="e#331#1310#0" expanded="false" />
+                <element signature="e#1351#2259#0" expanded="false" />
+                <element signature="e#2302#3595#0" expanded="false" />
+                <element signature="e#3639#4842#0" expanded="false" />
+                <element signature="e#4910#5473#0" expanded="false" />
+                <element signature="e#5536#6120#0" expanded="false" />
+                <element signature="e#6219#6502#0" expanded="false" />
+                <element signature="e#6601#6884#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -59,10 +49,32 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="53" />
-    <option name="y" value="-1084" />
+    <option name="x" value="-1867" />
+    <option name="y" value="-4" />
     <option name="width" value="1867" />
     <option name="height" value="1084" />
+  </component>
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+          <State>
+            <id>Spelling</id>
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>Python</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
+  </component>
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -96,6 +108,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="reference.settings.ide.settings.spelling" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -112,6 +125,7 @@
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
   </component>
+  <component name="SpellCheckerSettings" BundledDictionaries="5" BundledDictionary0="django.dic" BundledDictionary1="python.dic" BundledDictionary2="pythonExtras.dic" BundledDictionary3="jetbrains.dic" BundledDictionary4="english.dic" Folders="0" Dictionaries="0" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="8201b6fe-cbbb-4bfb-8bfc-0ef0ee62a352" name="Default" comment="" />
@@ -123,7 +137,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="53" y="-1084" width="1867" height="1084" extended-state="6" />
+    <frame x="-1867" y="-4" width="1867" height="1084" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24986272" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -168,18 +182,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modgp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="7" column="0" lean-forward="true" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
+        <state relative-caret-position="270">
+          <caret line="10" column="0" lean-forward="true" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
-            <element signature="e#329#1308#0" expanded="false" />
-            <element signature="e#1349#2257#0" expanded="false" />
-            <element signature="e#2300#3593#0" expanded="false" />
-            <element signature="e#3637#4840#0" expanded="false" />
-            <element signature="e#4908#5471#0" expanded="false" />
-            <element signature="e#5534#6118#0" expanded="false" />
-            <element signature="e#6217#6500#0" expanded="false" />
-            <element signature="e#6599#6882#0" expanded="false" />
+            <element signature="e#331#1310#0" expanded="false" />
+            <element signature="e#1351#2259#0" expanded="false" />
+            <element signature="e#2302#3595#0" expanded="false" />
+            <element signature="e#3639#4842#0" expanded="false" />
+            <element signature="e#4910#5473#0" expanded="false" />
+            <element signature="e#5536#6120#0" expanded="false" />
+            <element signature="e#6219#6502#0" expanded="false" />
+            <element signature="e#6601#6884#0" expanded="false" />
           </folding>
         </state>
       </provider>
