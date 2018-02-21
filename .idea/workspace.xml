@@ -16,18 +16,28 @@
       <file leaf-file-name="modgp.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modgp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="552">
-              <caret line="130" column="51" lean-forward="false" selection-start-line="130" selection-start-column="51" selection-end-line="130" selection-end-column="51" />
+            <state relative-caret-position="351">
+              <caret line="37" column="13" lean-forward="true" selection-start-line="37" selection-start-column="13" selection-end-line="37" selection-end-column="13" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
-                <element signature="e#331#1334#0" expanded="false" />
-                <element signature="e#1374#2282#0" expanded="false" />
-                <element signature="e#2324#3617#0" expanded="false" />
-                <element signature="e#3660#4864#0" expanded="false" />
-                <element signature="e#4931#5494#0" expanded="false" />
-                <element signature="e#5556#6121#0" expanded="false" />
-                <element signature="e#6219#6502#0" expanded="false" />
-                <element signature="e#6600#6883#0" expanded="false" />
+                <element signature="e#330#1333#0" expanded="false" />
+                <element signature="e#3457#4666#0" expanded="false" />
+                <element signature="e#4733#5300#0" expanded="false" />
+                <element signature="e#5362#5928#0" expanded="false" />
+                <element signature="e#6026#6309#0" expanded="false" />
+                <element signature="e#6407#6690#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/anaconda2/lib/python2.7/site-packages/gpflow-0.5-py2.7.egg/gpflow/__init__.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="405">
+              <caret line="15" column="14" lean-forward="true" selection-start-line="15" selection-start-column="14" selection-end-line="15" selection-end-column="14" />
+              <folding>
+                <element signature="e#606#644#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -41,12 +51,13 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
+        <option value="$USER_HOME$/anaconda2/lib/python2.7/site-packages/gpflow-0.5-py2.7.egg/gpflow/__init__.py" />
         <option value="$PROJECT_DIR$/modgp.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="1973" />
+    <option name="x" value="53" />
     <option name="y" value="-1084" />
     <option name="width" value="1867" />
     <option name="height" value="1084" />
@@ -134,10 +145,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1973" y="-1084" width="1867" height="1084" extended-state="6" />
+    <frame x="53" y="-1084" width="1867" height="1084" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24986272" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16474465" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32984293" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
@@ -172,25 +183,33 @@
         <state relative-caret-position="189">
           <caret line="7" column="0" lean-forward="true" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
           <folding>
-            <element signature="e#0#19#0" expanded="true" />
+            <element signature="e#0#19#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda2/lib/python2.7/site-packages/gpflow-0.5-py2.7.egg/gpflow/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="15" column="14" lean-forward="true" selection-start-line="15" selection-start-column="14" selection-end-line="15" selection-end-column="14" />
+          <folding>
+            <element signature="e#606#644#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/modgp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="552">
-          <caret line="130" column="51" lean-forward="false" selection-start-line="130" selection-start-column="51" selection-end-line="130" selection-end-column="51" />
+        <state relative-caret-position="351">
+          <caret line="37" column="13" lean-forward="true" selection-start-line="37" selection-start-column="13" selection-end-line="37" selection-end-column="13" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
-            <element signature="e#331#1334#0" expanded="false" />
-            <element signature="e#1374#2282#0" expanded="false" />
-            <element signature="e#2324#3617#0" expanded="false" />
-            <element signature="e#3660#4864#0" expanded="false" />
-            <element signature="e#4931#5494#0" expanded="false" />
-            <element signature="e#5556#6121#0" expanded="false" />
-            <element signature="e#6219#6502#0" expanded="false" />
-            <element signature="e#6600#6883#0" expanded="false" />
+            <element signature="e#330#1333#0" expanded="false" />
+            <element signature="e#3457#4666#0" expanded="false" />
+            <element signature="e#4733#5300#0" expanded="false" />
+            <element signature="e#5362#5928#0" expanded="false" />
+            <element signature="e#6026#6309#0" expanded="false" />
+            <element signature="e#6407#6690#0" expanded="false" />
           </folding>
         </state>
       </provider>
