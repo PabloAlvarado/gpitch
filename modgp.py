@@ -36,23 +36,21 @@ class ModGP(gpflow.model.Model):
         self.q_sqrt_act = gpflow.param.Param(q_sqrt.copy())
 
     @property
-    def build_prior_KL(self):
+    def build_prior_kl(self):
         if self.whiten:
-            KL1 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_com, self.q_sqrt_com)
-            KL2 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_act, self.q_sqrt_act)
+            kl1 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_com, self.q_sqrt_com)
+            kl2 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_act, self.q_sqrt_act)
         else:
-            K1 = self.kern_com.K(self.z) + \
-                 tf.eye(self.num_inducing, dtype=float_type) * settings.numerics.jitter_level
-            K2 = self.kern_act.K(self.z) + \
-                 tf.eye(self.num_inducing, dtype=float_type) * settings.numerics.jitter_level
-            KL1 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_com, self.q_sqrt_com, K1)
-            KL2 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_act, self.q_sqrt_act, K2)
-        return KL1 + KL2
+            k1 = self.kern_com.K(self.z) + tf.eye(self.num_inducing, dtype=float_type) * settings.numerics.jitter_level
+            k2 = self.kern_act.K(self.z) + tf.eye(self.num_inducing, dtype=float_type) * settings.numerics.jitter_level
+            kl1 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_com, self.q_sqrt_com, k1)
+            kl2 = gpflow.kullback_leiblers.gauss_kl(self.q_mu_act, self.q_sqrt_act, k2)
+        return kl1 + kl2
 
     @property
     def build_likelihood(self):
-        # Get prior KL.
-        KL = self.build_prior_KL
+        # Get prior kl.
+        kl = self.build_prior_kl
 
         # Get conditionals
         fmean1, fvar1 = gpflow.conditionals.conditional(self.x, self.z,
@@ -72,10 +70,10 @@ class ModGP(gpflow.model.Model):
         var_exp = self.likelihood.variational_expectations(fmean, fvar, self.y)
 
         # re-scale for minibatch size
-        scale = tf.cast(self.num_data, settings.dtypes.float_type) / \
-                tf.cast(tf.shape(self.x)[0], settings.dtypes.float_type)
+        scale = tf.cast(self.num_data, settings.dtypes.float_type) / tf.cast(tf.shape(self.x)[0],
+                                                                             settings.dtypes.float_type)
 
-        return tf.reduce_sum(var_exp) * scale - KL
+        return tf.reduce_sum(var_exp) * scale - kl
 
     def predict_all(self, xnew):
         """
