@@ -1,8 +1,8 @@
 import numpy as np
+import tensorflow as tf
 import gpflow
 from gpflow import settings
 from gpflow.minibatch import MinibatchData
-import tensorflow as tf
 from likelihoods import ModLik
 
 
@@ -15,7 +15,7 @@ class ModGP(gpflow.model.Model):
 
         if minibatch_size is None:
             minibatch_size = x.shape[0]
-        self.logf = []
+
         self.minibatch_size = minibatch_size
         self.num_data = x.shape[0]
         self.x = MinibatchData(x, minibatch_size, np.random.RandomState(0))
@@ -24,14 +24,14 @@ class ModGP(gpflow.model.Model):
         self.kern_com = kern_com
         self.kern_act = kern_act
         self.likelihood = ModLik()
-        self.num_inducing = z.shape[0]
         self.whiten = whiten
-        # initialize variational parameters
-        self.q_mu_com = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))
+        self.q_mu_com = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))  # initialize variational parameters
         self.q_mu_act = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))
+        self.num_inducing = z.shape[0]
         q_sqrt = np.array([np.eye(self.num_inducing) for _ in range(1)]).swapaxes(0, 2)
         self.q_sqrt_com = gpflow.param.Param(q_sqrt.copy())
         self.q_sqrt_act = gpflow.param.Param(q_sqrt.copy())
+        self.logf = []  # used for store values when using svi
 
     def build_prior_kl(self):
         if self.whiten:
@@ -45,29 +45,20 @@ class ModGP(gpflow.model.Model):
         return kl1 + kl2
 
     def build_likelihood(self):
-        # Get prior kl.
-        kl = self.build_prior_kl()
+        kl = self.build_prior_kl()  # Get prior kl.
 
         # Get conditionals
-        fmean1, fvar1 = gpflow.conditionals.conditional(self.x, self.z,
-                                                        self.kern_com, self.q_mu_com,
-                                                        q_sqrt=self.q_sqrt_com,
-                                                        full_cov=False,
-                                                        whiten=self.whiten)
-        fmean2, fvar2 = gpflow.conditionals.conditional(self.x, self.z,
-                                                        self.kern_act, self.q_mu_act,
-                                                        q_sqrt=self.q_sqrt_act,
-                                                        full_cov=False,
-                                                        whiten=self.whiten)
+        fmean1, fvar1 = gpflow.conditionals.conditional(self.x, self.z, self.kern_com, self.q_mu_com,
+                                                        q_sqrt=self.q_sqrt_com, full_cov=False, whiten=self.whiten)
+        fmean2, fvar2 = gpflow.conditionals.conditional(self.x, self.z, self.kern_act, self.q_mu_act,
+                                                        q_sqrt=self.q_sqrt_act, full_cov=False,  whiten=self.whiten)
         fmean = tf.concat([fmean1, fmean2], 1)
         fvar = tf.concat([fvar1, fvar2], 1)
 
-        # Get variational expectations.
-        var_exp = self.likelihood.variational_expectations(fmean, fvar, self.y)
+        var_exp = self.likelihood.variational_expectations(fmean, fvar, self.y)  # Get variational expectations
 
-        # re-scale for minibatch size
         scale = tf.cast(self.num_data, settings.dtypes.float_type) / \
-            tf.cast(tf.shape(self.x)[0], settings.dtypes.float_type)
+            tf.cast(tf.shape(self.x)[0], settings.dtypes.float_type)  # re-scale for minibatch size
 
         return tf.reduce_sum(var_exp) * scale - kl
 
@@ -106,7 +97,7 @@ class ModGP(gpflow.model.Model):
         """
         method introduced by Pablo A. Alvarado (11/11/2017)
 
-        This methods fixes or unfixes all the params associated to the frequencies and variacnes of
+        This methods fixes or unfixes all the params associated to the frequencies and variances of
         the matern specrtal mixture kernel.
         """
         nc = self.kern_com.Nc
@@ -139,12 +130,10 @@ class ModGP(gpflow.model.Model):
     def predict_com(self, xnew):
         return gpflow.conditionals.conditional(xnew, self.z, self.kern_com,
                                                self.q_mu_com, q_sqrt=self.q_sqrt_com,
-                                               full_cov=False,
-                                               whiten=self.whiten)
+                                               full_cov=False, whiten=self.whiten)
 
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_act(self, xnew):
         return gpflow.conditionals.conditional(xnew, self.z, self.kern_act,
                                                self.q_mu_act, q_sqrt=self.q_sqrt_act,
-                                               full_cov=False,
-                                               whiten=self.whiten)
+                                               full_cov=False, whiten=self.whiten)
