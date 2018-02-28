@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import gpitch
 import gpflow
 from gpflow import settings
 from gpflow.minibatch import MinibatchData
@@ -10,7 +11,7 @@ float_type = settings.dtypes.float_type
 
 
 class ModGP(gpflow.model.Model):
-    def __init__(self, x, y, z, kern_com, kern_act, transfunc, whiten=True, minibatch_size=None):
+    def __init__(self, x, y, z, kern, whiten=True, minibatch_size=None):
         """
         Constructor.
         :param x:
@@ -33,9 +34,9 @@ class ModGP(gpflow.model.Model):
         self.x = MinibatchData(x, minibatch_size, np.random.RandomState(0))
         self.y = MinibatchData(y, minibatch_size, np.random.RandomState(0))
         self.z = gpflow.param.Param(z)
-        self.kern_com = kern_com
-        self.kern_act = kern_act
-        self.likelihood = ModLik(transfunc)
+        self.kern_com = kern[0]
+        self.kern_act = kern[1]
+        self.likelihood = ModLik(transfunc=gpitch.logistic_tf)
         self.whiten = whiten
         self.q_mu_com = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))  # initialize variational parameters
         self.q_mu_act = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))
