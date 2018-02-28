@@ -108,14 +108,16 @@ class LooLik(gpflow.likelihoods.Likelihood):
 
 class ModLik(gpflow.likelihoods.Likelihood):
     '''Modulated GP likelihood'''
-    def __init__(self):
+    def __init__(self, transfunc):
         gpflow.likelihoods.Likelihood.__init__(self)
         self.variance = gpflow.param.Param(1.0, transforms.positive)
+        self.transfunc = transfunc
 
     def logp(self, F, Y):
         f, g = F[:, 0], F[:, 1]
         y = Y[:, 0]
-        sigma_g = 1./(1 + tf.exp(-g))  # squash g to be positive
+        #sigma_g = 1./(1 + tf.exp(-g))  # squash g to be positive
+        sigma_g = self.transfunc(g)
         mean = f * sigma_g
         return gpflow.densities.gaussian(y, mean, self.variance).reshape(-1, 1)
 
@@ -134,7 +136,8 @@ class ModLik(gpflow.likelihoods.Likelihood):
                                         mean_g, var_f, var_g)]
         shape = tf.shape(mean_g)  # get  output shape
         X = gh_x * tf.sqrt(2.*var_g) + mean_g  # transformed evaluation points
-        evaluations = 1. / (1. + tf.exp(-X))  # sigmoid function
+        #evaluations = 1. / (1. + tf.exp(-X))  # sigmoid function
+        evaluations = self.transfunc(X)
         E1 = tf.reshape(tf.matmul(evaluations, gh_w), shape)  # compute expectations
         E2 = tf.reshape(tf.matmul(evaluations**2, gh_w), shape)
 

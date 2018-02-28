@@ -13,6 +13,12 @@ import peakutils
 import soundfile
 
 
+
+#def reverse_envelope(f, window_size=160, tol=0.001):
+
+
+
+
 def find_ideal_f0(string):
     ideal_f0 = 0.
     for i in range(21, 89):
@@ -214,10 +220,34 @@ def learnparams(X, S, Nh):
 #         S_star *= sig_scale
 #     return F_star, S_star, F, Y, Ss
 
+def norm(x):
+    """divide by absolute max"""
+    return x / np.max(np.abs(x))
+
 
 def logistic(x):
-    return 1./(1+ np.exp(-x))
+    """ logistic function """
+    return 1./(1. + np.exp(-x))
 
+def softplus(x):
+    """ softplus function """
+    return np.log(np.exp(x) + 1.)
+
+def isoftplus(x):
+    """ inverse softplus function """
+    return np.log(np.exp(x) - 1.)
+
+def logistic_tf(x):
+    """logistic function using tensorflow """
+    return 1./(1. + tf.exp(-x))
+
+def softplus_tf(x):
+    """ softplus function using tensorflow  """
+    return tf.log(tf.exp(x) + 1.)
+
+def isoftplus_tf(x):
+    """ inverse softplus function using tensorflow  """
+    return tf.log(tf.exp(x) - 1.)
 
 def Matern12CosineMix(variance, lengthscale, period, Nh):
     '''Write it.'''

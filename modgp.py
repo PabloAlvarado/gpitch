@@ -10,7 +10,7 @@ float_type = settings.dtypes.float_type
 
 
 class ModGP(gpflow.model.Model):
-    def __init__(self, x, y, z, kern_com, kern_act, whiten=True, minibatch_size=None):
+    def __init__(self, x, y, z, kern_com, kern_act, transfunc, whiten=True, minibatch_size=None):
         """
         Constructor.
         :param x:
@@ -18,6 +18,7 @@ class ModGP(gpflow.model.Model):
         :param z:
         :param kern_com:
         :param kern_act:
+        :param transform:
         :param whiten:
         :param minibatch_size:
         """
@@ -34,7 +35,7 @@ class ModGP(gpflow.model.Model):
         self.z = gpflow.param.Param(z)
         self.kern_com = kern_com
         self.kern_act = kern_act
-        self.likelihood = ModLik()
+        self.likelihood = ModLik(transfunc)
         self.whiten = whiten
         self.q_mu_com = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))  # initialize variational parameters
         self.q_mu_act = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))
