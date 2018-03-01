@@ -14,6 +14,10 @@ import soundfile
 import pickle
 
 
+def ivi(interval, m):
+    """inducing variables intializer"""
+    return np.linspace(interval[0], interva[1], m).reshape(-1, 1)
+
 def loadm(directory, pattern=None):
     '''load an already gpitch trained model'''
    
@@ -262,7 +266,8 @@ def Matern12CosineMix(variance, lengthscale, period, Nh):
     return gpflow.kernels.Add(kern_list)
 
 
-def wavread(filename, start=0, N=None, norm=True, mono=True):
+def wavread(filename, start=0, N=None, norm=True, mono=False):
+    """Load .wav audio file."""
     fs, y = wav.read(filename)
     y = y.astype(np.float64)
     if mono:
@@ -273,7 +278,8 @@ def wavread(filename, start=0, N=None, norm=True, mono=True):
     if N == None:
     	N = y.size
     y = y[start: N + start].reshape(-1, 1) # select data subset
-    return y, fs
+    x = np.linspace(0, (N-1.)/fs, N).reshape(-1, 1)
+    return x, y, fs
 
 
 def load_pitch_params_data(pitch_list, data_loc, params_loc):
