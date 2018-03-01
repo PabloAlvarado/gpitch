@@ -11,13 +11,18 @@ import fnmatch
 import tensorflow as tf
 import peakutils
 import soundfile
+import pickle
 
 
-
-#def reverse_envelope(f, window_size=160, tol=0.001):
-
-
-
+def loadm(directory, pattern=None):
+    '''load an already gpitch trained model'''
+   
+    files = os.listdir(directory)  # filenames of models to load
+    m_list = []  # list of models loaded
+    for i in range(len(files)):
+        m_list.append(pickle.load(open(directory + files[i], "rb")))
+    return m_list 
+    #return files
 
 def find_ideal_f0(string):
     ideal_f0 = 0.
@@ -70,11 +75,13 @@ def init_com_params(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
     return F_star[idxf], vvec, F, Ss, thres
 
 
-def init_settings(visible_device='0', interactive=False):
-    '''Initialize usage of GPU and plotting'''
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0' #  deactivate tf warnings (default 0)
-    os.environ["CUDA_VISIBLE_DEVICES"] = visible_device # configuration use only one GPU
-    config = tf.ConfigProto() #Configuration to not to use all the memory
+def init_settings(visible_device, interactive=False):
+    '''Initialize usage of GPU and plotting
+       visible_device : which GPU to use'''
+
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'  # deactivate tf warnings (default 0)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(visible_device)  # configuration use only one GPU
+    config = tf.ConfigProto()  # configuration to not to use all the memory
     config.gpu_options.allow_growth = True
     if interactive == True:
         sess = tf.InteractiveSession(config=config)
