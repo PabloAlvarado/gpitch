@@ -14,18 +14,14 @@ import soundfile
 import pickle
 
 
-def ivi(interval, m):
-    """inducing variables intializer"""
-    return np.linspace(interval[0], interva[1], m).reshape(-1, 1)
-
 def loadm(directory, pattern=None):
     '''load an already gpitch trained model'''
-   
+
     files = os.listdir(directory)  # filenames of models to load
     m_list = []  # list of models loaded
     for i in range(len(files)):
         m_list.append(pickle.load(open(directory + files[i], "rb")))
-    return m_list 
+    return m_list
     #return files
 
 def find_ideal_f0(string):
