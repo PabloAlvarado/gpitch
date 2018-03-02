@@ -10,7 +10,7 @@ from likelihoods import ModLik
 float_type = settings.dtypes.float_type
 
 
-class ModGP(gpflow.model.Model):
+class Modgp(gpflow.model.Model):
     def __init__(self, x, y, z, kern, whiten=True, minibatch_size=None):
         """
         Constructor.
