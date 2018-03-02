@@ -148,18 +148,18 @@ class MaternSpecMix(gpflow.kernels.Kern):
     """
     Matern spectral mixture kernel with single lengthscale.
     """
-    def __init__(self, Nc, input_dim=1, lengthscales=None, variances=None, frequencies=None):
+    def __init__(self, input_dim=1, numc, lengthscales=None, variances=None, frequencies=None):
         gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
         self.ARD = False
-        self.Nc = Nc
+        self.numc = numc
 
         if lengthscales == None:
             lengthscales = 0.05
-            variances = 0.125*np.ones((Nc, 1))
-            frequencies = 1.*np.arange(1, Nc+1)
+            variances = 0.125*np.ones((numc, 1))
+            frequencies = 1.*np.arange(1, numc+1)
 
         self.lengthscales = Param(lengthscales, transforms.Logistic(0., 1.0) )
-        for i in range(self.Nc): # generate a param object for each  var, and freq, they must be (Nc,) arrays.
+        for i in range(self.numc): # generate a param object for each  var, and freq, they must be (numc,) arrays.
             setattr(self, 'variance_' + str(i+1), Param(variances[i], transforms.Logistic(0., 0.25) ) )
             setattr(self, 'frequency_' + str(i+1), Param(frequencies[i], transforms.positive ) )
 
@@ -179,7 +179,7 @@ class MaternSpecMix(gpflow.kernels.Kern):
         r2 = tf.reduce_sum(2.*np.pi * self.frequency_1 * r , 2)
         k = self.variance_1 * tf.exp(-r1) * tf.cos(r2)
 
-        for i in range(2, self.Nc + 1):
+        for i in range(2, self.numc + 1):
             r1 = tf.reduce_sum(r / self.lengthscales, 2)
             r2 = tf.reduce_sum(2.*np.pi * getattr(self, 'frequency_' + str(i)) * r , 2)
             k += getattr(self, 'variance_' + str(i)) * tf.exp(-r1) * tf.cos(r2)
@@ -188,7 +188,7 @@ class MaternSpecMix(gpflow.kernels.Kern):
 
     def Kdiag(self, X):
         var = tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance_1))
-        for i in range(2, self.Nc + 1):
+        for i in range(2, self.numc + 1):
             var += tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(getattr(self, 'variance_' + str(i))))
         return var
 

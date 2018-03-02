@@ -31,16 +31,17 @@ def find_ideal_f0(string):
             ideal_f0 = midi2frec(i)
     return ideal_f0
 
-def readaudio(fname, frames, start=0):
+def readaudio(fname, frames=-1, start=0):
     y, fs = soundfile.read(fname, frames=frames, start=start)  # load data and sample freq
     y = y.reshape(-1, 1)
     y += -y.mean()  # move data to have zero mean and bounded between (-1, 1)
     y /= np.max(np.abs(y))
+    frames = y.size
     x = np.linspace(0, (frames-1.)/fs, frames).reshape(-1, 1)  # time vector
     return x, y, fs
 
 
-def init_com_params(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
+def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
     '''
     peak detector using peakutils (webpage). The function returns the H peaks with highest
     energy.
@@ -72,7 +73,7 @@ def init_com_params(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
     if scaled:
         sig_scale = 1./ (4.*np.sum(vvec)) #rescale (sigma)
         vvec *= sig_scale
-    return F_star[idxf], vvec, F, Ss, thres
+    return [F_star[idxf], vvec, F, Ss, thres]
 
 
 def init_settings(visible_device, interactive=False):
@@ -308,7 +309,7 @@ def load_pitch_params_data(pitch_list, data_loc, params_loc):
     return final_list, train_data, params
 
 
-def midi2frec(midi):
+def midi2freq(midi):
     return 2.**( (midi - 69.)/12. ) * 440.
 
 def freq2midi(freq):
