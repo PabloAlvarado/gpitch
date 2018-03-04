@@ -31,11 +31,14 @@ def find_ideal_f0(string):
             ideal_f0 = midi2frec(i)
     return ideal_f0
 
-def readaudio(fname, frames=-1, start=0):
+def readaudio(fname, frames=-1, start=0, aug=False):
     y, fs = soundfile.read(fname, frames=frames, start=start)  # load data and sample freq
     y = y.reshape(-1, 1)
     y += -y.mean()  # move data to have zero mean and bounded between (-1, 1)
     y /= np.max(np.abs(y))
+    if aug:
+        augnum = 1000  # number of zeros to add
+        y = np.append(np.zeros((augnum, 1)), y[0: -augnum]).reshape(-1, 1)
     frames = y.size
     x = np.linspace(0, (frames-1.)/fs, frames).reshape(-1, 1)  # time vector
     return x, y, fs
