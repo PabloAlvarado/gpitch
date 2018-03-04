@@ -158,7 +158,7 @@ class MaternSpecMix(gpflow.kernels.Kern):
             variances = 0.125*np.ones((numc, 1))
             frequencies = 1.*np.arange(1, numc+1)
 
-        self.lengthscales = Param(lengthscales, transforms.Logistic(0., 10.0) )
+        self.lengthscales = Param(lengthscales, transforms.Logistic(0., 20.0) )
         for i in range(self.numc): # generate a param object for each  var, and freq, they must be (numc,) arrays.
             setattr(self, 'variance_' + str(i+1), Param(variances[i], transforms.Logistic(0., 0.25) ) )
             setattr(self, 'frequency_' + str(i+1), Param(frequencies[i], transforms.positive ) )
