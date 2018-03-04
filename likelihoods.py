@@ -110,7 +110,7 @@ class ModLik(gpflow.likelihoods.Likelihood):
     '''Modulated GP likelihood'''
     def __init__(self, transfunc):
         gpflow.likelihoods.Likelihood.__init__(self)
-        self.variance = gpflow.param.Param(1.0, transforms.positive)
+        self.variance = gpflow.param.Param(0.0001, transforms.positive)
         self.transfunc = transfunc
 
     def logp(self, F, Y):
