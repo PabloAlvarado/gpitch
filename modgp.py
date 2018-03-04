@@ -39,11 +39,14 @@ class Modgp(gpflow.model.Model):
         self.likelihood = ModLik(transfunc=gpitch.logistic_tf)
         self.whiten = whiten
         self.q_mu_com = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))  # initialize variational parameters
-        self.q_mu_act = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))
+        self.q_mu_act = gpflow.param.Param(-np.pi*np.zeros((self.z.shape[0], 1)))
         self.num_inducing = z.shape[0]
         q_sqrt = np.array([np.eye(self.num_inducing) for _ in range(1)]).swapaxes(0, 2)
         self.q_sqrt_com = gpflow.param.Param(q_sqrt.copy())
         self.q_sqrt_act = gpflow.param.Param(q_sqrt.copy())
+
+        self.z.fixed = True  # fix inducing variables
+        self.fixed_msmkern_params(freq=False, var=True)  # fix variance component kernel
         self.logf = []  # used for store values when using svi
 
     def build_prior_kl(self):
@@ -120,7 +123,7 @@ class Modgp(gpflow.model.Model):
         This methods fixes or unfixes all the params associated to the frequencies and variances of
         the matern specrtal mixture kernel.
         """
-        nc = self.kern_com.Nc
+        nc = self.kern_com.numc
         flist = [None]*nc
         for i in range(nc):
             flist[i] = 'self.kern_com.frequency_' + str(i + 1) + '.fixed = ' + str(freq)
