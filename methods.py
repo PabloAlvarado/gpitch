@@ -28,7 +28,7 @@ def find_ideal_f0(string):
     ideal_f0 = 0.
     for i in range(21, 89):
         if string.find('M' + str(i)) is not -1:
-            ideal_f0 = midi2frec(i)
+            ideal_f0 = midi2freq(i)
     return ideal_f0
 
 def readaudio(fname, frames=-1, start=0, aug=False):
@@ -96,8 +96,8 @@ def init_settings(visible_device, interactive=False):
     '''Initialize usage of GPU and plotting
        visible_device : which GPU to use'''
 
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'  # deactivate tf warnings (default 0)
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(visible_device)  # configuration use only one GPU
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # deactivate tf warnings (default 0)
+    os.environ["CUDA_VISIBLE_DEVICES"] = visible_device  # configuration use only one GPU
     config = tf.ConfigProto()  # configuration to not to use all the memory
     config.gpu_options.allow_growth = True
     if interactive == True:
