@@ -84,7 +84,7 @@ def plot_spec(iparam):
     F = iparam[2]
     S = iparam[3]
     plt.plot(F, S/np.max(S))
-    plt.plot(F_star, S_star/np.max(S_star), 'xk', mew=2)
+    plt.plot(F_star, S_star/np.max(S_star), 'ok', mew=2, mfc='none')
     plt.legend(['Smoothed spectral density of data', 'location of harmonics found for initialization'])
     plt.xlim([0, 8000])
 
