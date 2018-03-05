@@ -46,9 +46,15 @@ def readaudio(fname, frames=-1, start=0, aug=False):
 
 def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
     '''
-    peak detector using peakutils (webpage). The function returns the H peaks with highest
-    energy.
+    :param y: data
+    :param fs: sample frequency
+    :param maxh: max number of partials
+    :param ideal_f0: ideal f0 or pitch
+    :param scaled: to scale or not the variance
+    :param win_size: size of window to smooth spectrum
+    :return:
     '''
+
     N = y.size
     Y = fft(y.reshape(-1,)) #  FFT data
     S =  2./N * np.abs(Y[0:N//2]) #  spectral density data
@@ -56,15 +62,22 @@ def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
 
     win =  signal.hann(win_size)
     Ss = signal.convolve(S, win, mode='same') / sum(win)
-
-    thres = 0.003/max(Ss)
+    Sslog = np.log(Ss)
+    Sslog = Sslog + np.abs(np.min(Sslog))
+    Sslog /= np.max(Sslog)
+    thres = 0.10*np.max(Sslog)
     min_dist = 0.8*np.argmin(np.abs(F - ideal_f0))
-    idx = peakutils.indexes(Ss, thres=thres, min_dist=min_dist)
+    idx = peakutils.indexes(Sslog, thres=thres, min_dist=min_dist)
 
     F_star, S_star = F[idx], Ss[idx]
 
-    aux1 = np.flip(np.sort(S_star), 0)
-    aux2 = np.flip(np.argsort(S_star), 0)
+    for index in range(F_star.size):
+        if F_star[index] < ideal_f0:
+            F_star2 = np.delete(F_star, [index])
+            S_star2 = np.delete(S_star, [index])
+
+    aux1 = np.flip(np.sort(S_star2), 0)
+    aux2 = np.flip(np.argsort(S_star2), 0)
 
     if aux1.size > maxh :
         vvec = aux1[0:maxh]
@@ -76,7 +89,7 @@ def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
     if scaled:
         sig_scale = 1./ (4.*np.sum(vvec)) #rescale (sigma)
         vvec *= sig_scale
-    return [F_star[idxf], vvec, F, Ss, thres]
+    return [F_star2[idxf], vvec, F, Ss, thres]
 
 
 def init_settings(visible_device, interactive=False):
