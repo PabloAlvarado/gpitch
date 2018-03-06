@@ -17,12 +17,12 @@ import pickle
 def loadm(directory, pattern=None):
     '''load an already gpitch trained model'''
 
-    files = os.listdir(directory)  # filenames of models to load
+    filenames = os.listdir(directory)  # filenames of models to load
     m_list = []  # list of models loaded
-    for i in range(len(files)):
-        m_list.append(pickle.load(open(directory + files[i], "rb")))
-    return m_list
-    #return files
+    for i in range(len(filenames)):
+        m_list.append(pickle.load(open(directory + filenames[i], "rb")))
+    return m_list, filenames
+
 
 def find_ideal_f0(string):
     ideal_f0 = 0.
@@ -72,7 +72,7 @@ def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
     F_star, S_star = F[idx], Ss[idx]
 
     for index in range(F_star.size):
-        if F_star[index] < ideal_f0:
+        if F_star[index] < 0.75*ideal_f0:
             F_star2 = np.delete(F_star, [index])
             S_star2 = np.delete(S_star, [index])
 
