@@ -39,7 +39,7 @@ class Modgp(gpflow.model.Model):
         self.likelihood = ModLik(transfunc=gpitch.logistic_tf)
         self.whiten = whiten
         self.q_mu_com = gpflow.param.Param(np.zeros((self.z.shape[0], 1)))  # initialize variational parameters
-        self.q_mu_act = gpflow.param.Param(-np.pi*np.zeros((self.z.shape[0], 1)))
+        self.q_mu_act = gpflow.param.Param(-2.1972*np.ones((self.z.shape[0], 1)))
         self.num_inducing = z.shape[0]
         q_sqrt = np.array([np.eye(self.num_inducing) for _ in range(1)]).swapaxes(0, 2)
         self.q_sqrt_com = gpflow.param.Param(q_sqrt.copy())

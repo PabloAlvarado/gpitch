@@ -9,21 +9,21 @@ from scipy.fftpack import fft, ifft, ifftshift
 def plot_results(mean_f, var_f, mean_g, var_g, x_plot, y, z, xlim):
     mean_act = logistic(mean_g)
 
-    plt.figure(figsize=(16, 9))
-    plt.subplot(3, 1, 1), plt.title('data, and approximation')
+    plt.figure(figsize=(16, 3))
+    plt.subplot(1, 3, 1), plt.title('data, and approximation')
     plt.plot(x_plot, mean_act * mean_f, lw=2)
     plt.plot(x_plot, y, '.k')
     plt.plot(z, np.zeros(z.shape), 'r|', mew=4)
     plt.xlim(xlim)
 
-    plt.subplot(3, 1, 2), plt.title('activation')
+    plt.subplot(1, 3, 2), plt.title('activation')
     plt.plot(x_plot, mean_act, 'C1', lw=2)
     plt.fill_between(x_plot, logistic(mean_g-2*np.sqrt(var_g)), logistic(mean_g+2*np.sqrt(var_g)), color='C1',
                      alpha=0.2)
     plt.plot(z, np.zeros(z.shape), 'r|', mew=4)
     plt.xlim(xlim)
 
-    plt.subplot(3, 1, 3), plt.title('component')
+    plt.subplot(1, 3, 3), plt.title('component')
     plt.plot(x_plot, mean_f, 'C2', lw=2)
     plt.fill_between(x_plot, mean_f - 2 * np.sqrt(var_f), mean_f + 2 * np.sqrt(var_f), color='C2', alpha=0.2)
     plt.plot(z, np.zeros(z.shape), 'r|', mew=4)

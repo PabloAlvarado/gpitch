@@ -14,10 +14,12 @@ import soundfile
 import pickle
 
 
-def loadm(directory, pattern=None):
+def loadm(directory, pattern=''):
     '''load an already gpitch trained model'''
 
-    filenames = os.listdir(directory)  # filenames of models to load
+    #filenames = os.listdir(directory)  # filenames of models to load
+    filenames = []
+    filenames += [i for i in os.listdir(directory) if pattern in i]
     m_list = []  # list of models loaded
     for i in range(len(filenames)):
         m_list.append(pickle.load(open(directory + filenames[i], "rb")))
