@@ -5,10 +5,10 @@ from gpflow.kullback_leiblers import gauss_kl, gauss_kl_white
 from gpflow.minibatch import MinibatchData
 import tensorflow as tf
 from likelihoods import LooLik
-jitter = settings.numerics.jitter_level
-float_type = settings.dtypes.float_type
 import time
 
+jitter = settings.numerics.jitter_level
+float_type = settings.dtypes.float_type
 
 class LooGP(gpflow.model.Model):
     def __init__(self, X, Y, kf, kg, Z, whiten=True, minibatch_size=None,
