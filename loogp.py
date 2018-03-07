@@ -118,7 +118,7 @@ class LooGP(gpflow.model.Model):
         intervals of confidency.
         """
         n = xnew.size # total number of samples
-        spw = 16000 # number of samples per window
+        spw = 1600 # number of samples per window
         nw =  n/spw  # total number of windows
         l_xnew = [ xnew[spw*i : spw*(i+1)].copy() for i in range(nw) ]
         l_com_1_mean = []  # list to storage predictions
