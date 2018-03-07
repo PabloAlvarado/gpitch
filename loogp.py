@@ -114,18 +114,51 @@ class LooGP(gpflow.model.Model):
         components and activations. It also reshape the arrays to make easier to plot the
         intervals of confidency.
         """
-        mean_f1, var_f1 = self.predict_f1(xnew)
-        mean_g1, var_g1 = self.predict_g1(xnew)
-        mean_f2, var_f2 = self.predict_f2(xnew)
-        mean_g2, var_g2 = self.predict_g2(xnew)
-        mean_f1, var_f1 = mean_f1.reshape(-1,), var_f1.reshape(-1,)
-        mean_g1, var_g1 = mean_g1.reshape(-1,), var_g1.reshape(-1,)
-        mean_f2, var_f2 = mean_f2.reshape(-1,), var_f2.reshape(-1,)
-        mean_g2, var_g2 = mean_g2.reshape(-1,), var_g2.reshape(-1,)
+        n = xnew.size # total number of samples
+        spw = 16000 # number of samples per window
+        nw =  n/spw  # total number of windows
+        l_xnew = [ xnew[spw*i : spw*(i+1)].copy() for i in range(nw) ]
+        l_com_1_mean = []  # list to storage predictions
+        l_com_1_var = []
+        l_com_2_mean = []
+        l_com_2_var = []
+
+        l_act_1_mean = []
+        l_act_1_var = []
+        l_act_2_mean = []
+        l_act_2_var = []
+
+        for i in range(len(l_xnew)):
+            mean_f1, var_f1 = self.predict_f1(l_xnew[i])
+            mean_g1, var_g1 = self.predict_g1(l_xnew[i])
+            mean_f2, var_f2 = self.predict_f2(l_xnew[i])
+            mean_g2, var_g2 = self.predict_g2(l_xnew[i])
+
+            l_com_1_mean.append(mean_f1)
+            l_com_1_var.append(var_f1)
+            l_com_2_mean.append(mean_f2)
+            l_com_2_var.append(var_f2)
+
+            l_act_1_mean.append(mean_g1)
+            l_act_1_var.append(var_g1)
+            l_act_2_mean.append(mean_g2)
+            l_act_2_var.append(var_g2)
+
+        mean_f1 = np.asarray(l_com_1_mean).reshape(-1,)
+        var_f1 = np.asarray(l_com_1_var).reshape(-1,)
+        mean_f2 = np.asarray(l_com_2_mean).reshape(-1,)
+        var_f2 = np.asarray(l_com_2_var).reshape(-1,)
+
+        mean_g1 = np.asarray(l_act_1_mean).reshape(-1,)
+        var_g1 = np.asarray(l_act_1_var).reshape(-1,)
+        mean_g2 = np.asarray(l_act_2_mean).reshape(-1,)
+        var_g2 = np.asarray(l_act_2_var).reshape(-1,)
+
         mean_f = [mean_f1, mean_f2]
         mean_g = [mean_g1, mean_g2]
         var_f = [var_f1, var_f2]
         var_g = [var_g1, var_g2]
+
         return mean_f, var_f, mean_g, var_g
 
     def optimize_svi(self, maxiter, learning_rate):
