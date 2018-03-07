@@ -44,7 +44,7 @@ class LooLik(gpflow.likelihoods.Likelihood):
     '''Leave One Out likelihood'''
     def __init__(self, version):
         gpflow.likelihoods.Likelihood.__init__(self)
-        self.variance = gpflow.param.Param(1e-3, transforms.positive)
+        self.variance = gpflow.param.Param(0.001, transforms.positive)
         self.version = version
     def logp(self, F, Y):
         f1, g1 = F[:, 0], F[:, 1]
