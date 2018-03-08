@@ -41,10 +41,10 @@ class LooGP(gpflow.model.Model):
         self.whiten = whiten
 
         # initialize variational parameters
-        self.q_mu1 = gpflow.param.Param(np.zeros((self.Z.shape[0], 1)))
-        self.q_mu2 = gpflow.param.Param(-2.1972*np.ones((self.Z.shape[0], 1)))
-        self.q_mu3 = gpflow.param.Param(np.zeros((self.Z.shape[0], 1)))
-        self.q_mu4 = gpflow.param.Param(-2.1972*np.ones((self.Z.shape[0], 1)))
+        self.q_mu1 = gpflow.param.Param(np.zeros((self.Z.shape[0], 1)))  # f1
+        self.q_mu2 = gpflow.param.Param(-2.1972*np.ones((self.Z.shape[0], 1)))  # g1
+        self.q_mu3 = gpflow.param.Param(np.zeros((self.Z.shape[0], 1)))  # f2
+        self.q_mu4 = gpflow.param.Param(-2.1972*np.ones((self.Z.shape[0], 1)))  # g2
 
 
         q_sqrt = np.array([np.eye(self.num_inducing)
