@@ -12,6 +12,134 @@ import tensorflow as tf
 import peakutils
 import soundfile
 import pickle
+import loogp
+import time
+
+def init_vv(x, y, niv, kern_com, kern_act, maxiter=50):
+    """
+    Initializer of variational variables for the LOO model
+    :param x: time vector
+    :param y: audio data
+    :param niv: number of inducing variables per window
+    :param kernels: list with 4 elements [kern_com1, kern_act1, kern_com2, kern_act2]
+    :param maxiter: maximun number of iterations per window
+    :return: list with q_mu and q_sqrt for each process
+    """
+
+    def get_predict(x, y, xnew, m):
+        m.X = x
+        m.Y = y
+        return m.predict_f(xnew)
+
+    l_q_mu1 = []  # list to save variational parameteres
+    l_q_mu2 = []
+    l_q_mu3 = []
+    l_q_mu4 = []
+    l_q_sqrt1 = []
+    l_q_sqrt2 = []
+    l_q_sqrt3 = []
+    l_q_sqrt4 = []
+    l_z = []
+
+    n = y.size  # size of data
+    nsw = 16000  # number samples per window
+    nw = n / nsw  # number of windows
+    x_win = [x[i * nsw: (i + 1) * nsw].copy() for i in range(nw)]
+    y_win = [y[i*nsw : (i+1)*nsw].copy() for i in range(nw)]
+    zinit = np.linspace(x_win[0][0], x_win[0][-1], niv).reshape(-1, 1)
+    model = loogp.LooGP(X=x_win[0].copy(), Y=y_win[0].copy(), kf=kern_com, kg=kern_act, Z=zinit)
+
+    for i in range(nw):
+        model.X = x_win[i].reshape(-1, 1)
+        model.Y = y_win[i].reshape(-1, 1)
+        model.Z = np.linspace(x_win[i][0], x_win[i][-1], niv).reshape(-1, 1)
+
+        model.q_mu1 = np.zeros((model.Z.value.shape[0], 1))  # f1
+        model.q_mu3 = np.zeros((model.Z.value.shape[0], 1))  # f2
+        model.q_mu2 = -2.1972 * np.ones((model.Z.value.shape[0], 1))  # g1
+        model.q_mu4 = -2.1972 * np.ones((model.Z.value.shape[0], 1))  # g2
+
+        q_sqrt = np.array([np.eye(model.Z.value.shape[0]) for _ in range(1)]).swapaxes(0, 2)
+
+        model.q_sqrt1, model.q_sqrt2, model.q_sqrt3, model.q_sqrt4 = [q_sqrt.copy() for _ in range(4)]
+
+        st = time.time()
+        model.optimize(disp=1, maxiter=maxiter)
+        print(time.time() - st)
+
+        l_q_mu1.append(model.q_mu1.value)  # f1
+        l_q_mu2.append(model.q_mu2.value)  # g1
+        l_q_mu3.append(model.q_mu3.value)  # f2
+        l_q_mu4.append(model.q_mu4.value)  # g2
+
+        l_q_sqrt1.append(model.q_sqrt1.value)
+        l_q_sqrt2.append(model.q_sqrt2.value)
+        l_q_sqrt3.append(model.q_sqrt3.value)
+        l_q_sqrt4.append(model.q_sqrt4.value)
+
+        l_z.append(model.Z.value)
+
+    m_iv_com1 = gpflow.gpr.GPR(l_z[0].copy(), l_q_mu1[0].copy(), kern_com[0])  # f1
+    m_iv_act1 = gpflow.gpr.GPR(l_z[0].copy(), l_q_mu2[0].copy(), kern_act[0])  # g1
+    m_iv_com2 = gpflow.gpr.GPR(l_z[0].copy(), l_q_mu3[0].copy(), kern_com[1])  # f2
+    m_iv_act2 = gpflow.gpr.GPR(l_z[0].copy(), l_q_mu4[0].copy(), kern_act[1])  # g2
+
+
+    l_q_mu1_hr = []  # list to save variational parameteres hihg resolution
+    l_q_mu2_hr = []
+    l_q_mu3_hr = []
+    l_q_mu4_hr = []
+    l_q_sqrt1_hr = []
+    l_q_sqrt2_hr = []
+    l_q_sqrt3_hr = []
+    l_q_sqrt4_hr = []
+    l_z_hr = []
+    for i in range(nw):
+        x_pred = np.linspace(i, i + 1, 50).reshape(-1, 1)
+        mean_com1, var_com1 = get_predict(x=l_z[i], y=l_q_mu1[i], xnew=x_pred, m=m_iv_com1)
+        mean_act1, var_act1 = get_predict(x=l_z[i], y=l_q_mu2[i], xnew=x_pred, m=m_iv_act1)
+        mean_com2, var_com2 = get_predict(x=l_z[i], y=l_q_mu3[i], xnew=x_pred, m=m_iv_com2)
+        mean_act2, var_act2 = get_predict(x=l_z[i], y=l_q_mu4[i], xnew=x_pred, m=m_iv_act2)
+
+        l_q_mu1_hr.append(mean_com1)
+        l_q_mu2_hr.append(mean_act1)
+        l_q_mu3_hr.append(mean_com2)
+        l_q_mu4_hr.append(mean_act2)
+        l_q_sqrt1_hr.append(var_com1)
+        l_q_sqrt2_hr.append(var_act1)
+        l_q_sqrt3_hr.append(var_com2)
+        l_q_sqrt4_hr.append(var_act2)
+        l_z_hr.append(x_pred)
+
+    q_mu1 = np.asarray(l_q_mu1).reshape(-1, 1)
+    q_mu2 = np.asarray(l_q_mu2).reshape(-1, 1)
+    q_mu3 = np.asarray(l_q_mu3).reshape(-1, 1)
+    q_mu4 = np.asarray(l_q_mu4).reshape(-1, 1)
+    #q_sqrt1 = np.asarray(l_q_sqrt1).reshape(-1, 1)
+    #q_sqrt2 = np.asarray(l_q_sqrt2).reshape(-1, 1)
+    #q_sqrt3 = np.asarray(l_q_sqrt3).reshape(-1, 1)
+    #q_sqrt4 = np.asarray(l_q_sqrt4).reshape(-1, 1)
+
+
+    q_mu1_hr = np.asarray(l_q_mu1_hr).reshape(-1, 1)
+    q_mu2_hr = np.asarray(l_q_mu2_hr).reshape(-1, 1)
+    q_mu3_hr = np.asarray(l_q_mu3_hr).reshape(-1, 1)
+    q_mu4_hr = np.asarray(l_q_mu4_hr).reshape(-1, 1)
+    q_sqrt1_hr = np.asarray(l_q_sqrt1_hr).reshape(-1, 1)
+    q_sqrt2_hr = np.asarray(l_q_sqrt2_hr).reshape(-1, 1)
+    q_sqrt3_hr = np.asarray(l_q_sqrt3_hr).reshape(-1, 1)
+    q_sqrt4_hr = np.asarray(l_q_sqrt4_hr).reshape(-1, 1)
+
+    z = np.asarray(l_z).reshape(-1, 1)
+
+    q_mu = [q_mu1, q_mu2, q_mu3, q_mu4]
+    q_sqrt = [l_q_sqrt1, l_q_sqrt2, l_q_sqrt3, l_q_sqrt4]
+
+    q_mean_hr = [q_mu1_hr, q_mu2_hr, q_mu3_hr, q_mu4_hr]
+    q_var_hr = [q_sqrt1_hr, q_sqrt2_hr, q_sqrt3_hr, q_sqrt4_hr]
+    return q_mu, q_sqrt, z, q_mean_hr, q_var_hr
+
+
 
 
 def loadm(directory, pattern=''):
