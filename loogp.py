@@ -47,8 +47,7 @@ class LooGP(gpflow.model.Model):
         self.q_mu4 = gpflow.param.Param(-2.1972*np.ones((self.Z.shape[0], 1)))  # g2
 
 
-        q_sqrt = np.array([np.eye(self.num_inducing)
-                           for _ in range(1)]).swapaxes(0, 2)
+        q_sqrt = np.array([0.001*np.eye(self.num_inducing) for _ in range(1)]).swapaxes(0, 2)
 
         self.q_sqrt1, self.q_sqrt2, self.q_sqrt3, self.q_sqrt4 = \
         [gpflow.param.Param(q_sqrt.copy()) for _ in range(4)]
