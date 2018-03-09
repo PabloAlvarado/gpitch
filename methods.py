@@ -15,7 +15,7 @@ import pickle
 import loogp
 import time
 
-def init_vv(x, y, niv, kern_com, kern_act, maxiter=50):
+def init_vv(x, y, niv, kern_com, kern_act, maxiter=100):
     """
     Initializer of variational variables for the LOO model
     :param x: time vector
@@ -42,7 +42,7 @@ def init_vv(x, y, niv, kern_com, kern_act, maxiter=50):
     l_z = []
 
     n = y.size  # size of data
-    nsw = 16000  # number samples per window
+    nsw = 20000  # number samples per window
     nw = n / nsw  # number of windows
     x_win = [x[i * nsw: (i + 1) * nsw].copy() for i in range(nw)]
     y_win = [y[i*nsw : (i+1)*nsw].copy() for i in range(nw)]
@@ -95,7 +95,7 @@ def init_vv(x, y, niv, kern_com, kern_act, maxiter=50):
     l_q_sqrt4_hr = []
     l_z_hr = []
     for i in range(nw):
-        x_pred = np.linspace(i, i + 1, 50).reshape(-1, 1)
+        x_pred = np.linspace(i, i + 1, 100).reshape(-1, 1)
         mean_com1, var_com1 = get_predict(x=l_z[i], y=l_q_mu1[i], xnew=x_pred, m=m_iv_com1)
         mean_act1, var_act1 = get_predict(x=l_z[i], y=l_q_mu2[i], xnew=x_pred, m=m_iv_act1)
         mean_com2, var_com2 = get_predict(x=l_z[i], y=l_q_mu3[i], xnew=x_pred, m=m_iv_com2)
