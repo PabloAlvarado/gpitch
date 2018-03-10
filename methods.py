@@ -155,10 +155,11 @@ def loadm(directory, pattern=''):
 
 
 def find_ideal_f0(string):
-    ideal_f0 = 0.
-    for i in range(21, 89):
-        if string.find('M' + str(i)) is not -1:
-            ideal_f0 = midi2freq(i)
+    ideal_f0 = []
+    for j in range(len(string)):
+        for i in range(21, 89):
+            if string[j].find('M' + str(i)) is not -1:
+                ideal_f0.append(midi2freq(i))
     return ideal_f0
 
 def readaudio(fname, frames=-1, start=0, aug=False):
@@ -234,6 +235,7 @@ def init_settings(visible_device, interactive=False):
         sess = tf.InteractiveSession(config=config)
     else:
         sess = tf.Session(config=config)
+    return sess
 
 
 def load_filenames(directory, pattern, bounds):
