@@ -42,7 +42,7 @@ def init_vv(x, y, niv, kern_com, kern_act, maxiter=100):
     l_z = []
 
     n = y.size  # size of data
-    nsw = 20000  # number samples per window
+    nsw = 16000  # number samples per window
     nw = n / nsw  # number of windows
     x_win = [x[i * nsw: (i + 1) * nsw].copy() for i in range(nw)]
     y_win = [y[i*nsw : (i+1)*nsw].copy() for i in range(nw)]
