@@ -155,6 +155,7 @@ def loadm(directory, pattern=''):
 
 
 def find_ideal_f0(string):
+    """"""
     ideal_f0 = []
     for j in range(len(string)):
         for i in range(21, 89):
