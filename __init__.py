@@ -1,4 +1,5 @@
 from methods import *
+from init_models import *
 from . import kernels
 from . import likelihoods
 from . import loogp
