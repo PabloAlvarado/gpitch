@@ -47,7 +47,7 @@ def init_model_pd(x, y, m1, m2, m3):
 
     k_bg = kc2 + kc3
 
-    niv, nsecs = 20, y.size/16000  # number inducong variables, duration of signal in seconds
+    niv, nsecs = 20, y.size/16000  # number inducing variables per second, duration of signal in seconds
     z = np.linspace(x[0], x[-1], niv*nsecs).reshape(-1, 1)
     m = loogp.LooGP(X=x.copy(), Y=y.copy(), kf=[kc1, k_bg], kg=[ka1, ka2], Z=z, minibatch_size=475)
 
