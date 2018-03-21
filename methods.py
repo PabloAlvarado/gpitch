@@ -386,6 +386,10 @@ def logistic(x):
     """ logistic function """
     return 1./(1. + np.exp(-x))
 
+def ilogistic(x):
+    """inverse logistic function"""
+    return - np.log(1./x - 1.)
+
 def softplus(x):
     """ softplus function """
     return np.log(np.exp(x) + 1.)
@@ -405,6 +409,11 @@ def softplus_tf(x):
 def isoftplus_tf(x):
     """ inverse softplus function using tensorflow  """
     return tf.log(tf.exp(x) - 1.)
+
+def ilogistic_tf(x):
+    """inverse logistic function using tensorflow"""
+    return - tf.log(1./x - 1.)
+
 
 def Matern12CosineMix(variance, lengthscale, period, Nh):
     '''Write it.'''
