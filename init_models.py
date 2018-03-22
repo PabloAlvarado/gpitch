@@ -1,9 +1,12 @@
 import numpy as np
+from scipy import signal
 import loogp
+import loogp2
 import myplots
 from matplotlib import pyplot as plt
 from gpflow.kernels import Matern32
 from gpitch.kernels import Matern32SpecMix
+from gpitch.methods import ilogistic
 
 
 def get_act_params(indict):
@@ -39,7 +42,7 @@ def init_kernels_pd(m, background=False, alpha=1.):
     k_c = Matern32SpecMix(input_dim=1, numc=fre_com.size, lengthscales=ls_com[0], variances=alpha*var_com, frequencies=fre_com)
     return k_a, k_c
 
-def init_model_pd(x, y, m1, m2, m3):
+def init_model_pd(x, y, m1, m2, m3, niv=20, minibatch_size=475):
     """Initialize pitch detection model"""
     ka1, kc1 = init_kernels_pd(m1, background=False)  # kernels for pitch to detect
     ka2, kc2 = init_kernels_pd(m2, background=True)  # kernels for background
@@ -47,9 +50,19 @@ def init_model_pd(x, y, m1, m2, m3):
 
     k_bg = kc2 + kc3
 
-    niv, nsecs = 20, y.size/16000  # number inducing variables per second, duration of signal in seconds
-    z = np.linspace(x[0], x[-1], niv*nsecs).reshape(-1, 1)
-    m = loogp.LooGP(X=x.copy(), Y=y.copy(), kf=[kc1, k_bg], kg=[ka1, ka2], Z=z, minibatch_size=475)
+    nsecs = y.size/16000  # niv number inducing variables per second, duration of signal in seconds
+    dec = 16000/niv
+    z = np.vstack([x[::dec].copy(), x[-1].copy()])  # location inducing variables
+    #z = np.linspace(x[0], x[-1], niv*nsecs).reshape(-1, 1)
+    m = loogp.LooGP(X=x.copy(), Y=y.copy(), kf=[kc1, k_bg], kg=[ka1, ka2], Z=z, minibatch_size=minibatch_size)
+
+    envelope, latent, compon = get_env(y.copy(), win_size=500)
+    m.q_mu1 = np.vstack([ compon[::dec].reshape(-1,1).copy(), compon[-1].reshape(-1,1).copy() ])  # f1
+    m.q_mu2 = np.vstack([ latent[::dec].reshape(-1,1).copy(), latent[-1].reshape(-1,1).copy() ])  # g1
+    m.q_mu3 = np.vstack([ compon[::dec].reshape(-1,1).copy(), compon[-1].reshape(-1,1).copy() ])  # f2
+    m.q_mu4 = np.vstack([ latent[::dec].reshape(-1,1).copy(), latent[-1].reshape(-1,1).copy() ])  # g2
+    m.kern_g1.lengthscales = 0.05
+    m.kern_g2.lengthscales = 0.05
 
     m.kern_f1.fixed = True
     m.kern_f1.lengthscales.fixed = False
@@ -77,12 +90,82 @@ def plot_loaded_models(m, instr_name):
         myplots.plot_results(mean_f.reshape(-1,), var_f.reshape(-1,), mean_g.reshape(-1,), var_g.reshape(-1,), xplot, y, z, xlim=[-0.01, 1.01])
         plt.suptitle(instr_name)
 
+def get_env(f, win_size=160):
+    """get envelope and component of a function f"""
+    win = signal.hann(win_size)
+    filtered = signal.convolve(np.abs(f).reshape(-1,), win, mode='same') / sum(win)
+    filtered = filtered/np.max(np.abs(filtered))
+    latent = ilogistic(0.001 + 0.9*filtered)
+    comp = f*(1./(filtered.reshape(-1,1) + 0.000001))
+    return filtered, latent, comp
 
 
 
+def opti(y, m, dec, maxiter):
+    """optimize intializing with approximate envelope and component"""
+    env, lat, comp = get_env(y)
+    #m.q_mu_com = np.vstack([comp[::dec[1]].reshape(-1,1).copy(), comp[-1].reshape(-1,1).copy()])
+    m.q_mu_act = np.vstack([lat[::dec[0]].reshape(-1,1).copy(), lat[-1].reshape(-1,1).copy()])
+
+
+    m.q_mu_act.fixed = True
+    m.q_sqrt_act.fixed = True
+    m.kern_act.lengthscales.fixed = True
+    m.kern_act.variance.fixed = True
+
+    m.kern_com.lengthscales.fixed = False
+    m.q_mu_com.fixed = False
+    m.q_sqrt_com.fixed = False
+    m.likelihood.variance.fixed = False
+
+    m.optimize(disp=1, maxiter=200)
+
+    m.q_mu_act.fixed = False
+    m.q_sqrt_act.fixed = False
+    m.kern_act.lengthscales.fixed = False
+
+    m.optimize(disp=1, maxiter=maxiter)
 
 
 
+def init_model_pd_loo2(x, y, m1, m2, m3, niv_a=10, niv_c=50, minibatch_size=475):
+    """Initialize pitch detection model"""
+    ka1, kc1 = init_kernels_pd(m1, background=False)  # kernels for pitch to detect
+    ka2, kc2 = init_kernels_pd(m2, background=True)  # kernels for background
+    ka3, kc3 = init_kernels_pd(m3, background=True)
+
+    k_bg = kc2 + kc3
+
+    nsecs = y.size/16000  # niv number inducing variables per second, duration of signal in seconds
+    dec_a = 16000/niv_a
+    dec_c = 16000/niv_c
+    za = np.vstack([x[::dec_a].copy(), x[-1].copy()])  # location inducing variables
+    zc = np.vstack([x[::dec_c].copy(), x[-1].copy()])  # location inducing variables
+    #z = np.linspace(x[0], x[-1], niv*nsecs).reshape(-1, 1)
+    m = loogp2.LooGP2(X=x.copy(), Y=y.copy(), kf=[kc1, k_bg], kg=[ka1, ka2], Za=za, Zc=zc, minibatch_size=minibatch_size)
+
+    envelope, latent, compon = get_env(y.copy(), win_size=500)
+    m.q_mu1 = np.vstack([ compon[::dec_c].reshape(-1,1).copy(), compon[-1].reshape(-1,1).copy() ])  # f1
+    m.q_mu2 = np.vstack([ latent[::dec_a].reshape(-1,1).copy(), latent[-1].reshape(-1,1).copy() ])  # g1
+    m.q_mu3 = np.vstack([ compon[::dec_c].reshape(-1,1).copy(), compon[-1].reshape(-1,1).copy() ])  # f2
+    m.q_mu4 = np.vstack([ latent[::dec_a].reshape(-1,1).copy(), latent[-1].reshape(-1,1).copy() ])  # g2
+    m.kern_g1.lengthscales = 0.1
+    m.kern_g2.lengthscales = 0.1
+
+    m.kern_f1.fixed = True
+    m.kern_f1.lengthscales.fixed = False
+    m.kern_f1.lengthscales = 1.
+
+    m.kern_f2.fixed = True
+    m.kern_f2.matern32specmix_1.lengthscales.fixed = False
+    m.kern_f2.matern32specmix_1.lengthscales = 1.
+    m.kern_f2.matern32specmix_2.lengthscales.fixed = False
+    m.kern_f2.matern32specmix_2.lengthscales = 1.
+
+    m.kern_g1.variance.fixed = True
+    m.kern_g2.variance.fixed = True
+
+    return m
 
 
 

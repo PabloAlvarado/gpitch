@@ -203,6 +203,11 @@ def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
 
     F_star, S_star = F[idx], Ss[idx]
 
+    idx_sorted = np.argsort(F_star.copy())
+    S_star = S_star[idx_sorted]
+    F_star = np.sort(F_star)
+
+
     for index in range(F_star.size):
         if F_star[index] < 0.75*ideal_f0:
             F_star2 = np.delete(F_star, [index])
@@ -221,7 +226,15 @@ def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
     if scaled:
         sig_scale = 1./ (4.*np.sum(vvec)) #rescale (sigma)
         vvec *= sig_scale
-    return [F_star2[idxf], vvec, F, Ss, thres]
+
+    freq_final = F_star2[idxf]
+    var_final = vvec
+
+    idx_sorted = np.argsort(freq_final.copy())
+    var_final = var_final[idx_sorted]
+    freq_final = np.sort(freq_final)
+
+    return [freq_final, var_final, F, Ss, thres]
 
 
 def init_settings(visible_device, interactive=False):

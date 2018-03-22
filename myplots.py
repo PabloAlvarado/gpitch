@@ -54,9 +54,13 @@ def plot_loo(mean_f, var_f, mean_g, var_g, x_plot, y, z, xlim):
 
     plt.subplot(ncol, nrow, 3)
     plt.plot(x_plot, mean_f1)
+    plt.fill_between(x_plot, mean_f1 - 2*np.sqrt(var_f1),
+                             mean_f1 + 2*np.sqrt(var_f1), color='C0', alpha=0.2)
 
     plt.subplot(ncol, nrow, 4)
     plt.plot(x_plot, mean_f2)
+    plt.fill_between(x_plot, mean_f2 - 2*np.sqrt(var_f2),
+                             mean_f2 + 2*np.sqrt(var_f2), color='C0', alpha=0.2)
 
     plt.subplot(ncol, nrow, 5)
     plt.plot(x_plot, logistic(mean_g1), 'C0')
