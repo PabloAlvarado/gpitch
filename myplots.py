@@ -33,6 +33,33 @@ def plot_results(mean_f, var_f, mean_g, var_g, x_plot, y, z, xlim):
     plt.xlim(xlim)
 
 
+def plot_results_2(mean_f, var_f, mean_g, var_g, x_plot, y, za, zc, xlim):
+    mean_act = logistic(mean_g)
+    plt.figure()
+    plt.subplot(1, 4, 1), plt.title('data')
+    plt.plot(x_plot, y)
+    # plt.plot(z, -np.ones(z.shape), 'k|', mew=1)
+    plt.xlim(xlim)
+
+    plt.subplot(1, 4, 2), plt.title('data approx')
+    plt.plot(x_plot, mean_act * mean_f, lw=2)
+    # plt.plot(z, -np.ones(z.shape), 'k|', mew=1)
+    plt.xlim(xlim)
+
+    plt.subplot(1, 4, 3), plt.title('activation')
+    plt.plot(x_plot, mean_act, 'C0', lw=2)
+    plt.fill_between(x_plot, logistic(mean_g-2*np.sqrt(var_g)), logistic(mean_g+2*np.sqrt(var_g)), color='C0',
+                     alpha=0.2)
+    plt.plot(za, np.zeros(za.shape), 'k|', mew=1)
+    plt.xlim(xlim)
+
+    plt.subplot(1, 4, 4), plt.title('component')
+    plt.plot(x_plot, mean_f, 'C0', lw=2)
+    plt.fill_between(x_plot, mean_f - 2 * np.sqrt(var_f), mean_f + 2 * np.sqrt(var_f), color='C0', alpha=0.2)
+    plt.plot(zc, np.zeros(zc.shape), 'k|', mew=1)
+    plt.xlim(xlim)
+
+
 def plot_loo(mean_f, var_f, mean_g, var_g, x_plot, y, z, xlim):
     mean_f1, mean_f2 = mean_f[0], mean_f[1]
     mean_g1, mean_g2 = mean_g[0], mean_g[1]

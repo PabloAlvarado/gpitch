@@ -156,17 +156,27 @@ def init_model_pd_loo2(x, y, m1, m2, m3, niv_a=10, niv_c=50, minibatch_size=475)
     m.kern_f1.lengthscales = 1.
 
     m.kern_f2.fixed = True
-    m.kern_f2.matern32specmix_1.lengthscales.fixed = False
-    m.kern_f2.matern32specmix_1.lengthscales = 1.
-    m.kern_f2.matern32specmix_2.lengthscales.fixed = False
-    m.kern_f2.matern32specmix_2.lengthscales = 1.
+    m.kern_f2.matern32sm_1.lengthscales.fixed = False
+    m.kern_f2.matern32sm_1.lengthscales = 1.
+    m.kern_f2.matern32sm_2.lengthscales.fixed = False
+    m.kern_f2.matern32sm_2.lengthscales = 1.
 
     m.kern_g1.variance.fixed = True
     m.kern_g2.variance.fixed = True
 
     return m
 
-
+def plot_loaded_models_2(m, instr_name):
+    for i in range(len(m)):
+        x = m[i].x.value.copy()
+        y = m[i].y.value.copy()
+        za = m[i].za.value.copy()
+        zc = m[i].zc.value.copy()
+        xplot = x.reshape(-1, ).copy()
+        mean_g, var_g = m[i].prediction_act
+        mean_f, var_f = m[i].prediction_com
+        myplots.plot_results_2(mean_f.reshape(-1,), var_f.reshape(-1,), mean_g.reshape(-1,), var_g.reshape(-1,), xplot, y, za, zc, xlim=[-0.01, 1.01])
+        plt.suptitle(instr_name)
 
 
 
