@@ -144,9 +144,9 @@ def init_model_pd_loo2(x, y, m1, m2, m3, niv_a=10, niv_c=50, minibatch_size=475)
     m = loogp2.LooGP2(X=x.copy(), Y=y.copy(), kf=[kc1, k_bg], kg=[ka1, ka2], Za=za, Zc=zc, minibatch_size=minibatch_size)
 
     envelope, latent, compon = get_env(y.copy(), win_size=500)
-    m.q_mu1 = np.vstack([ compon[::dec_c].reshape(-1,1).copy(), compon[-1].reshape(-1,1).copy() ])  # f1
+    #m.q_mu1 = np.vstack([ compon[::dec_c].reshape(-1,1).copy(), compon[-1].reshape(-1,1).copy() ])  # f1
     m.q_mu2 = np.vstack([ latent[::dec_a].reshape(-1,1).copy(), latent[-1].reshape(-1,1).copy() ])  # g1
-    m.q_mu3 = np.vstack([ compon[::dec_c].reshape(-1,1).copy(), compon[-1].reshape(-1,1).copy() ])  # f2
+    #m.q_mu3 = np.vstack([ compon[::dec_c].reshape(-1,1).copy(), compon[-1].reshape(-1,1).copy() ])  # f2
     m.q_mu4 = np.vstack([ latent[::dec_a].reshape(-1,1).copy(), latent[-1].reshape(-1,1).copy() ])  # g2
     m.kern_g1.lengthscales = 0.1
     m.kern_g2.lengthscales = 0.1
