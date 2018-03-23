@@ -5,7 +5,7 @@ import loogp2
 import myplots
 from matplotlib import pyplot as plt
 from gpflow.kernels import Matern32
-from gpitch.kernels import Matern32SpecMix
+from gpitch.kernels import Matern32sm
 from gpitch.methods import ilogistic
 
 
@@ -39,7 +39,7 @@ def init_kernels_pd(m, background=False, alpha=1.):
     var_com, fre_com, ls_com = get_com_params(m.kern_com.get_parameter_dict())
 
     k_a = Matern32(input_dim=1, lengthscales=ls_act[0], variance=var_act[0])
-    k_c = Matern32SpecMix(input_dim=1, numc=fre_com.size, lengthscales=ls_com[0], variances=alpha*var_com, frequencies=fre_com)
+    k_c = Matern32sm(input_dim=1, numc=fre_com.size, lengthscales=ls_com[0], variances=alpha*var_com, frequencies=fre_com)
     return k_a, k_c
 
 def init_model_pd(x, y, m1, m2, m3, niv=20, minibatch_size=475):
@@ -101,10 +101,9 @@ def get_env(f, win_size=160):
 
 
 
-def opti(y, m, dec, maxiter):
-    """optimize intializing with approximate envelope and component"""
+def opti(y, m, dec, maxiter, init_maxiter=200):
+    """optimize intializing with approximate envelope"""
     env, lat, comp = get_env(y)
-    #m.q_mu_com = np.vstack([comp[::dec[1]].reshape(-1,1).copy(), comp[-1].reshape(-1,1).copy()])
     m.q_mu_act = np.vstack([lat[::dec[0]].reshape(-1,1).copy(), lat[-1].reshape(-1,1).copy()])
 
 
@@ -118,7 +117,7 @@ def opti(y, m, dec, maxiter):
     m.q_sqrt_com.fixed = False
     m.likelihood.variance.fixed = False
 
-    m.optimize(disp=1, maxiter=200)
+    m.optimize(disp=1, maxiter=init_maxiter)
 
     m.q_mu_act.fixed = False
     m.q_sqrt_act.fixed = False
