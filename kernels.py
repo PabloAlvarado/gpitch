@@ -192,7 +192,7 @@ class MaternSpecMix(gpflow.kernels.Kern):
             var += tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(getattr(self, 'variance_' + str(i))))
         return var
 
-class Matern32SpecMix(gpflow.kernels.Kern):
+class Matern32sm(gpflow.kernels.Kern):
     """
     Matern spectral mixture kernel with single lengthscale.
     """
