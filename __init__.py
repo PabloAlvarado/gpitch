@@ -4,5 +4,7 @@ from . import kernels
 from . import likelihoods
 from . import loogp
 from . import modgp
+from . import loogp2
+from . import modgp2
 from . import modpdet
 from . import loopdet
