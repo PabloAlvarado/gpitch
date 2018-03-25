@@ -8,3 +8,4 @@ from . import loogp2
 from . import modgp2
 from . import modpdet
 from . import loopdet
+from . import ssgp
