@@ -6,9 +6,135 @@ from gpflow.minibatch import MinibatchData
 import tensorflow as tf
 from likelihoods import SsLik
 import time
+from gpitch.kernels import Matern32sm
+from gpitch import get_act_params, get_com_params, get_env
+from gpflow.kernels import Matern32
+
 
 jitter = settings.numerics.jitter_level
 float_type = settings.dtypes.float_type
+
+
+def init_kernels(m, alpha=0.333):
+    """Initialize kernels for source separation model"""
+    var_act, ls_act = get_act_params(m.kern_act.get_parameter_dict())
+    var_com, fre_com, ls_com = get_com_params(m.kern_com.get_parameter_dict())
+
+    k_a = Matern32(input_dim=1, lengthscales=ls_act[0], variance=var_act[0])
+    k_c = Matern32sm(input_dim=1, numc=fre_com.size, lengthscales=ls_com[0], variances=alpha*var_com, frequencies=fre_com)
+    return k_a, k_c
+
+
+def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size):
+    """Initialize pitch detection model"""
+    ka1, kc1 = init_kernels(m1) 
+    ka2, kc2 = init_kernels(m2)  
+    ka3, kc3 = init_kernels(m3)
+
+    nsecs = y.size/16000  # niv number inducing variables per second, duration of signal in seconds
+    dec_a1 = 16000/niv_a
+    dec_c1 = 16000/niv_c
+    dec_a2 = 16000/niv_a
+    dec_c2 = 16000/niv_c
+    dec_a3 = 16000/niv_a
+    dec_c3 = 16000/niv_c
+    za1 = np.vstack([x[::dec_a1].copy(), x[-1].copy()])  # location inducing variables
+    zc1 = np.vstack([x[::dec_c1].copy(), x[-1].copy()])  # location inducing variables
+    za2 = 0.33*(za1[1] - za1[0]) + np.vstack([x[::dec_a2].copy(), x[-1].copy()])  # location inducing variables
+    zc2 = 0.33*(zc1[1] - zc1[0]) + np.vstack([x[::dec_c2].copy(), x[-1].copy()])  # location inducing variables
+    za3 = 0.66*(za1[1] - za1[0]) + np.vstack([x[::dec_a3].copy(), x[-1].copy()])  # location inducing variables
+    zc3 = 0.66*(zc1[1] - zc1[0]) + np.vstack([x[::dec_c3].copy(), x[-1].copy()])  # location inducing variables
+
+    Z = [za1, zc1, za2, zc2, za3, zc3]
+    m = SsGP(X=x.copy(), Y=y.copy(), kf=[kc1, kc2, kc3], kg=[ka1, ka2, ka3], Z=Z, 
+             minibatch_size=minibatch_size)
+
+    m.kern_g1.lengthscales = 0.2
+    m.kern_g2.lengthscales = 0.2
+    m.kern_g3.lengthscales = 0.2
+
+    m.kern_f1.fixed = True
+    m.kern_f1.lengthscales.fixed = False
+    m.kern_f1.lengthscales = 5.
+    
+    m.kern_f2.fixed = True
+    m.kern_f2.lengthscales.fixed = False
+    m.kern_f2.lengthscales = 5.
+    
+    m.kern_f3.fixed = True
+    m.kern_f3.lengthscales.fixed = False
+    m.kern_f3.lengthscales = 5.
+
+    m.kern_g1.variance.fixed = True
+    m.kern_g2.variance.fixed = True
+    m.kern_g3.variance.fixed = True
+    
+    m.likelihood.variance = 1.
+    # envelope, latent, compon = get_env(y.copy(), win_size=500)
+    # m.q_mu2 = np.vstack([ latent[::dec_a1].reshape(-1,1).copy(), latent[-1].reshape(-1,1).copy() ])  # g1
+    # m.q_mu4 = np.vstack([ latent[::dec_a2].reshape(-1,1).copy(), latent[-1].reshape(-1,1).copy() ])  # g2
+    # m.q_mu6 = np.vstack([ latent[::dec_a3].reshape(-1,1).copy(), latent[-1].reshape(-1,1).copy() ])  # g3
+    return m
+
+
+def predict_windowed(x, y, predfunc):
+    st = time.time()
+    n = y.size
+    nw = 1600
+    mf = [[], [], []]
+    mg = [[], [], []]
+    vf = [[], [], []]
+    vg = [[], [], []]
+    x_plot = []
+    y_plot = []
+
+    for i in range(n/nw):
+        xnew = x[i*nw : (i+1)*nw].copy()
+        ynew = y[i*nw : (i+1)*nw].copy()
+
+        mean_f, mean_g, var_f, var_g = predfunc(xnew)
+
+        mf[0].append(mean_f[0]) 
+        mf[1].append(mean_f[1]) 
+        mf[2].append(mean_f[2]) 
+
+        vf[0].append(var_f[0]) 
+        vf[1].append(var_f[1]) 
+        vf[2].append(var_f[2])
+
+        mg[0].append(mean_g[0]) 
+        mg[1].append(mean_g[1]) 
+        mg[2].append(mean_g[2])
+
+        vg[0].append(var_g[0]) 
+        vg[1].append(var_g[1]) 
+        vg[2].append(var_g[2])
+
+        x_plot.append(xnew)
+        y_plot.append(ynew)
+        
+    mf[0] = np.asarray(mf[0]).reshape(-1, 1) 
+    mf[1] = np.asarray(mf[1]).reshape(-1, 1) 
+    mf[2] = np.asarray(mf[2]).reshape(-1, 1)
+    vf[0] = np.asarray(vf[0]).reshape(-1, 1) 
+    vf[1] = np.asarray(vf[1]).reshape(-1, 1) 
+    vf[2] = np.asarray(vf[2]).reshape(-1, 1)
+
+    mg[0] = np.asarray(mg[0]).reshape(-1, 1) 
+    mg[1] = np.asarray(mg[1]).reshape(-1, 1) 
+    mg[2] = np.asarray(mg[2]).reshape(-1, 1)
+    vg[0] = np.asarray(vg[0]).reshape(-1, 1) 
+    vg[1] = np.asarray(vg[1]).reshape(-1, 1) 
+    vg[2] = np.asarray(vg[2]).reshape(-1, 1)
+
+    x_plot = np.asarray(x_plot).reshape(-1, 1)
+    y_plot = np.asarray(y_plot).reshape(-1, 1)
+    
+    print("Time predicting {} secs".format(time.time() - st))
+    
+    return mf, vf, mg, vg, x_plot, y_plot
+
+
 
 class SsGP(gpflow.model.Model):
     def __init__(self, X, Y, kf, kg, Z, whiten=True, minibatch_size=None,
@@ -156,78 +282,6 @@ class SsGP(gpflow.model.Model):
             tf.cast(tf.shape(self.X)[0], settings.dtypes.float_type)
 
         return tf.reduce_sum(var_exp) * scale - KL
-
-    
-#     def predict_all(self, xnew):
-#         """
-#         method introduced by Pablo A. Alvarado (14/11/2017)
-
-#         This method call all the decorators needed to compute the prediction over the latent
-#         components and activations. It also reshape the arrays to make easier to plot the
-#         intervals of confidency.
-#         """
-#         n = xnew.size # total number of samples
-#         spw = 1600 # number of samples per window
-#         nw =  n/spw  # total number of windows
-#         l_xnew = [ xnew[spw*i : spw*(i+1)].copy() for i in range(nw) ]
-#         l_com_1_mean = []  # list to storage predictions
-#         l_com_1_var = []
-#         l_com_2_mean = []
-#         l_com_2_var = []
-#         l_com_3_mean = []
-#         l_com_3_var = []
-
-#         l_act_1_mean = []
-#         l_act_1_var = []
-#         l_act_2_mean = []
-#         l_act_2_var = []
-#         l_act_3_mean = []
-#         l_act_3_var = []
-
-#         for i in range(len(l_xnew)):
-#             mean_f1, var_f1 = self.predict_f1(l_xnew[i])
-#             mean_g1, var_g1 = self.predict_g1(l_xnew[i])
-            
-#             mean_f2, var_f2 = self.predict_f2(l_xnew[i])
-#             mean_g2, var_g2 = self.predict_g2(l_xnew[i])
-            
-#             mean_f3, var_f3 = self.predict_f3(l_xnew[i])
-#             mean_g3, var_g3 = self.predict_g3(l_xnew[i])
-            
-#             l_com_1_mean.append(mean_f1)
-#             l_com_1_var.append(var_f1)
-#             l_com_2_mean.append(mean_f2)
-#             l_com_2_var.append(var_f2)
-#             l_com_3_mean.append(mean_f3)
-#             l_com_3_var.append(var_f3)
-
-#             l_act_1_mean.append(mean_g1)
-#             l_act_1_var.append(var_g1)
-#             l_act_2_mean.append(mean_g2)
-#             l_act_2_var.append(var_g2)
-#             l_act_3_mean.append(mean_g3)
-#             l_act_3_var.append(var_g3)
-            
-#         mean_f1 = np.asarray(l_com_1_mean).reshape(-1,)
-#         var_f1 = np.asarray(l_com_1_var).reshape(-1,)
-#         mean_f2 = np.asarray(l_com_2_mean).reshape(-1,)
-#         var_f2 = np.asarray(l_com_2_var).reshape(-1,)
-#         mean_f3 = np.asarray(l_com_3_mean).reshape(-1,)
-#         var_f3 = np.asarray(l_com_3_var).reshape(-1,)
-
-#         mean_g1 = np.asarray(l_act_1_mean).reshape(-1,)
-#         var_g1 = np.asarray(l_act_1_var).reshape(-1,)
-#         mean_g2 = np.asarray(l_act_2_mean).reshape(-1,)
-#         var_g2 = np.asarray(l_act_2_var).reshape(-1,)
-#         mean_g3 = np.asarray(l_act_3_mean).reshape(-1,)
-#         var_g3 = np.asarray(l_act_3_var).reshape(-1,)
-
-#         mean_f = [mean_f1, mean_f2, mean_f3]
-#         mean_g = [mean_g1, mean_g2, mean_g3]
-#         var_f = [var_f1, var_f2, var_f3]
-#         var_g = [var_g1, var_g2, var_g3]
-
-#         return mean_f, var_f, mean_g, var_g
     
     
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
@@ -262,12 +316,6 @@ class SsGP(gpflow.model.Model):
         vg = [vg1, vg2, vg3]
         return mf, mg, vf, vg
 
-    
-    
-    
-    
-    
-    
     
 #     @gpflow.param.AutoFlow((tf.float64, [None, None]))
 #     def predict_f1(self, Xnew):
@@ -304,30 +352,3 @@ class SsGP(gpflow.model.Model):
 #         return gpflow.conditionals.conditional(Xnew, self.Za3, self.kern_g3,
 #                                                self.q_mu6, q_sqrt=self.q_sqrt6,
 #                                                full_cov=False, whiten=self.whiten)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#

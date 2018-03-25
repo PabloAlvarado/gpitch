@@ -200,15 +200,17 @@ def plot_loo3(mean_f, var_f, mean_g, var_g, x_plot, y, z, xlim):
     plt.suptitle('Results')
 
 
-def plot_ssgp(mean_f, var_f, mean_g, var_g, x_plot, y, z, xlim):
+def plot_ssgp(m, mean_f, var_f, mean_g, var_g, x_plot, y):
     mean_f1, mean_f2, mean_f3 = mean_f[0].reshape(-1,), mean_f[1].reshape(-1,), mean_f[2].reshape(-1,)
     mean_g1, mean_g2, mean_g3 = mean_g[0].reshape(-1,), mean_g[1].reshape(-1,), mean_g[2].reshape(-1,)
     var_f1, var_f2, var_f3 = var_f[0].reshape(-1,), var_f[1].reshape(-1,), var_f[2].reshape(-1,)
     var_g1, var_g2, var_g3 = var_g[0].reshape(-1,), var_g[1].reshape(-1,), var_g[2].reshape(-1,)
     x_plot = x_plot.reshape(-1,)
     y_plot = y.reshape(-1,)
+    xlim = [x_plot[0], x_plot[-1]]
     mew=1
 
+    z = [m.Za1.value, m.Zc1.value, m.Za2.value, m.Zc2.value, m.Za3.value, m.Zc3.value]
     ncol, nrow = 4, 3
     plt.figure(figsize=(16, 10))
     
