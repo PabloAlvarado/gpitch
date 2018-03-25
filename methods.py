@@ -241,7 +241,7 @@ def init_settings(visible_device, interactive=False):
     '''Initialize usage of GPU and plotting
        visible_device : which GPU to use'''
 
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # deactivate tf warnings (default 0)
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'  # deactivate tf warnings (default 0)
     os.environ["CUDA_VISIBLE_DEVICES"] = visible_device  # configuration use only one GPU
     config = tf.ConfigProto()  # configuration to not to use all the memory
     config.gpu_options.allow_growth = True
