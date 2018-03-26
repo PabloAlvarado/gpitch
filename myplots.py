@@ -200,7 +200,7 @@ def plot_loo3(mean_f, var_f, mean_g, var_g, x_plot, y, z, xlim):
     plt.suptitle('Results')
 
 
-def plot_ssgp(m, mean_f, var_f, mean_g, var_g, x_plot, y):
+def plot_ssgp(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results'):
     mean_f1, mean_f2, mean_f3 = mean_f[0].reshape(-1,), mean_f[1].reshape(-1,), mean_f[2].reshape(-1,)
     mean_g1, mean_g2, mean_g3 = mean_g[0].reshape(-1,), mean_g[1].reshape(-1,), mean_g[2].reshape(-1,)
     var_f1, var_f2, var_f3 = var_f[0].reshape(-1,), var_f[1].reshape(-1,), var_f[2].reshape(-1,)
@@ -279,7 +279,7 @@ def plot_ssgp(m, mean_f, var_f, mean_g, var_g, x_plot, y):
     plt.plot(x_plot, logistic(mean_g1)*mean_f1 + logistic(mean_g2)*mean_f2 + logistic(mean_g3)*mean_f3, 'k')
     plt.ylim([-1, 1])
     plt.xlim(xlim)
-    plt.suptitle('Results')
+    plt.suptitle(title)
 
 
 
