@@ -280,6 +280,104 @@ def plot_ssgp(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results'):
     plt.ylim([-1, 1])
     plt.xlim(xlim)
     plt.suptitle(title)
+    
+    
+    
+def plot_ssgp_full(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results', parts=None):
+    mean_f1, mean_f2, mean_f3 = mean_f[0].reshape(-1,), mean_f[1].reshape(-1,), mean_f[2].reshape(-1,)
+    mean_g1, mean_g2, mean_g3 = mean_g[0].reshape(-1,), mean_g[1].reshape(-1,), mean_g[2].reshape(-1,)
+    var_f1, var_f2, var_f3 = var_f[0].reshape(-1,), var_f[1].reshape(-1,), var_f[2].reshape(-1,)
+    var_g1, var_g2, var_g3 = var_g[0].reshape(-1,), var_g[1].reshape(-1,), var_g[2].reshape(-1,)
+    x_plot = x_plot.reshape(-1,)
+    y_plot = y.reshape(-1,)
+    xlim = [x_plot[0], x_plot[-1]]
+    mew=1
+
+    z = [m.Za1.value, m.Zc1.value, m.Za2.value, m.Zc2.value, m.Za3.value, m.Zc3.value]
+    ncol, nrow = 5, 3
+    plt.figure(figsize=(16, 18))
+    
+    plt.subplot(ncol, nrow, 1), plt.title('activation 1')
+    plt.plot(x_plot, logistic(mean_g1), 'C0')
+    plt.fill_between(x_plot, logistic(mean_g1-2*np.sqrt(var_g1)),
+                     logistic(mean_g1+2*np.sqrt(var_g1)), color='C0', alpha=0.2)
+    plt.plot(z[0], np.zeros((z[0].shape)), '|C3', mew=mew)
+    plt.xlim(xlim)
+    
+    plt.subplot(ncol, nrow, 2), plt.title('activation 2')
+    plt.plot(x_plot, logistic(mean_g2), 'C0')
+    plt.fill_between(x_plot, logistic(mean_g2-2*np.sqrt(var_g2)),
+                     logistic(mean_g2+2*np.sqrt(var_g2)), color='C0', alpha=0.2)
+    plt.plot(z[2], np.zeros((z[2].shape)), '|C3', mew=mew)
+    plt.xlim(xlim)
+    
+    plt.subplot(ncol, nrow, 3), plt.title('activation 3')
+    plt.plot(x_plot, logistic(mean_g3), 'C0')
+    plt.fill_between(x_plot, logistic(mean_g3-2*np.sqrt(var_g3)),
+                     logistic(mean_g3+2*np.sqrt(var_g3)), color='C0', alpha=0.2)
+    plt.plot(z[4], np.zeros((z[4].shape)), '|C3', mew=mew)
+    plt.xlim(xlim)
+
+
+    plt.subplot(ncol, nrow, 4), plt.title('component 1')
+    plt.plot(x_plot, mean_f1, 'C0')
+    plt.fill_between(x_plot, mean_f1 - 2*np.sqrt(var_f1),
+                             mean_f1 + 2*np.sqrt(var_f1), color='C0', alpha=0.2)
+    plt.plot(z[1], np.zeros((z[1].shape)), '|C3', mew=mew)
+    plt.xlim(xlim)
+
+    plt.subplot(ncol, nrow, 5)
+    plt.plot(x_plot, mean_f2, 'C0'), plt.title('component 2')
+    plt.fill_between(x_plot, mean_f2 - 2*np.sqrt(var_f2),
+                             mean_f2 + 2*np.sqrt(var_f2), color='C0', alpha=0.2)
+    plt.plot(z[3], np.zeros((z[3].shape)), '|C3', mew=mew)
+    plt.xlim(xlim)
+    
+    
+    plt.subplot(ncol, nrow, 6)
+    plt.plot(x_plot, mean_f3, 'C0'), plt.title('component 3')
+    plt.fill_between(x_plot, mean_f3 - 2*np.sqrt(var_f3),
+                             mean_f3 + 2*np.sqrt(var_f3), color='C0', alpha=0.2)
+    plt.plot(z[5], np.zeros((z[5].shape)), '|C3', mew=mew)
+    plt.xlim(xlim)
+    
+    
+    plt.subplot(ncol, nrow, 7), plt.title('approximate source 1')
+    plt.plot(x_plot, logistic(mean_g1)*mean_f1)
+    plt.ylim([-1, 1])
+    plt.xlim(xlim)
+
+    plt.subplot(ncol, nrow, 8), plt.title('approximate source 2')
+    plt.plot(x_plot, logistic(mean_g2)*mean_f2)
+    plt.ylim([-1, 1])
+    plt.xlim(xlim)
+    
+    plt.subplot(ncol, nrow, 9), plt.title('approximate source 3')
+    plt.plot(x_plot, logistic(mean_g3)*mean_f3)
+    plt.ylim([-1, 1])
+    plt.xlim(xlim)
+    
+    plt.subplot(ncol, nrow, 10), plt.title('real source 1')
+    plt.plot(x_plot, parts[0])
+    plt.ylim([-1, 1])
+    plt.xlim(xlim)
+
+    plt.subplot(ncol, nrow, 11), plt.title('real source 2')
+    plt.plot(x_plot, parts[1])
+    plt.ylim([-1, 1])
+    plt.xlim(xlim)
+    
+    plt.subplot(ncol, nrow, 12), plt.title('real source 3')
+    plt.plot(x_plot, parts[2])
+    plt.ylim([-1, 1])
+    plt.xlim(xlim)
+
+    plt.subplot(ncol, nrow, (13,15)), plt.title('data and complete approximation')
+    plt.plot(x_plot, y, 'C0')
+    plt.plot(x_plot, logistic(mean_g1)*mean_f1 + logistic(mean_g2)*mean_f2 + logistic(mean_g3)*mean_f3, 'k')
+    plt.ylim([-1, 1])
+    plt.xlim(xlim)
+    plt.suptitle(title)
 
 
 

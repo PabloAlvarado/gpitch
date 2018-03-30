@@ -10,8 +10,8 @@ from likelihoods import ModLik
 float_type = settings.dtypes.float_type
 
 
-class Modgp2(gpflow.model.Model):
-    def __init__(self, x, y, za, zc, kern, whiten=True, minibatch_size=None):
+class Modgpn(gpflow.model.Model):
+    def __init__(self, x, y, za, zc, kern, whiten=True, minibatch_size=None, msmk=True):
         """
         Constructor.
         :param x:
@@ -27,20 +27,21 @@ class Modgp2(gpflow.model.Model):
         gpflow.model.Model.__init__(self)
 
         if minibatch_size is None:
-            minibatch_size = x.shape[0]
+            minibatch_size = x[0].shape[0]
 
         self.minibatch_size = minibatch_size
-        self.num_data = x.shape[0]
-        self.x = MinibatchData(x, minibatch_size, np.random.RandomState(0))
+        self.num_data = x[0].shape[0]
+        self.xtime = MinibatchData(x[0], minibatch_size, np.random.RandomState(0))
+        self.xidx = MinibatchData(x[1], minibatch_size, np.random.RandomState(0))
         self.y = MinibatchData(y, minibatch_size, np.random.RandomState(0))
         self.za = gpflow.param.Param(za)
         self.zc = gpflow.param.Param(zc)
         self.kern_com = kern[0]
         self.kern_act = kern[1]
-        self.likelihood = ModLik(transfunc=gpitch.gaussfunc_tf)
+        self.likelihood = ModLik(transfunc=gpitch.logistic_tf)
         self.whiten = whiten
         self.q_mu_com = gpflow.param.Param(np.zeros((self.zc.shape[0], 1)))  # initialize variational parameters
-        self.q_mu_act = gpflow.param.Param(-np.ones((self.za.shape[0], 1)))
+        self.q_mu_act = gpflow.param.Param(np.zeros((self.za.shape[0], 1)))
         self.num_inducing_c = zc.shape[0]
         self.num_inducing_a = za.shape[0]
         self.q_sqrt_com = gpflow.param.Param(np.array([np.eye(self.num_inducing_c) for _ in range(1)]).swapaxes(0, 2))
@@ -48,7 +49,9 @@ class Modgp2(gpflow.model.Model):
 
         self.zc.fixed = True  # fix inducing variables
         self.za.fixed = True  # fix inducing variables
-        self.fixed_msmkern_params(freq=False, var=True)  # fix variance component kernel when using matern spectral mixture
+        self.logf = []  # used for store values when using svi
+        if msmk:
+            self.fixed_msmkern_params(freq=False, var=True)  # fix variance component kernel when using matern spectral mixture
         
 
     def build_prior_kl(self):
@@ -74,9 +77,9 @@ class Modgp2(gpflow.model.Model):
         kl = self.build_prior_kl()  # Get prior kl.
 
         # Get conditionals
-        fmean1, fvar1 = gpflow.conditionals.conditional(self.x, self.zc, self.kern_com, self.q_mu_com,
+        fmean1, fvar1 = gpflow.conditionals.conditional(self.xidx, self.zc, self.kern_com, self.q_mu_com,
                                                         q_sqrt=self.q_sqrt_com, full_cov=False, whiten=self.whiten)
-        fmean2, fvar2 = gpflow.conditionals.conditional(self.x, self.za, self.kern_act, self.q_mu_act,
+        fmean2, fvar2 = gpflow.conditionals.conditional(self.xtime, self.za, self.kern_act, self.q_mu_act,
                                                         q_sqrt=self.q_sqrt_act, full_cov=False,  whiten=self.whiten)
         fmean = tf.concat([fmean1, fmean2], 1)
         fvar = tf.concat([fvar1, fvar2], 1)
@@ -84,7 +87,7 @@ class Modgp2(gpflow.model.Model):
         var_exp = self.likelihood.variational_expectations(fmean, fvar, self.y)  # Get variational expectations
 
         scale = tf.cast(self.num_data, settings.dtypes.float_type) / \
-            tf.cast(tf.shape(self.x)[0], settings.dtypes.float_type)  # re-scale for minibatch size
+            tf.cast(tf.shape(self.xtime)[0], settings.dtypes.float_type)  # re-scale for minibatch size
         return tf.reduce_sum(var_exp) * scale - kl
 
     def predict_all(self, xnew):
@@ -135,20 +138,6 @@ class Modgp2(gpflow.model.Model):
             flist[i] = 'self.kern_com.variance_' + str(i + 1) + '.fixed = ' + str(var)
             exec(flist[i])
 
-    def optimize_svi(self, maxiter, learning_rate=0.001):
-        """
-        method introduced by Pablo A. Alvarado (20/11/2017)
-        This method uses stochastic variational inference for maximizing the ELBO.
-        """
-        def logger(x):
-            if (logger.i % 10) == 0:
-                self.logf.append(self._objective(x)[0])
-            logger.i += 1
-        logger.i = 1
-        self.x.minibatch_size = self.minibatch_size
-        self.y.minibatch_size = self.minibatch_size
-        method = tf.train.AdamOptimizer(learning_rate=learning_rate)
-        self.optimize(method=method, maxiter=maxiter, callback=logger)
 
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_com(self, xnew):

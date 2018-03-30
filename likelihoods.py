@@ -136,9 +136,13 @@ class ModLik(gpflow.likelihoods.Likelihood):
                                         mean_g, var_f, var_g)]
         shape = tf.shape(mean_g)  # get  output shape
         X = gh_x * tf.sqrt(2.*var_g) + mean_g  # transformed evaluation points
+        #evaluations = tf.exp(X)  # sigmoid function
         #evaluations = 1. / (1. + tf.exp(-X))  # sigmoid function
         evaluations = self.transfunc(X)
         E1 = tf.reshape(tf.matmul(evaluations, gh_w), shape)  # compute expectations
+        #E1 = 1. / (1. + tf.exp(-mean_g / tf.sqrt(1. + 3.1416*var_g/8.)))
+        
+        #E2 = E1**2 +  var_g * (tf.exp(-mean_g)/(1. + tf.exp(-mean_g))**2)**2
         E2 = tf.reshape(tf.matmul(evaluations**2, gh_w), shape)
 
         # compute log-lik expectations under variational distribution

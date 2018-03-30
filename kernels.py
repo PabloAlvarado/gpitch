@@ -228,7 +228,7 @@ class Matern32sm(gpflow.kernels.Kern):
         k = self.variance_1 * (1. + r1) * tf.exp(-r1) * tf.cos(r2)
 
         for i in range(2, self.numc + 1):
-            r1 = tf.reduce_sum(r / self.lengthscales, 2)
+            # r1 = tf.reduce_sum(r / self.lengthscales, 2)
             r2 = tf.reduce_sum(2.*np.pi * getattr(self, 'frequency_' + str(i)) * r , 2)
             k += getattr(self, 'variance_' + str(i)) * (1. + r1) * tf.exp(-r1) * tf.cos(r2)
         return k
