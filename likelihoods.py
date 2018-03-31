@@ -27,7 +27,7 @@ def mvhermgauss(means, covs, H, D):
     return Xr, wn * np.pi ** (-D * 0.5)
 
 # Pablo Alvarado implementation
-def hermgauss1d(mean_g, var_g, H):
+def hermgauss1d(mean_g, var_g, H, nlinfun):
     #H = 20  # get eval points and weights
     gh_x, gh_w = gpflow.quadrature.hermgauss(H)
     gh_x = gh_x.reshape(1, -1)
@@ -35,7 +35,8 @@ def hermgauss1d(mean_g, var_g, H):
 
     shape = tf.shape(mean_g)  # get  output shape
     X = gh_x * tf.sqrt(2.*var_g) + mean_g  # transformed evaluation points
-    evaluations = 1. / (1. + tf.exp(-X))  # sigmoid function
+    #evaluations = 1. / (1. + tf.exp(-X))  # sigmoid function
+    evaluations = nlinfun(X)
     E1 = tf.reshape(tf.matmul(evaluations, gh_w), shape)  # compute expect
     E2 = tf.reshape(tf.matmul(evaluations**2, gh_w), shape)
     return E1, E2
@@ -171,80 +172,66 @@ class ModLik(gpflow.likelihoods.Likelihood):
 
 class SsLik(gpflow.likelihoods.Likelihood):
     '''Source separation likelihood'''
-    def __init__(self, version):
+    def __init__(self, nlinfun):
         gpflow.likelihoods.Likelihood.__init__(self)
         self.variance = gpflow.param.Param(1., transforms.positive)
-        self.version = version
+        self.nlinfun = nlinfun
+
     def logp(self, F, Y):
         f1, g1 = F[:, 0], F[:, 1]
         f2, g2 = F[:, 2], F[:, 3]
         f3, g3 = F[:, 4], F[:, 5]
         y = Y[:, 0]
-        sigma_g1 = 1./(1 + tf.exp(-g1))  # squash g to be positive
-        sigma_g2 = 1./(1 + tf.exp(-g2))  # squash g to be positive
-        sigma_g3 = 1./(1 + tf.exp(-g3))  # squash g to be positive
+        #sigma_g1 = 1./(1 + tf.exp(-g1))  # squash g to be positive
+        #sigma_g2 = 1./(1 + tf.exp(-g2))  # squash g to be positive
+        #sigma_g3 = 1./(1 + tf.exp(-g3))  # squash g to be positive
+        sigma_g1 = self.nlinfun(g1)  # squash g to be positive
+        sigma_g2 = self.nlinfun(g2)  # squash g to be positive
+        sigma_g3 = self.nlinfun(g3)  # squash g to be positive
         mean = sigma_g1 * f1 + sigma_g2 * f2 + sigma_g3 * f3
         return gpflow.densities.gaussian(y, mean, self.variance).reshape(-1, 1)
 
     def variational_expectations(self, Fmu, Fvar, Y):
-        old_version = self.version
-        if old_version:
-            H = 5 # number of Gauss-Hermite evaluation points. (reduced  to 5)
-            D = 4  # Number of input dimensions (increased from 2 to 4)
-            Xr, w = mvhermgauss(Fmu, tf.matrix_diag(Fvar), H, D)
-            w = tf.reshape(w, [-1, 1])
-            f1, g1 = Xr[:, 0], Xr[:, 1]
-            f2, g2 = Xr[:, 2], Xr[:, 3]
-            y = tf.tile(Y, [H**D, 1])[:, 0]
-            sigma_g1 = 1./(1 + tf.exp(-g1))  # squash g to be positive
-            sigma_g2 = 1./(1 + tf.exp(-g2))  # squash g to be positive
-            mean =  sigma_g1 * f1 + sigma_g2 * f2
-            evaluations = gpflow.densities.gaussian(y, mean, self.variance)
-            evaluations = tf.transpose(tf.reshape(evaluations, tf.pack([tf.size(w),
-                                                                tf.shape(Fmu)[0]])))
-            return tf.matmul(evaluations, w)
+        # variational expectations function, Pablo Alvarado implementation
+        mean_f1 = Fmu[:, 0]  # get mean and var of each q dist, and reshape
+        mean_g1 = Fmu[:, 1]
+        var_f1 = Fvar[:, 0]
+        var_g1 = Fvar[:, 1]
 
-        else:
-            # variational expectations function, Pablo Alvarado implementation
-            mean_f1 = Fmu[:, 0]  # get mean and var of each q dist, and reshape
-            mean_g1 = Fmu[:, 1]
-            var_f1 = Fvar[:, 0]
-            var_g1 = Fvar[:, 1]
+        mean_f2 = Fmu[:, 2]  # get mean and var of each q dist, and reshape
+        mean_g2 = Fmu[:, 3]
+        var_f2 = Fvar[:, 2]
+        var_g2 = Fvar[:, 3]
 
-            mean_f2 = Fmu[:, 2]  # get mean and var of each q dist, and reshape
-            mean_g2 = Fmu[:, 3]
-            var_f2 = Fvar[:, 2]
-            var_g2 = Fvar[:, 3]
-            
-            mean_f3 = Fmu[:, 4]  # get mean and var of each q dist, and reshape
-            mean_g3 = Fmu[:, 5]
-            var_f3 = Fvar[:, 4]
-            var_g3 = Fvar[:, 5]
+        mean_f3 = Fmu[:, 4]  # get mean and var of each q dist, and reshape
+        mean_g3 = Fmu[:, 5]
+        var_f3 = Fvar[:, 4]
+        var_g3 = Fvar[:, 5]
 
-            mean_f1, mean_g1, var_f1, var_g1 = [tf.reshape(e, [-1, 1]) for e in
-                                               (mean_f1, mean_g1, var_f1, var_g1)]
+        mean_f1, mean_g1, var_f1, var_g1 = [tf.reshape(e, [-1, 1]) for e in
+                                           (mean_f1, mean_g1, var_f1, var_g1)]
 
-            mean_f2, mean_g2, var_f2, var_g2 = [tf.reshape(e, [-1, 1]) for e in
-                                               (mean_f2, mean_g2, var_f2, var_g2)]
-            
-            mean_f3, mean_g3, var_f3, var_g3 = [tf.reshape(e, [-1, 1]) for e in
-                                               (mean_f3, mean_g3, var_f3, var_g3)]
-            H = 20
-            # calculate required quadratures
-            E1, E2 = hermgauss1d(mean_g1, var_g1, H)
-            E3, E4 = hermgauss1d(mean_g2, var_g2, H)
-            E5, E6 = hermgauss1d(mean_g3, var_g3, H)
+        mean_f2, mean_g2, var_f2, var_g2 = [tf.reshape(e, [-1, 1]) for e in
+                                           (mean_f2, mean_g2, var_f2, var_g2)]
 
-            # compute log-lik expectations under variational distribution
-            var_exp = -0.5*((1./self.variance)*(Y**2 -
-                       2.*Y*(mean_f1*E1 + mean_f2*E3 + mean_f3*E5) +
-                      (var_f1 + mean_f1**2)*E2 +
-                      (var_f2 + mean_f2**2)*E4 +
-                      (var_f3 + mean_f3**2)*E6 +
-                      2.* (mean_f1*E1 * mean_f2*E3 + mean_f1*E1 * mean_f3*E5 + mean_f2*E3 * mean_f3*E5)) +
-                      np.log(2.*np.pi) +
-                      tf.log(self.variance))
-            return var_exp
+        mean_f3, mean_g3, var_f3, var_g3 = [tf.reshape(e, [-1, 1]) for e in
+                                           (mean_f3, mean_g3, var_f3, var_g3)]
+        H = 20
+        # calculate required quadratures
+        E1, E2 = hermgauss1d(mean_g1, var_g1, H, self.nlinfun)
+        E3, E4 = hermgauss1d(mean_g2, var_g2, H, self.nlinfun)
+        E5, E6 = hermgauss1d(mean_g3, var_g3, H, self.nlinfun)
+
+        # compute log-lik expectations under variational distribution
+        var_exp = -0.5*((1./self.variance)*(Y**2 -
+                   2.*Y*(mean_f1*E1 + mean_f2*E3 + mean_f3*E5) +
+                  (var_f1 + mean_f1**2)*E2 +
+                  (var_f2 + mean_f2**2)*E4 +
+                  (var_f3 + mean_f3**2)*E6 +
+                  2.* (mean_f1*E1 * mean_f2*E3 + mean_f1*E1 * mean_f3*E5 + mean_f2*E3 * mean_f3*E5)) +
+                  np.log(2.*np.pi) +
+                  tf.log(self.variance))
+        return var_exp
 
 
 

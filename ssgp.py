@@ -25,7 +25,7 @@ def init_kernels(m, alpha=0.333):
     return k_a, k_c
 
 
-def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size):
+def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun):
     """Initialize pitch detection model"""
     ka1, kc1 = init_kernels(m1) 
     ka2, kc2 = init_kernels(m2)  
@@ -47,7 +47,7 @@ def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size):
 
     Z = [za1, zc1, za2, zc2, za3, zc3]
     m = SsGP(X=x.copy(), Y=y.copy(), kf=[kc1, kc2, kc3], kg=[ka1, ka2, ka3], Z=Z, 
-             minibatch_size=minibatch_size)
+             minibatch_size=minibatch_size, nlinfun=nlinfun)
 
     m.kern_g1.lengthscales = 0.2
     m.kern_g2.lengthscales = 0.2
@@ -55,16 +55,21 @@ def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size):
 
     m.kern_f1.fixed = True
     m.kern_f1.lengthscales.fixed = False
-    m.kern_f1.lengthscales = 5.
+    m.kern_f1.lengthscales = 1.
     
     m.kern_f2.fixed = True
     m.kern_f2.lengthscales.fixed = False
-    m.kern_f2.lengthscales = 5.
+    m.kern_f2.lengthscales = 1.
     
     m.kern_f3.fixed = True
     m.kern_f3.lengthscales.fixed = False
-    m.kern_f3.lengthscales = 5.
+    m.kern_f3.lengthscales = 1.
 
+    
+    m.kern_g1.variance = 1.
+    m.kern_g2.variance = 1.
+    m.kern_g3.variance = 1.
+    
     m.kern_g1.variance.fixed = True
     m.kern_g2.variance.fixed = True
     m.kern_g3.variance.fixed = True
@@ -137,8 +142,7 @@ def predict_windowed(x, y, predfunc):
 
 
 class SsGP(gpflow.model.Model):
-    def __init__(self, X, Y, kf, kg, Z, whiten=True, minibatch_size=None,
-                 old_version=False):
+    def __init__(self, X, Y, kf, kg, Z, whiten=True, minibatch_size=None, nlinfun=None):
         '''Leave One Out (LOO) model.
         INPUTS:
         kf : list of kernels for each latent quasi-periodic function
@@ -151,45 +155,53 @@ class SsGP(gpflow.model.Model):
 
         self.minibatch_size = minibatch_size
         self.num_data = X.shape[0]
+        self.nlinfun = nlinfun
 
         self.X = MinibatchData(X, minibatch_size, np.random.RandomState(0))
         self.Y = MinibatchData(Y, minibatch_size, np.random.RandomState(0))
-        #self.X = gpflow.param.DataHolder(X, on_shape_change='pass')
-        #self.Y = gpflow.param.DataHolder(Y, on_shape_change='pass')
-
-        self.Za1 = gpflow.param.DataHolder(Z[0], on_shape_change='pass')
-        self.Zc1 = gpflow.param.DataHolder(Z[1], on_shape_change='pass')
         
-        self.Za2 = gpflow.param.DataHolder(Z[2], on_shape_change='pass')
-        self.Zc2 = gpflow.param.DataHolder(Z[3], on_shape_change='pass')
+        self.Za1 = gpflow.param.Param(Z[0])
+        self.Zc1 = gpflow.param.Param(Z[1])
         
-        self.Za3 = gpflow.param.DataHolder(Z[4], on_shape_change='pass')
-        self.Zc3 = gpflow.param.DataHolder(Z[5], on_shape_change='pass')
+        self.Za2 = gpflow.param.Param(Z[2])
+        self.Zc2 = gpflow.param.Param(Z[3])
         
-        self.num_inducing_a1 = self.Za1.shape[0]
-        self.num_inducing_c1 = self.Zc1.shape[0]
+        self.Za3 = gpflow.param.Param(Z[4])
+        self.Zc3 = gpflow.param.Param(Z[5])
         
-        self.num_inducing_a2 = self.Za2.shape[0]
-        self.num_inducing_c2 = self.Zc2.shape[0]
+        self.Za1.fixed = True
+        self.Zc1.fixed = True
         
-        self.num_inducing_a3 = self.Za3.shape[0]
-        self.num_inducing_c3 = self.Zc3.shape[0]
-
+        self.Za2.fixed = True
+        self.Zc2.fixed = True
+        
+        self.Za3.fixed = True
+        self.Zc3.fixed = True
+    
+        self.num_inducing_a1 = Z[0].shape[0]
+        self.num_inducing_c1 = Z[1].shape[0]
+        
+        self.num_inducing_a2 = Z[2].shape[0]
+        self.num_inducing_c2 = Z[3].shape[0]
+        
+        self.num_inducing_a3 = Z[4].shape[0]
+        self.num_inducing_c3 = Z[5].shape[0]
 
 
         self.kern_f1, self.kern_f2, self.kern_f3 = kf[0], kf[1], kf[2]
         self.kern_g1, self.kern_g2, self.kern_g3 = kg[0], kg[1], kg[2]
-
-        self.likelihood = SsLik(version=old_version)
+        
+        
+        self.likelihood = SsLik(nlinfun)
         self.whiten = whiten
 
         # initialize variational parameters
         self.q_mu1 = gpflow.param.Param(np.zeros((self.Zc1.shape[0], 1)))  # f1
-        self.q_mu2 = gpflow.param.Param(np.zeros((self.Za1.shape[0], 1)))  # g1
+        self.q_mu2 = gpflow.param.Param(-np.ones((self.Za1.shape[0], 1)))  # g1
         self.q_mu3 = gpflow.param.Param(np.zeros((self.Zc2.shape[0], 1)))  # f2
-        self.q_mu4 = gpflow.param.Param(np.zeros((self.Za2.shape[0], 1)))  # g2
+        self.q_mu4 = gpflow.param.Param(-np.ones((self.Za2.shape[0], 1)))  # g2
         self.q_mu5 = gpflow.param.Param(np.zeros((self.Zc2.shape[0], 1)))  # f3
-        self.q_mu6 = gpflow.param.Param(np.zeros((self.Za2.shape[0], 1)))  # g3
+        self.q_mu6 = gpflow.param.Param(-np.ones((self.Za2.shape[0], 1)))  # g3
 
         q_sqrt_a1 = np.array([np.eye(self.num_inducing_a1) for _ in range(1)]).swapaxes(0, 2)
         q_sqrt_c1 = np.array([np.eye(self.num_inducing_c1) for _ in range(1)]).swapaxes(0, 2)
