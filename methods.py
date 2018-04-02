@@ -194,14 +194,14 @@ def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
 
     win =  signal.hann(win_size)
     Ss = signal.convolve(S, win, mode='same') / sum(win)
-    Sslog = np.log(Ss)
+    Sslog = np.log(S)
     Sslog = Sslog + np.abs(np.min(Sslog))
     Sslog /= np.max(Sslog)
     thres = 0.10*np.max(Sslog)
     min_dist = 0.8*np.argmin(np.abs(F - ideal_f0))
     idx = peakutils.indexes(Sslog, thres=thres, min_dist=min_dist)
 
-    F_star, S_star = F[idx], Ss[idx]
+    F_star, S_star = F[idx], S[idx]
 
     idx_sorted = np.argsort(F_star.copy())
     S_star = S_star[idx_sorted]

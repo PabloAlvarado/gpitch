@@ -5,6 +5,9 @@ import itertools
 from gpflow.param import transforms
 
 
+def exp_value_closed_form(mean, var, b):
+    return tf.sqrt(b / (var + b)) * tf.exp(-0.5*(mean**2) / (var + b))
+
 def mvhermgauss(means, covs, H, D):
     """
     Return the evaluation locations, and weights for several multivariate
@@ -172,10 +175,11 @@ class ModLik(gpflow.likelihoods.Likelihood):
 
 class SsLik(gpflow.likelihoods.Likelihood):
     '''Source separation likelihood'''
-    def __init__(self, nlinfun):
+    def __init__(self, nlinfun, quad=True):
         gpflow.likelihoods.Likelihood.__init__(self)
         self.variance = gpflow.param.Param(1., transforms.positive)
         self.nlinfun = nlinfun
+        self.quad = quad
 
     def logp(self, F, Y):
         f1, g1 = F[:, 0], F[:, 1]
@@ -216,11 +220,24 @@ class SsLik(gpflow.likelihoods.Likelihood):
 
         mean_f3, mean_g3, var_f3, var_g3 = [tf.reshape(e, [-1, 1]) for e in
                                            (mean_f3, mean_g3, var_f3, var_g3)]
-        H = 20
+        
         # calculate required quadratures
-        E1, E2 = hermgauss1d(mean_g1, var_g1, H, self.nlinfun)
-        E3, E4 = hermgauss1d(mean_g2, var_g2, H, self.nlinfun)
-        E5, E6 = hermgauss1d(mean_g3, var_g3, H, self.nlinfun)
+        if self.quad:
+            H = 20
+            E1, E2 = hermgauss1d(mean_g1, var_g1, H, self.nlinfun)
+            E3, E4 = hermgauss1d(mean_g2, var_g2, H, self.nlinfun)
+            E5, E6 = hermgauss1d(mean_g3, var_g3, H, self.nlinfun)
+        else:
+            # compute expected values using closed form expressions
+            E1 = exp_value_closed_form(mean=mean_g1, var=var_g1, b=0.5)
+            E2 = exp_value_closed_form(mean=mean_g1, var=var_g1, b=0.25)
+            
+            E3 = exp_value_closed_form(mean=mean_g2, var=var_g2, b=0.5)
+            E4 = exp_value_closed_form(mean=mean_g2, var=var_g2, b=0.25)
+            
+            E5 = exp_value_closed_form(mean=mean_g3, var=var_g3, b=0.5)
+            E6 = exp_value_closed_form(mean=mean_g3, var=var_g3, b=0.25)
+        
 
         # compute log-lik expectations under variational distribution
         var_exp = -0.5*((1./self.variance)*(Y**2 -

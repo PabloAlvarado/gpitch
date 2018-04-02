@@ -15,7 +15,7 @@ jitter = settings.numerics.jitter_level
 float_type = settings.dtypes.float_type
 
 
-def init_kernels(m, alpha=0.333):
+def init_kernels(m, alpha=1.0):
     """Initialize kernels for source separation model"""
     var_act, ls_act = get_act_params(m.kern_act.get_parameter_dict())
     var_com, fre_com, ls_com = get_com_params(m.kern_com.get_parameter_dict())
@@ -25,7 +25,7 @@ def init_kernels(m, alpha=0.333):
     return k_a, k_c
 
 
-def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun):
+def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun, quad=True):
     """Initialize pitch detection model"""
     ka1, kc1 = init_kernels(m1) 
     ka2, kc2 = init_kernels(m2)  
@@ -47,7 +47,7 @@ def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun):
 
     Z = [za1, zc1, za2, zc2, za3, zc3]
     m = SsGP(X=x.copy(), Y=y.copy(), kf=[kc1, kc2, kc3], kg=[ka1, ka2, ka3], Z=Z, 
-             minibatch_size=minibatch_size, nlinfun=nlinfun)
+             minibatch_size=minibatch_size, nlinfun=nlinfun, quad=quad)
 
     m.kern_g1.lengthscales = 0.2
     m.kern_g2.lengthscales = 0.2
@@ -66,9 +66,9 @@ def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun):
     m.kern_f3.lengthscales = 1.
 
     
-    m.kern_g1.variance = 1.
-    m.kern_g2.variance = 1.
-    m.kern_g3.variance = 1.
+    m.kern_g1.variance = 4.0
+    m.kern_g2.variance = 4.0
+    m.kern_g3.variance = 4.0
     
     m.kern_g1.variance.fixed = True
     m.kern_g2.variance.fixed = True
@@ -142,7 +142,7 @@ def predict_windowed(x, y, predfunc):
 
 
 class SsGP(gpflow.model.Model):
-    def __init__(self, X, Y, kf, kg, Z, whiten=True, minibatch_size=None, nlinfun=None):
+    def __init__(self, X, Y, kf, kg, Z, whiten=True, minibatch_size=None, nlinfun=None, quad=True):
         '''Leave One Out (LOO) model.
         INPUTS:
         kf : list of kernels for each latent quasi-periodic function
@@ -156,6 +156,7 @@ class SsGP(gpflow.model.Model):
         self.minibatch_size = minibatch_size
         self.num_data = X.shape[0]
         self.nlinfun = nlinfun
+        self.quad = quad
 
         self.X = MinibatchData(X, minibatch_size, np.random.RandomState(0))
         self.Y = MinibatchData(Y, minibatch_size, np.random.RandomState(0))
@@ -192,7 +193,7 @@ class SsGP(gpflow.model.Model):
         self.kern_g1, self.kern_g2, self.kern_g3 = kg[0], kg[1], kg[2]
         
         
-        self.likelihood = SsLik(nlinfun)
+        self.likelihood = SsLik(nlinfun=nlinfun, quad=quad)
         self.whiten = whiten
 
         # initialize variational parameters

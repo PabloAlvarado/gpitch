@@ -218,13 +218,22 @@ def plot_ssgp(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results'):
     plt.plot(x_plot, logistic(mean_g1), 'C0')
     plt.fill_between(x_plot, logistic(mean_g1-2*np.sqrt(var_g1)),
                      logistic(mean_g1+2*np.sqrt(var_g1)), color='C0', alpha=0.2)
+    plt.twinx()
+    plt.plot(x_plot, mean_g1, 'C2', alpha=0.5)
+    plt.fill_between(x_plot, mean_g1-2*np.sqrt(var_g1), mean_g1+2*np.sqrt(var_g1), color='C2', alpha=0.1)
+    
     plt.plot(z[0], np.zeros((z[0].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
+    
     
     plt.subplot(ncol, nrow, 2)#, plt.title('activation 2')
     plt.plot(x_plot, logistic(mean_g2), 'C0')
     plt.fill_between(x_plot, logistic(mean_g2-2*np.sqrt(var_g2)),
                      logistic(mean_g2+2*np.sqrt(var_g2)), color='C0', alpha=0.2)
+    plt.twinx()
+    plt.plot(x_plot, mean_g2, 'C2', alpha=0.5)
+    plt.fill_between(x_plot, mean_g2-2*np.sqrt(var_g2), mean_g2+2*np.sqrt(var_g2), color='C2', alpha=0.1)
+    
     plt.plot(z[2], np.zeros((z[2].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
     
@@ -232,6 +241,10 @@ def plot_ssgp(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results'):
     plt.plot(x_plot, logistic(mean_g3), 'C0')
     plt.fill_between(x_plot, logistic(mean_g3-2*np.sqrt(var_g3)),
                      logistic(mean_g3+2*np.sqrt(var_g3)), color='C0', alpha=0.2)
+    plt.twinx()
+    plt.plot(x_plot, mean_g3, 'C2', alpha=0.5)
+    plt.fill_between(x_plot, mean_g3-2*np.sqrt(var_g3), mean_g3+2*np.sqrt(var_g3), color='C2', alpha=0.1)
+    
     plt.plot(z[4], np.zeros((z[4].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
 
@@ -303,6 +316,11 @@ def plot_ssgp_gauss(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results')
     plt.plot(x_plot, gaussfunc(mean_g1), 'C0')
     plt.fill_between(x_plot, gaussfunc(mean_g1-2*np.sqrt(var_g1)),
                      gaussfunc(mean_g1+2*np.sqrt(var_g1)), color='C0', alpha=0.2)
+    #plt.ylim(-0.1, 1.1)
+    plt.twinx()
+    plt.plot(x_plot, mean_g1, 'C2', alpha=0.5)
+    plt.fill_between(x_plot, mean_g1-2*np.sqrt(var_g1), mean_g1+2*np.sqrt(var_g1), color='C2', alpha=0.1)
+    
     plt.plot(z[0], np.zeros((z[0].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
     
@@ -310,6 +328,11 @@ def plot_ssgp_gauss(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results')
     plt.plot(x_plot, gaussfunc(mean_g2), 'C0')
     plt.fill_between(x_plot, gaussfunc(mean_g2-2*np.sqrt(var_g2)),
                      gaussfunc(mean_g2+2*np.sqrt(var_g2)), color='C0', alpha=0.2)
+    #plt.ylim(-0.1, 1.1)
+    plt.twinx()
+    plt.plot(x_plot, mean_g2, 'C2', alpha=0.5)
+    plt.fill_between(x_plot, mean_g2-2*np.sqrt(var_g2), mean_g2+2*np.sqrt(var_g2), color='C2', alpha=0.1)
+    
     plt.plot(z[2], np.zeros((z[2].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
     
@@ -317,7 +340,12 @@ def plot_ssgp_gauss(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results')
     plt.plot(x_plot, gaussfunc(mean_g3), 'C0')
     plt.fill_between(x_plot, gaussfunc(mean_g3-2*np.sqrt(var_g3)),
                      gaussfunc(mean_g3+2*np.sqrt(var_g3)), color='C0', alpha=0.2)
+    #plt.ylim(-0.1, 1.1)
+    plt.twinx()
+    plt.plot(x_plot, mean_g3, 'C2', alpha=0.5)
+    plt.fill_between(x_plot, mean_g3-2*np.sqrt(var_g3), mean_g3+2*np.sqrt(var_g3), color='C2', alpha=0.1)
     plt.plot(z[4], np.zeros((z[4].shape)), '|C3', mew=mew)
+    
     plt.xlim(xlim)
 
 
