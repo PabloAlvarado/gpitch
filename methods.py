@@ -170,10 +170,35 @@ def readaudio(fname, frames=-1, start=0, aug=False):
     y += -y.mean()  # move data to have zero mean and bounded between (-1, 1)
     if aug:
         augnum = 1000  # number of zeros to add
-        y = np.append(np.zeros((augnum, 1)), y[0: -augnum]).reshape(-1, 1)
+        y = np.append(np.zeros((augnum, 1)), y).reshape(-1, 1)
+        y = np.append(y, np.zeros((augnum, 1))).reshape(-1, 1)
     frames = y.size
     x = np.linspace(0, (frames-1.)/fs, frames).reshape(-1, 1)  # time vector
     return x, y, fs
+
+
+def segment(x, y, window_size=32000):
+    """segments the input data into arrays of size nw. Returns a list with segments
+        the augmentation corresponds to 50 miliseconds (800 samples) assuming 16kHz of sampling rate
+    """
+    xs = []  # time vector segmented
+    ys = []  # data segmented
+    for i in range(y.size/window_size):
+        yaux = y[i*window_size : (i+1)*window_size].copy()
+        xaux = x[i*window_size : (i+1)*window_size].copy()
+        xa, ya = augmentate(xaux, yaux)
+        ys.append(ya)  
+        xs.append(xa)  
+    return xs, ys
+
+def augmentate(x, y, augment_size=800):
+    addzeros = np.zeros((augment_size, 1)) # patch of zeros to add at the begining and end
+    yaug1 = np.append(addzeros, y.copy()).reshape(-1, 1)
+    yaug = np.append(yaug1, addzeros).reshape(-1, 1)
+    
+    alpha = augment_size/16000.
+    xaug = np.linspace(x[0] - alpha, x[-1] + alpha, x.size + 2*augment_size).reshape(-1, 1)  # time vector
+    return xaug, yaug
 
 
 def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10):

@@ -201,8 +201,8 @@ class SsGP(gpflow.model.Model):
         self.q_mu2 = gpflow.param.Param(-np.ones((self.Za1.shape[0], 1)))  # g1
         self.q_mu3 = gpflow.param.Param(np.zeros((self.Zc2.shape[0], 1)))  # f2
         self.q_mu4 = gpflow.param.Param(-np.ones((self.Za2.shape[0], 1)))  # g2
-        self.q_mu5 = gpflow.param.Param(np.zeros((self.Zc2.shape[0], 1)))  # f3
-        self.q_mu6 = gpflow.param.Param(-np.ones((self.Za2.shape[0], 1)))  # g3
+        self.q_mu5 = gpflow.param.Param(np.zeros((self.Zc3.shape[0], 1)))  # f3
+        self.q_mu6 = gpflow.param.Param(-np.ones((self.Za3.shape[0], 1)))  # g3
 
         q_sqrt_a1 = np.array([np.eye(self.num_inducing_a1) for _ in range(1)]).swapaxes(0, 2)
         q_sqrt_c1 = np.array([np.eye(self.num_inducing_c1) for _ in range(1)]).swapaxes(0, 2)

@@ -9,3 +9,4 @@ from . import modgp2
 from . import modpdet
 from . import loopdet
 from . import ssgp
+from gpitch_notebook import *
