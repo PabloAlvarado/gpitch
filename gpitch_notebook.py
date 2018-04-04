@@ -95,10 +95,20 @@ def re_init_params(m, x, y, nivps):
     m.q_sqrt4 = q_sqrt_a2.copy()
     m.q_sqrt5 = q_sqrt_c3.copy()
     m.q_sqrt6 = q_sqrt_a3.copy()
+    
+    
+def get_init_lists_save_results():
+    # mf_l = []
+    # mg_l = []
+    # vf_l = []
+    # vg_l = []
+    # x_l = []
+    # y_l = []
+    pass
 
         
-def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[40, 10], learning_rate=[0.01, 0.001], minibatch_size=500,
-                         frames=-1, start=0, opt_za=False, segmented=False, window_size=32000):
+def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[5000, 1], learning_rate=[0.01, 0.001], minibatch_size=500,
+                         frames=-1, start=0, opt_za=False, window_size=32000, display=False):
     """
     param nivps: number of inducing variables per second, for activations and components
     """
@@ -124,11 +134,7 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[40, 10], lea
     
     xall, yall, fs = gpitch.readaudio(test_data_dir + lfiles[0], aug=False, start=start, frames=frames)
     
-    # if segmented:
     x, y = gpitch.segment(xall.copy(), yall.copy(), window_size=window_size)  # return list of segments
-    # else:
-        # x, y = [x], [y]  # convert to list
-
         
     nlinfun = gpitch.gaussfunc_tf  # use gaussian as non-linear transform for activations 
     mpd = gpitch.ssgp.init_model(x=x[0].copy(), y=y[0].copy(), m1=m[0], m2=m[1], m3=m[2], niv_a=nivps[0], niv_c=nivps[1], 
@@ -173,20 +179,25 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[40, 10], lea
 
             mf, vf, mg, vg, x_plot, y_plot =  gpitch.ssgp.predict_windowed(x=x[i], y=y[i], predfunc=mpd.predictall)  # predict
             gpitch.myplots.plot_ssgp_gauss(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)
+            
+        # save partial results on list
+        # save partial variational parameters on list
+        
+        if display:
+            
+            print("Likelihood")
+            display(mpd.likelihood)
 
-#         print("Likelihood")
-#         display(mpd.likelihood)
+            print("Activation kernels")
+            display(mpd.kern_g1)
+            display(mpd.kern_g2)
+            display(mpd.kern_g3)
 
-#         print("Activation kernels")
-#         display(mpd.kern_g1)
-#         display(mpd.kern_g2)
-#         display(mpd.kern_g3)
-
-#         print("Component kernels")
-#         data_com_kern = pd.DataFrame({'Lengthscales':[mpd.kern_f1.lengthscales.value[0].copy(), 
-#                                                       mpd.kern_f2.lengthscales.value[0].copy(), 
-#                                                       mpd.kern_f3.lengthscales.value[0].copy()]})
-#         display(data_com_kern)
+            print("Component kernels")
+            data_com_kern = pd.DataFrame({'Lengthscales':[mpd.kern_f1.lengthscales.value[0].copy(), 
+                                                          mpd.kern_f2.lengthscales.value[0].copy(), 
+                                                          mpd.kern_f3.lengthscales.value[0].copy()]})
+            display(data_com_kern)
         
     return mpd
     
