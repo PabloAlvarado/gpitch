@@ -8,7 +8,7 @@ from likelihoods import SsLik
 import time
 from gpitch.kernels import Matern32sm
 from gpitch import get_act_params, get_com_params, get_env
-from gpflow.kernels import Matern32
+from gpflow.kernels import Matern32, Matern12
 
 
 jitter = settings.numerics.jitter_level
@@ -20,12 +20,12 @@ def init_kernels(m, alpha=1.0):
     var_act, ls_act = get_act_params(m.kern_act.get_parameter_dict())
     var_com, fre_com, ls_com = get_com_params(m.kern_com.get_parameter_dict())
 
-    k_a = Matern32(input_dim=1, lengthscales=ls_act[0], variance=var_act[0])
+    k_a = Matern12(input_dim=1, lengthscales=ls_act[0], variance=var_act[0])
     k_c = Matern32sm(input_dim=1, numc=fre_com.size, lengthscales=ls_com[0], variances=alpha*var_com, frequencies=fre_com)
     return k_a, k_c
 
 
-def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun, quad=True):
+def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun, quad=True, varfix=False):
     """Initialize pitch detection model"""
     ka1, kc1 = init_kernels(m1) 
     ka2, kc2 = init_kernels(m2)  
@@ -66,13 +66,17 @@ def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun, quad=Tru
     m.kern_f3.lengthscales = 1.
 
     
-    m.kern_g1.variance = 4.0
-    m.kern_g2.variance = 4.0
-    m.kern_g3.variance = 4.0
+    #m.kern_g1.variance = 4.0
+    #m.kern_g2.variance = 4.0
+    #m.kern_g3.variance = 4.0
     
-    m.kern_g1.variance.fixed = True
-    m.kern_g2.variance.fixed = True
-    m.kern_g3.variance.fixed = True
+    m.kern_g1.variance = 1.0
+    m.kern_g2.variance = 1.0
+    m.kern_g3.variance = 1.0
+    
+    m.kern_g1.variance.fixed = varfix
+    m.kern_g2.variance.fixed = varfix
+    m.kern_g3.variance.fixed = varfix
     
     m.likelihood.variance = 1.
     # envelope, latent, compon = get_env(y.copy(), win_size=500)

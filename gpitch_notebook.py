@@ -55,7 +55,9 @@ def plot_loaded_models(m, instr_name):
         plt.suptitle(instr_name)
         
 
-def re_init_params(m, x, y, nivps):    
+def re_init_params(m, x, y, nivps):  
+    
+    # reset inducing variables
     dec_a = 16000/nivps[0]
     dec_c = 16000/nivps[1]
     za1 = np.vstack([x[::dec_a].copy(), x[-1].copy()])  # location inducing variables
@@ -72,9 +74,11 @@ def re_init_params(m, x, y, nivps):
     m.Zc2 = zc2.copy()
     m.Zc3 = zc3.copy()
     
+    # reset input data
     m.X = x.copy()
     m.Y = y.copy()
     
+    # reset variational parameters
     m.q_mu1 = np.zeros((zc1.shape[0], 1))  # f1
     m.q_mu2 = -np.ones((za1.shape[0], 1))  # g1
     m.q_mu3 = np.zeros((zc2.shape[0], 1))  # f2
@@ -96,19 +100,28 @@ def re_init_params(m, x, y, nivps):
     m.q_sqrt5 = q_sqrt_c3.copy()
     m.q_sqrt6 = q_sqrt_a3.copy()
     
+    # reset hyper-parameters
+    m.kern_g1.variance = 1.
+    m.kern_g2.variance = 1.
+    m.kern_g3.variance = 1.
     
-def get_init_lists_save_results():
-    # mf_l = []
-    # mg_l = []
-    # vf_l = []
-    # vg_l = []
-    # x_l = []
-    # y_l = []
-    pass
+    m.kern_g1.lengthscales = 0.2
+    m.kern_g2.lengthscales = 0.2
+    m.kern_g3.lengthscales = 0.2
+    
+    m.kern_f1.lengthscales = 1.    
+    m.kern_f2.lengthscales = 1. 
+    m.kern_f3.lengthscales = 1.  
+    
+    m.likelihood.variance = 1.
+
+
+def get_lists_save_results():
+    return [], [], [], [], [], [], [[], [], []], [[], [], []], [[], [], []], [[], [], []]
 
         
-def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[5000, 1], learning_rate=[0.01, 0.001], minibatch_size=500,
-                         frames=-1, start=0, opt_za=False, window_size=32000, display=False):
+def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[10000, 1], learning_rate=[0.005, 0.001], minibatch_size=500,
+                         frames=-1, start=0, opt_za=False, window_size=32000, disp=True, varfix=False):
     """
     param nivps: number of inducing variables per second, for activations and components
     """
@@ -138,30 +151,29 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[5000, 1], le
         
     nlinfun = gpitch.gaussfunc_tf  # use gaussian as non-linear transform for activations 
     mpd = gpitch.ssgp.init_model(x=x[0].copy(), y=y[0].copy(), m1=m[0], m2=m[1], m3=m[2], niv_a=nivps[0], niv_c=nivps[1], 
-                                 minibatch_size=minibatch_size, nlinfun=nlinfun, quad=False)  # init pitch detection model
+                                 minibatch_size=minibatch_size, nlinfun=nlinfun, quad=False, varfix=varfix)  # init pitch detection model
+    
+    mf_l, mg_l, vf_l, vg_l, x_l, y_l, q_mu_acts_l, q_mu_comps_l, q_sqrt_acts_l, q_sqrt_comps_l = get_lists_save_results()
+    
     for i in range(len(y)):
         plt.figure(5), plt.title("Test data  " + lfiles[0])
         plt.plot(x[i], y[i])
         
         if i is not 0:
             re_init_params(m=mpd, x=x[i].copy(), y=y[i].copy(), nivps=nivps)
-
         
         st = time.time()  # run optimization
-
+        
         if minibatch_size is None:  
-            print ("Using VI")
+            print ("Optimizing using VI")
             mpd.optimize(disp=True, maxiter=maxiter[0])
         else:
-            print ("Using SVI")
+            print ("Optimizing using SVI")
             mpd.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate[0], epsilon=0.1), maxiter=maxiter[0])
-
+            
         print("Time optimizing {} secs".format(time.time() - st))
 
-        mf, vf, mg, vg, x_plot, y_plot =  gpitch.ssgp.predict_windowed(x=x[i], y=y[i], predfunc=mpd.predictall)  # predict
-        gpitch.myplots.plot_ssgp_gauss(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)  # plot results
-
-        if opt_za:
+        if opt_za: # if True, optimize location inducing variables of activations
             mpd.Za1.fixed = False
             mpd.Za2.fixed = False
             mpd.Za3.fixed = False
@@ -169,21 +181,43 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[5000, 1], le
             st = time.time()
 
             if minibatch_size is None:  
-                print ("Using VI")
+                print ("Optimizing location inducing variables using VI")
                 mpd.optimize(disp=True, maxiter=maxiter[1])
             else:
-                print ("Using SVI")
+                print ("Optimizing location inducing variables using SVI")
                 mpd.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate[1], epsilon=0.1), maxiter=maxiter[1])
 
             print("Time optimizing location inducing variables {} secs".format(time.time() - st))
 
-            mf, vf, mg, vg, x_plot, y_plot =  gpitch.ssgp.predict_windowed(x=x[i], y=y[i], predfunc=mpd.predictall)  # predict
-            gpitch.myplots.plot_ssgp_gauss(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)
-            
-        # save partial results on list
-        # save partial variational parameters on list
+        mf, vf, mg, vg, x_plot, y_plot =  gpitch.ssgp.predict_windowed(x=x[i], y=y[i], predfunc=mpd.predictall)  # predict
+        gpitch.myplots.plot_ssgp_gauss(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)  # plot results
         
-        if display:
+        mf_l.append(list(mf))
+        mg_l.append(list(mg))
+        vf_l.append(list(vf))
+        vg_l.append(list(vg))
+        x_l.append(list(x_plot))
+        y_l.append(list(y_plot))
+
+        q_mu_acts_l[0].append(mpd.q_mu2.value.copy())
+        q_mu_acts_l[1].append(mpd.q_mu4.value.copy())
+        q_mu_acts_l[2].append(mpd.q_mu6.value.copy())
+
+        q_mu_comps_l[0].append(mpd.q_mu1.value.copy())
+        q_mu_comps_l[1].append(mpd.q_mu3.value.copy())
+        q_mu_comps_l[2].append(mpd.q_mu5.value.copy())
+
+        q_sqrt_acts_l[0].append(mpd.q_sqrt2.value.copy())
+        q_sqrt_acts_l[1].append(mpd.q_sqrt4.value.copy())
+        q_sqrt_acts_l[2].append(mpd.q_sqrt6.value.copy())
+
+        q_sqrt_comps_l[0].append(mpd.q_sqrt1.value.copy())
+        q_sqrt_comps_l[1].append(mpd.q_sqrt3.value.copy())
+        q_sqrt_comps_l[2].append(mpd.q_sqrt5.value.copy())
+        
+        tf.reset_default_graph()
+        
+        if disp:
             
             print("Likelihood")
             display(mpd.likelihood)
@@ -198,8 +232,9 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[5000, 1], le
                                                           mpd.kern_f2.lengthscales.value[0].copy(), 
                                                           mpd.kern_f3.lengthscales.value[0].copy()]})
             display(data_com_kern)
-        
-    return mpd
+            
+    results = [mf_l, mg_l, vf_l, vg_l, x_l, y_l, q_mu_acts_l, q_mu_comps_l, q_sqrt_acts_l, q_sqrt_comps_l]   
+    return mpd, results
     
     # group results
     
