@@ -8,7 +8,7 @@ from likelihoods import SsLik
 import time
 from gpitch.kernels import Matern32sm
 from gpitch import get_act_params, get_com_params, get_env
-from gpflow.kernels import Matern32, Matern12
+from gpflow.kernels import Matern32
 
 
 jitter = settings.numerics.jitter_level
@@ -20,7 +20,7 @@ def init_kernels(m, alpha=1.0):
     var_act, ls_act = get_act_params(m.kern_act.get_parameter_dict())
     var_com, fre_com, ls_com = get_com_params(m.kern_com.get_parameter_dict())
 
-    k_a = Matern12(input_dim=1, lengthscales=ls_act[0], variance=var_act[0])
+    k_a = Matern32(input_dim=1, lengthscales=ls_act[0], variance=var_act[0])
     k_c = Matern32sm(input_dim=1, numc=fre_com.size, lengthscales=ls_com[0], variances=alpha*var_com, frequencies=fre_com)
     return k_a, k_c
 
@@ -49,9 +49,9 @@ def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun, quad=Tru
     m = SsGP(X=x.copy(), Y=y.copy(), kf=[kc1, kc2, kc3], kg=[ka1, ka2, ka3], Z=Z, 
              minibatch_size=minibatch_size, nlinfun=nlinfun, quad=quad)
 
-    m.kern_g1.lengthscales = 0.2
-    m.kern_g2.lengthscales = 0.2
-    m.kern_g3.lengthscales = 0.2
+    m.kern_g1.lengthscales = 0.5
+    m.kern_g2.lengthscales = 0.5
+    m.kern_g3.lengthscales = 0.5
 
     m.kern_f1.fixed = True
     m.kern_f1.lengthscales.fixed = False

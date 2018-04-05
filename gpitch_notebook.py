@@ -105,9 +105,9 @@ def re_init_params(m, x, y, nivps):
     m.kern_g2.variance = 1.
     m.kern_g3.variance = 1.
     
-    m.kern_g1.lengthscales = 0.2
-    m.kern_g2.lengthscales = 0.2
-    m.kern_g3.lengthscales = 0.2
+    m.kern_g1.lengthscales = 0.5
+    m.kern_g2.lengthscales = 0.5
+    m.kern_g3.lengthscales = 0.5
     
     m.kern_f1.lengthscales = 1.    
     m.kern_f2.lengthscales = 1. 
@@ -120,8 +120,8 @@ def get_lists_save_results():
     return [], [], [], [], [], [], [[], [], []], [[], [], []], [[], [], []], [[], [], []]
 
         
-def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[10000, 1], learning_rate=[0.005, 0.001], minibatch_size=500,
-                         frames=-1, start=0, opt_za=False, window_size=32000, disp=True, varfix=False):
+def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[10000, 10000], learning_rate=[0.005, 0.001], minibatch_size=500,
+                         frames=-1, start=0, opt_za=True, window_size=32000, disp=True, varfix=False):
     """
     param nivps: number of inducing variables per second, for activations and components
     """
@@ -171,7 +171,7 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[10000, 1], l
             print ("Optimizing using SVI")
             mpd.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate[0], epsilon=0.1), maxiter=maxiter[0])
             
-        print("Time optimizing {} secs".format(time.time() - st))
+        print("Time {} secs".format(time.time() - st))
 
         if opt_za: # if True, optimize location inducing variables of activations
             mpd.Za1.fixed = False
@@ -187,7 +187,7 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[10000, 1], l
                 print ("Optimizing location inducing variables using SVI")
                 mpd.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate[1], epsilon=0.1), maxiter=maxiter[1])
 
-            print("Time optimizing location inducing variables {} secs".format(time.time() - st))
+            print("Time {} secs".format(time.time() - st))
 
         mf, vf, mg, vg, x_plot, y_plot =  gpitch.ssgp.predict_windowed(x=x[i], y=y[i], predfunc=mpd.predictall)  # predict
         gpitch.myplots.plot_ssgp_gauss(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)  # plot results
