@@ -120,7 +120,7 @@ def get_lists_save_results():
     return [], [], [], [], [], [], [[], [], []], [[], [], []], [[], [], []], [[], [], []]
 
         
-def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[10000, 10000], learning_rate=[0.005, 0.001], minibatch_size=500,
+def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[20000, 20000], learning_rate=[0.005, 0.001], minibatch_size=500,
                          frames=-1, start=0, opt_za=True, window_size=32000, disp=True, varfix=False):
     """
     param nivps: number of inducing variables per second, for activations and components

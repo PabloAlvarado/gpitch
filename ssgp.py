@@ -49,9 +49,9 @@ def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun, quad=Tru
     m = SsGP(X=x.copy(), Y=y.copy(), kf=[kc1, kc2, kc3], kg=[ka1, ka2, ka3], Z=Z, 
              minibatch_size=minibatch_size, nlinfun=nlinfun, quad=quad)
 
-    m.kern_g1.lengthscales = 0.5
-    m.kern_g2.lengthscales = 0.5
-    m.kern_g3.lengthscales = 0.5
+    m.kern_g1.lengthscales = 1.
+    m.kern_g2.lengthscales = 1.
+    m.kern_g3.lengthscales = 1.
 
     m.kern_f1.fixed = True
     m.kern_f1.lengthscales.fixed = False
