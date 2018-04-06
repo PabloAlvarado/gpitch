@@ -105,13 +105,13 @@ def re_init_params(m, x, y, nivps):
     m.kern_g2.variance = 1.
     m.kern_g3.variance = 1.
     
-    m.kern_g1.lengthscales = 0.5
-    m.kern_g2.lengthscales = 0.5
-    m.kern_g3.lengthscales = 0.5
+    m.kern_g1.lengthscales = 0.2
+    m.kern_g2.lengthscales = 0.2
+    m.kern_g3.lengthscales = 0.2
     
-    m.kern_f1.lengthscales = 1.    
-    m.kern_f2.lengthscales = 1. 
-    m.kern_f3.lengthscales = 1.  
+    m.kern_f1.lengthscales = 2.5    
+    m.kern_f2.lengthscales = 2.5 
+    m.kern_f3.lengthscales = 2.5  
     
     m.likelihood.variance = 1.
 
@@ -120,8 +120,8 @@ def get_lists_save_results():
     return [], [], [], [], [], [], [[], [], []], [[], [], []], [[], [], []], [[], [], []]
 
         
-def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[20000, 20000], learning_rate=[0.005, 0.001], minibatch_size=500,
-                         frames=-1, start=0, opt_za=True, window_size=32000, disp=True, varfix=False):
+def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[2500, 5000], learning_rate=[0.005, 0.002], minibatch_size=500,
+                         frames=-1, start=0, opt_za=False, window_size=32000, disp=True, varfix=False):
     """
     param nivps: number of inducing variables per second, for activations and components
     """
