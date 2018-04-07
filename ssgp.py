@@ -8,7 +8,7 @@ from likelihoods import SsLik
 import time
 from gpitch.kernels import Matern32sm
 from gpitch import get_act_params, get_com_params, get_env
-from gpflow.kernels import Matern32
+from gpflow.kernels import Matern32, Matern12
 
 
 jitter = settings.numerics.jitter_level
@@ -20,15 +20,15 @@ def init_kernels(m, alpha=1.0):
     var_act, ls_act = get_act_params(m.kern_act.get_parameter_dict())
     var_com, fre_com, ls_com = get_com_params(m.kern_com.get_parameter_dict())
 
-    k_a = Matern32(input_dim=1, lengthscales=ls_act[0], variance=var_act[0])
+    k_a = Matern12(input_dim=1, lengthscales=ls_act[0], variance=var_act[0])
     k_c = Matern32sm(input_dim=1, numc=fre_com.size, lengthscales=ls_com[0], variances=alpha*var_com, frequencies=fre_com)
     return k_a, k_c
 
 
 def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun, quad=True, varfix=False):
     """Initialize pitch detection model"""
-    ka1, kc1 = init_kernels(m1) 
-    ka2, kc2 = init_kernels(m2)  
+    ka1, kc1 = init_kernels(m1)
+    ka2, kc2 = init_kernels(m2)
     ka3, kc3 = init_kernels(m3)
 
     nsecs = y.size/16000  # niv number inducing variables per second, duration of signal in seconds
@@ -46,21 +46,21 @@ def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun, quad=Tru
     zc3 = 0.66*(zc1[1] - zc1[0]) + np.vstack([x[::dec_c3].copy(), x[-1].copy()])  # location inducing variables
 
     Z = [za1, zc1, za2, zc2, za3, zc3]
-    m = SsGP(X=x.copy(), Y=y.copy(), kf=[kc1, kc2, kc3], kg=[ka1, ka2, ka3], Z=Z, 
+    m = SsGP(X=x.copy(), Y=y.copy(), kf=[kc1, kc2, kc3], kg=[ka1, ka2, ka3], Z=Z,
              minibatch_size=minibatch_size, nlinfun=nlinfun, quad=quad)
 
     m.kern_f1.fixed = True
     m.kern_f1.lengthscales.fixed = False
     m.kern_f1.lengthscales = 2.5
-    
+
     m.kern_f2.fixed = True
     m.kern_f2.lengthscales.fixed = False
     m.kern_f2.lengthscales = 2.5
-    
+
     m.kern_f3.fixed = True
     m.kern_f3.lengthscales.fixed = False
     m.kern_f3.lengthscales = 2.5
-    
+
     m.kern_g1.lengthscales = 0.2
     m.kern_g2.lengthscales = 0.2
     m.kern_g3.lengthscales = 0.2
@@ -68,11 +68,11 @@ def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun, quad=Tru
     m.kern_g1.variance = 1.
     m.kern_g2.variance = 1.
     m.kern_g3.variance = 1.
-    
+
     m.kern_g1.variance.fixed = varfix
     m.kern_g2.variance.fixed = varfix
     m.kern_g3.variance.fixed = varfix
-    
+
     m.likelihood.variance = 1.
     # envelope, latent, compon = get_env(y.copy(), win_size=500)
     # m.q_mu2 = np.vstack([ latent[::dec_a1].reshape(-1,1).copy(), latent[-1].reshape(-1,1).copy() ])  # g1
@@ -98,44 +98,44 @@ def predict_windowed(x, y, predfunc):
 
         mean_f, mean_g, var_f, var_g = predfunc(xnew)
 
-        mf[0].append(mean_f[0]) 
-        mf[1].append(mean_f[1]) 
-        mf[2].append(mean_f[2]) 
+        mf[0].append(mean_f[0])
+        mf[1].append(mean_f[1])
+        mf[2].append(mean_f[2])
 
-        vf[0].append(var_f[0]) 
-        vf[1].append(var_f[1]) 
+        vf[0].append(var_f[0])
+        vf[1].append(var_f[1])
         vf[2].append(var_f[2])
 
-        mg[0].append(mean_g[0]) 
-        mg[1].append(mean_g[1]) 
+        mg[0].append(mean_g[0])
+        mg[1].append(mean_g[1])
         mg[2].append(mean_g[2])
 
-        vg[0].append(var_g[0]) 
-        vg[1].append(var_g[1]) 
+        vg[0].append(var_g[0])
+        vg[1].append(var_g[1])
         vg[2].append(var_g[2])
 
         x_plot.append(xnew)
         y_plot.append(ynew)
-        
-    mf[0] = np.asarray(mf[0]).reshape(-1, 1) 
-    mf[1] = np.asarray(mf[1]).reshape(-1, 1) 
+
+    mf[0] = np.asarray(mf[0]).reshape(-1, 1)
+    mf[1] = np.asarray(mf[1]).reshape(-1, 1)
     mf[2] = np.asarray(mf[2]).reshape(-1, 1)
-    vf[0] = np.asarray(vf[0]).reshape(-1, 1) 
-    vf[1] = np.asarray(vf[1]).reshape(-1, 1) 
+    vf[0] = np.asarray(vf[0]).reshape(-1, 1)
+    vf[1] = np.asarray(vf[1]).reshape(-1, 1)
     vf[2] = np.asarray(vf[2]).reshape(-1, 1)
 
-    mg[0] = np.asarray(mg[0]).reshape(-1, 1) 
-    mg[1] = np.asarray(mg[1]).reshape(-1, 1) 
+    mg[0] = np.asarray(mg[0]).reshape(-1, 1)
+    mg[1] = np.asarray(mg[1]).reshape(-1, 1)
     mg[2] = np.asarray(mg[2]).reshape(-1, 1)
-    vg[0] = np.asarray(vg[0]).reshape(-1, 1) 
-    vg[1] = np.asarray(vg[1]).reshape(-1, 1) 
+    vg[0] = np.asarray(vg[0]).reshape(-1, 1)
+    vg[1] = np.asarray(vg[1]).reshape(-1, 1)
     vg[2] = np.asarray(vg[2]).reshape(-1, 1)
 
     x_plot = np.asarray(x_plot).reshape(-1, 1)
     y_plot = np.asarray(y_plot).reshape(-1, 1)
-    
+
     print("Time predicting {} secs".format(time.time() - st))
-    
+
     return mf, vf, mg, vg, x_plot, y_plot
 
 
@@ -159,49 +159,49 @@ class SsGP(gpflow.model.Model):
 
         self.X = MinibatchData(X, minibatch_size, np.random.RandomState(0))
         self.Y = MinibatchData(Y, minibatch_size, np.random.RandomState(0))
-        
+
         self.Za1 = gpflow.param.Param(Z[0])
         self.Zc1 = gpflow.param.Param(Z[1])
-        
+
         self.Za2 = gpflow.param.Param(Z[2])
         self.Zc2 = gpflow.param.Param(Z[3])
-        
+
         self.Za3 = gpflow.param.Param(Z[4])
         self.Zc3 = gpflow.param.Param(Z[5])
-        
+
         self.Za1.fixed = True
         self.Zc1.fixed = True
-        
+
         self.Za2.fixed = True
         self.Zc2.fixed = True
-        
+
         self.Za3.fixed = True
         self.Zc3.fixed = True
-    
+
         self.num_inducing_a1 = Z[0].shape[0]
         self.num_inducing_c1 = Z[1].shape[0]
-        
+
         self.num_inducing_a2 = Z[2].shape[0]
         self.num_inducing_c2 = Z[3].shape[0]
-        
+
         self.num_inducing_a3 = Z[4].shape[0]
         self.num_inducing_c3 = Z[5].shape[0]
 
 
         self.kern_f1, self.kern_f2, self.kern_f3 = kf[0], kf[1], kf[2]
         self.kern_g1, self.kern_g2, self.kern_g3 = kg[0], kg[1], kg[2]
-        
-        
+
+
         self.likelihood = SsLik(nlinfun=nlinfun, quad=quad)
         self.whiten = whiten
 
         # initialize variational parameters
         self.q_mu1 = gpflow.param.Param(np.zeros((self.Zc1.shape[0], 1)))  # f1
-        self.q_mu2 = gpflow.param.Param(-np.ones((self.Za1.shape[0], 1)))  # g1
+        self.q_mu2 = gpflow.param.Param(np.zeros((self.Za1.shape[0], 1)))  # g1
         self.q_mu3 = gpflow.param.Param(np.zeros((self.Zc2.shape[0], 1)))  # f2
-        self.q_mu4 = gpflow.param.Param(-np.ones((self.Za2.shape[0], 1)))  # g2
+        self.q_mu4 = gpflow.param.Param(np.zeros((self.Za2.shape[0], 1)))  # g2
         self.q_mu5 = gpflow.param.Param(np.zeros((self.Zc3.shape[0], 1)))  # f3
-        self.q_mu6 = gpflow.param.Param(-np.ones((self.Za3.shape[0], 1)))  # g3
+        self.q_mu6 = gpflow.param.Param(np.zeros((self.Za3.shape[0], 1)))  # g3
 
         q_sqrt_a1 = np.array([np.eye(self.num_inducing_a1) for _ in range(1)]).swapaxes(0, 2)
         q_sqrt_c1 = np.array([np.eye(self.num_inducing_c1) for _ in range(1)]).swapaxes(0, 2)
@@ -252,37 +252,37 @@ class SsGP(gpflow.model.Model):
                                                         q_sqrt=self.q_sqrt1,
                                                         full_cov=False,
                                                         whiten=self.whiten)
-        
+
         fmean2, fvar2 = gpflow.conditionals.conditional(self.X, self.Za1,
                                                         self.kern_g1, self.q_mu2,
                                                         q_sqrt=self.q_sqrt2,
                                                         full_cov=False,
                                                         whiten=self.whiten)
-        
+
         fmean3, fvar3 = gpflow.conditionals.conditional(self.X, self.Zc2,
                                                         self.kern_f2, self.q_mu3,
                                                         q_sqrt=self.q_sqrt3,
                                                         full_cov=False,
                                                         whiten=self.whiten)
-        
+
         fmean4, fvar4 = gpflow.conditionals.conditional(self.X, self.Za2,
                                                         self.kern_g2, self.q_mu4,
                                                         q_sqrt=self.q_sqrt4,
                                                         full_cov=False,
                                                         whiten=self.whiten)
-                
+
         fmean5, fvar5 = gpflow.conditionals.conditional(self.X, self.Zc3,
                                                         self.kern_f3, self.q_mu5,
                                                         q_sqrt=self.q_sqrt5,
                                                         full_cov=False,
                                                         whiten=self.whiten)
-        
+
         fmean6, fvar6 = gpflow.conditionals.conditional(self.X, self.Za3,
                                                         self.kern_g3, self.q_mu6,
                                                         q_sqrt=self.q_sqrt6,
                                                         full_cov=False,
-                                                        whiten=self.whiten)   
-        
+                                                        whiten=self.whiten)
+
         fmean = tf.concat([fmean1, fmean2, fmean3, fmean4, fmean5, fmean6], 1)
         fvar = tf.concat([fvar1, fvar2, fvar3, fvar4, fvar5, fvar6], 1)
 
@@ -294,11 +294,11 @@ class SsGP(gpflow.model.Model):
             tf.cast(tf.shape(self.X)[0], settings.dtypes.float_type)
 
         return tf.reduce_sum(var_exp) * scale - KL
-    
-    
+
+
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predictall(self, Xnew):
-        
+
         mf1, vf1 =  gpflow.conditionals.conditional(Xnew, self.Zc1, self.kern_f1,
                                                self.q_mu1, q_sqrt=self.q_sqrt1,
                                                full_cov=False, whiten=self.whiten)
@@ -328,7 +328,7 @@ class SsGP(gpflow.model.Model):
         vg = [vg1, vg2, vg3]
         return mf, mg, vf, vg
 
-    
+
 #     @gpflow.param.AutoFlow((tf.float64, [None, None]))
 #     def predict_f1(self, Xnew):
 #         return gpflow.conditionals.conditional(Xnew, self.Zc1, self.kern_f1,

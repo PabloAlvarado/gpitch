@@ -191,7 +191,7 @@ def segment(x, y, window_size=32000):
         xs.append(xa)  
     return xs, ys
 
-def augmentate(x, y, augment_size=800):
+def augmentate(x, y, augment_size=1600):
     addzeros = np.zeros((augment_size, 1)) # patch of zeros to add at the begining and end
     yaug1 = np.append(addzeros, y.copy()).reshape(-1, 1)
     yaug = np.append(yaug1, addzeros).reshape(-1, 1)
@@ -437,7 +437,7 @@ def isoftplus(x):
     return np.log(np.exp(x) - 1.)
 
 def gaussfunc(x):
-    return np.exp(-x**2)
+    return np.exp(-2.*(x - np.pi)**2)
 
 def logistic_tf(x):
     """logistic function using tensorflow """
@@ -456,7 +456,7 @@ def ilogistic_tf(x):
     return - tf.log(1./x - 1.)
 
 def gaussfunc_tf(x):
-    return tf.exp(-(x**2))
+    return tf.exp(-2.*(x - np.pi)**2)
 
 
 def Matern12CosineMix(variance, lengthscale, period, Nh):
