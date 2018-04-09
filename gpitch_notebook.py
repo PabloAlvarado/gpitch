@@ -80,11 +80,11 @@ def re_init_params(m, x, y, nivps):
 
     # reset variational parameters
     m.q_mu1 = np.zeros((zc1.shape[0], 1))  # f1
-    m.q_mu2 = -np.ones((za1.shape[0], 1))  # g1
+    m.q_mu2 = np.zeros((za1.shape[0], 1))  # g1
     m.q_mu3 = np.zeros((zc2.shape[0], 1))  # f2
-    m.q_mu4 = -np.ones((za2.shape[0], 1))  # g2
+    m.q_mu4 = np.zeros((za2.shape[0], 1))  # g2
     m.q_mu5 = np.zeros((zc3.shape[0], 1))  # f3
-    m.q_mu6 = -np.ones((za3.shape[0], 1))  # g3
+    m.q_mu6 = np.zeros((za3.shape[0], 1))  # g3
 
     q_sqrt_a1 = np.array([np.eye(za1.shape[0]) for _ in range(1)]).swapaxes(0, 2)
     q_sqrt_c1 = np.array([np.eye(zc1.shape[0]) for _ in range(1)]).swapaxes(0, 2)
