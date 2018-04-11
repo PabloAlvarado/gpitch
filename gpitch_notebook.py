@@ -120,7 +120,7 @@ def get_lists_save_results():
     return [], [], [], [], [], [], [[], [], []], [[], [], []], [[], [], []], [[], [], []]
 
 
-def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[2500, 5000], learning_rate=[0.005, 0.0025], minibatch_size=500,
+def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[20000, 20000], learning_rate=[0.005, 0.0025], minibatch_size=500,
                          frames=-1, start=0, opt_za=True, window_size=32000, disp=True, varfix=False):
     """
     param nivps: number of inducing variables per second, for activations and components
@@ -196,8 +196,8 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[2500, 5000],
         mg_l.append(list(mg))
         vf_l.append(list(vf))
         vg_l.append(list(vg))
-        x_l.append(list(x_plot))
-        y_l.append(list(y_plot))
+        x_l.append(x_plot)
+        y_l.append(y_plot)
 
         q_mu_acts_l[0].append(mpd.q_mu2.value.copy())
         q_mu_acts_l[1].append(mpd.q_mu4.value.copy())
@@ -233,8 +233,14 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[2500, 5000],
                                                           mpd.kern_f3.lengthscales.value[0].copy()]})
             display(data_com_kern)
 
-    results = [mf_l, mg_l, vf_l, vg_l, x_l, y_l, q_mu_acts_l, q_mu_comps_l, q_sqrt_acts_l, q_sqrt_comps_l]
-    return mpd, results
+    results_l = [mf_l, mg_l, vf_l, vg_l, x_l, y_l, q_mu_acts_l, q_mu_comps_l, q_sqrt_acts_l, q_sqrt_comps_l]
+    
+    # results_array = [[], [], [], [], [], []]
+    # for i in range(6):
+    #     for j in range(3):
+    #         results_array[i].append(gpitch.trim(results_l[i][j]))
+                             
+    return mpd, results_l
 
     # group results
 

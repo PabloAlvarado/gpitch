@@ -201,6 +201,38 @@ def augmentate(x, y, augment_size=1600):
     return xaug, yaug
 
 
+def trim_n_merge(x, trim_size=1600):
+    xl = []
+    for i in range(len(x)):
+        xl.append(x[i][trim_size:-trim_size].copy().reshape(-1, 1))
+    xl = np.asarray(xl).reshape(-1, 1)
+    return xl
+
+def merge_all(inlist):
+    outlist = [[[], [], []], 
+               [[], [], []],
+               [[], [], []],
+               [[], [], []],
+               [], 
+               []]
+    for j in range(4):
+        for i in range(2):
+            outlist[j][0].append(inlist[j][i][0])
+            outlist[j][1].append(inlist[j][i][1])
+            outlist[j][2].append(inlist[j][i][2])
+    outlist[4] = inlist[4]
+    outlist[5] = inlist[5]
+    
+    for j in range(4):
+        outlist[j][0] = trim_n_merge(outlist[j][0])
+        outlist[j][1] = trim_n_merge(outlist[j][1])
+        outlist[j][2] = trim_n_merge(outlist[j][2])
+    outlist[4] =  trim_n_merge(outlist[4])
+    outlist[5] =  trim_n_merge(outlist[5])
+    
+    return outlist
+
+
 def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
     '''
     :param y: data
