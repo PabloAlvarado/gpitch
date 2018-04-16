@@ -454,7 +454,7 @@ def norm(x):
 
 def logistic(x):
     """ logistic function """
-    return 1./(1. + np.exp(-x))
+    return 1./(1. + np.exp( -2.*(x - np.pi) ) )
 
 def ilogistic(x):
     """inverse logistic function"""
@@ -473,7 +473,7 @@ def gaussfunc(x):
 
 def logistic_tf(x):
     """logistic function using tensorflow """
-    return 1./(1. + tf.exp(-x))
+    return 1./(1. + tf.exp(-2.*(x - np.pi) ))
 
 def softplus_tf(x):
     """ softplus function using tensorflow  """

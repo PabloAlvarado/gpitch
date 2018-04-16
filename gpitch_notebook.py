@@ -105,13 +105,13 @@ def re_init_params(m, x, y, nivps):
     m.kern_g2.variance = 1.
     m.kern_g3.variance = 1.
 
-    m.kern_g1.lengthscales = 0.2
-    m.kern_g2.lengthscales = 0.2
-    m.kern_g3.lengthscales = 0.2
+    m.kern_g1.lengthscales = 0.5
+    m.kern_g2.lengthscales = 0.5
+    m.kern_g3.lengthscales = 0.5
 
-    m.kern_f1.lengthscales = 2.5
-    m.kern_f2.lengthscales = 2.5
-    m.kern_f3.lengthscales = 2.5
+    m.kern_f1.lengthscales = 1.
+    m.kern_f2.lengthscales = 1.
+    m.kern_f3.lengthscales = 1.
 
     m.likelihood.variance = 1.
 
@@ -120,7 +120,7 @@ def get_lists_save_results():
     return [], [], [], [], [], [], [[], [], []], [[], [], []], [[], [], []], [[], [], []]
 
 
-def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[20000, 20000], learning_rate=[0.005, 0.0025], minibatch_size=500,
+def learning_on_notebook(gpu='0', inst=0, nivps=[20, 100], maxiter=[10000, 20000], learning_rate=[0.0025, 0.0025], minibatch_size=1000,
                          frames=-1, start=0, opt_za=True, window_size=32000, disp=True, varfix=False):
     """
     param nivps: number of inducing variables per second, for activations and components
@@ -149,7 +149,8 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[20000, 20000
 
     x, y = gpitch.segment(xall.copy(), yall.copy(), window_size=window_size)  # return list of segments
 
-    nlinfun = gpitch.gaussfunc_tf  # use gaussian as non-linear transform for activations
+    #nlinfun = gpitch.gaussfunc_tf  # use gaussian as non-linear transform for activations
+    nlinfun = gpitch.logistic_tf  # use gaussian as non-linear transform for activations
     mpd = gpitch.ssgp.init_model(x=x[0].copy(), y=y[0].copy(), m1=m[0], m2=m[1], m3=m[2], niv_a=nivps[0], niv_c=nivps[1],
                                  minibatch_size=minibatch_size, nlinfun=nlinfun, quad=True, varfix=varfix)  # init pitch detection model
 
@@ -185,12 +186,18 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 200], maxiter=[20000, 20000
                 mpd.optimize(disp=True, maxiter=maxiter[1])
             else:
                 print ("Optimizing location inducing variables using SVI")
-                mpd.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate[1], epsilon=0.1), maxiter=maxiter[1])
+                mpd.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate[1], epsilon=0.1), maxiter=maxiter[1])           
 
             print("Time {} secs".format(time.time() - st))
+            
+            mpd.Za1.fixed = True
+            mpd.Za2.fixed = True
+            mpd.Za3.fixed = True
 
         mf, vf, mg, vg, x_plot, y_plot =  gpitch.ssgp.predict_windowed(x=x[i], y=y[i], predfunc=mpd.predictall)  # predict
-        gpitch.myplots.plot_ssgp_gauss(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)  # plot results
+        #gpitch.myplots.plot_ssgp_gauss(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)  # plot results
+        gpitch.myplots.plot_ssgp(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)  # plot results
+
 
         mf_l.append(list(mf))
         mg_l.append(list(mg))

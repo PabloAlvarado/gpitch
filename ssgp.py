@@ -44,26 +44,27 @@ def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun, quad=Tru
     zc2 = 0.33*(zc1[1] - zc1[0]) + np.vstack([x[::dec_c2].copy(), x[-1].copy()])  # location inducing variables
     za3 = 0.66*(za1[1] - za1[0]) + np.vstack([x[::dec_a3].copy(), x[-1].copy()])  # location inducing variables
     zc3 = 0.66*(zc1[1] - zc1[0]) + np.vstack([x[::dec_c3].copy(), x[-1].copy()])  # location inducing variables
-
+    
+    
     Z = [za1, zc1, za2, zc2, za3, zc3]
     m = SsGP(X=x.copy(), Y=y.copy(), kf=[kc1, kc2, kc3], kg=[ka1, ka2, ka3], Z=Z,
              minibatch_size=minibatch_size, nlinfun=nlinfun, quad=quad)
 
     m.kern_f1.fixed = True
     m.kern_f1.lengthscales.fixed = False
-    m.kern_f1.lengthscales = 2.5
+    m.kern_f1.lengthscales = 1.0
 
     m.kern_f2.fixed = True
     m.kern_f2.lengthscales.fixed = False
-    m.kern_f2.lengthscales = 2.5
+    m.kern_f2.lengthscales = 1.0
 
     m.kern_f3.fixed = True
     m.kern_f3.lengthscales.fixed = False
-    m.kern_f3.lengthscales = 2.5
+    m.kern_f3.lengthscales = 1.0
 
-    m.kern_g1.lengthscales = 0.2
-    m.kern_g2.lengthscales = 0.2
-    m.kern_g3.lengthscales = 0.2
+    m.kern_g1.lengthscales = 0.5
+    m.kern_g2.lengthscales = 0.5
+    m.kern_g3.lengthscales = 0.5
 
     m.kern_g1.variance = 1.
     m.kern_g2.variance = 1.
@@ -197,11 +198,11 @@ class SsGP(gpflow.model.Model):
 
         # initialize variational parameters
         self.q_mu1 = gpflow.param.Param(np.zeros((self.Zc1.shape[0], 1)))  # f1
-        self.q_mu2 = gpflow.param.Param(np.zeros((self.Za1.shape[0], 1)))  # g1
+        self.q_mu2 = gpflow.param.Param(3.*np.ones((self.Za1.shape[0], 1)))  # g1
         self.q_mu3 = gpflow.param.Param(np.zeros((self.Zc2.shape[0], 1)))  # f2
-        self.q_mu4 = gpflow.param.Param(np.zeros((self.Za2.shape[0], 1)))  # g2
+        self.q_mu4 = gpflow.param.Param(3.*np.ones((self.Za2.shape[0], 1)))  # g2
         self.q_mu5 = gpflow.param.Param(np.zeros((self.Zc3.shape[0], 1)))  # f3
-        self.q_mu6 = gpflow.param.Param(np.zeros((self.Za3.shape[0], 1)))  # g3
+        self.q_mu6 = gpflow.param.Param(3.*np.ones((self.Za3.shape[0], 1)))  # g3
 
         q_sqrt_a1 = np.array([np.eye(self.num_inducing_a1) for _ in range(1)]).swapaxes(0, 2)
         q_sqrt_c1 = np.array([np.eye(self.num_inducing_c1) for _ in range(1)]).swapaxes(0, 2)
