@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.fftpack import fft
 from IPython.display import display
+from gpitch import window_overlap
 
 
 plt.rcParams['figure.figsize'] = (16, 2)  # set plot size
@@ -101,17 +102,17 @@ def re_init_params(m, x, y, nivps):
     m.q_sqrt6 = q_sqrt_a3.copy()
 
     # reset hyper-parameters
-    m.kern_g1.variance = 1.
-    m.kern_g2.variance = 1.
-    m.kern_g3.variance = 1.
+    m.kern_g1.variance = 4.
+    m.kern_g2.variance = 4.
+    m.kern_g3.variance = 4.
 
     m.kern_g1.lengthscales = 0.5
     m.kern_g2.lengthscales = 0.5
     m.kern_g3.lengthscales = 0.5
 
-    m.kern_f1.lengthscales = 1.
-    m.kern_f2.lengthscales = 1.
-    m.kern_f3.lengthscales = 1.
+    m.kern_f1.lengthscales = 1.0
+    m.kern_f2.lengthscales = 1.0
+    m.kern_f3.lengthscales = 1.0
 
     m.likelihood.variance = 1.
 
@@ -120,8 +121,8 @@ def get_lists_save_results():
     return [], [], [], [], [], [], [[], [], []], [[], [], []], [[], [], []], [[], [], []]
 
 
-def learning_on_notebook(gpu='0', inst=0, nivps=[20, 100], maxiter=[10000, 20000], learning_rate=[0.0025, 0.0025], minibatch_size=1000,
-                         frames=-1, start=0, opt_za=True, window_size=32000, disp=True, varfix=False):
+def learning_on_notebook(gpu='0', inst=0, nivps=[50, 200], maxiter=[10000, 20000], learning_rate=[0.0025, 0.0025], minibatch_size=1000,
+                         frames=-1, start=0, opt_za=True, window_size=32000, disp=True, varfix=False, overlap=False):
     """
     param nivps: number of inducing variables per second, for activations and components
     """
@@ -138,7 +139,7 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 100], maxiter=[10000, 20000
     pattern = 'trained_25_modgp2_new_var_1' + instrument  # which model version
 
     m, names_list = gpitch.loadm(directory=directory, pattern=pattern)  # load pitch models
-    plot_loaded_models(m, instrument)
+    #plot_loaded_models(m, instrument)
 
     # load data
     test_data_dir = '/import/c4dm-04/alvarado/datasets/ss_amt/test_data/'
@@ -146,10 +147,12 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 100], maxiter=[10000, 20000
     lfiles += [i for i in os.listdir(test_data_dir) if instrument + '_mixture' in i]
 
     xall, yall, fs = gpitch.readaudio(test_data_dir + lfiles[0], aug=False, start=start, frames=frames)
+    
+    if overlap:
+        x, y = window_overlap.windowed(xall.copy(), yall.copy(), ws=window_size)  # return list of segments
+    else:
+        x, y = gpitch.segment(xall.copy(), yall.copy(), window_size=window_size, aug=False)  # return list of segments
 
-    x, y = gpitch.segment(xall.copy(), yall.copy(), window_size=window_size)  # return list of segments
-
-    #nlinfun = gpitch.gaussfunc_tf  # use gaussian as non-linear transform for activations
     nlinfun = gpitch.logistic_tf  # use gaussian as non-linear transform for activations
     mpd = gpitch.ssgp.init_model(x=x[0].copy(), y=y[0].copy(), m1=m[0], m2=m[1], m3=m[2], niv_a=nivps[0], niv_c=nivps[1],
                                  minibatch_size=minibatch_size, nlinfun=nlinfun, quad=True, varfix=varfix)  # init pitch detection model
@@ -157,12 +160,14 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 100], maxiter=[10000, 20000
     mf_l, mg_l, vf_l, vg_l, x_l, y_l, q_mu_acts_l, q_mu_comps_l, q_sqrt_acts_l, q_sqrt_comps_l = get_lists_save_results()
 
     for i in range(len(y)):
-        plt.figure(5), plt.title("Test data  " + lfiles[0])
-        plt.plot(x[i], y[i])
+
 
         if i is not 0:
             re_init_params(m=mpd, x=x[i].copy(), y=y[i].copy(), nivps=nivps)
 
+        plt.figure(5), plt.title("Test data  " + lfiles[0])
+        plt.plot(x[i], y[i])
+            
         st = time.time()  # run optimization
 
         if minibatch_size is None:
@@ -192,11 +197,10 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[20, 100], maxiter=[10000, 20000
             
             mpd.Za1.fixed = True
             mpd.Za2.fixed = True
-            mpd.Za3.fixed = True
+            mpd.Za3.fixed = True          
 
         mf, vf, mg, vg, x_plot, y_plot =  gpitch.ssgp.predict_windowed(x=x[i], y=y[i], predfunc=mpd.predictall)  # predict
-        #gpitch.myplots.plot_ssgp_gauss(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)  # plot results
-        gpitch.myplots.plot_ssgp(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)  # plot results
+        #gpitch.myplots.plot_ssgp(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)  # plot results
 
 
         mf_l.append(list(mf))

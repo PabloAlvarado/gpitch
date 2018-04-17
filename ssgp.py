@@ -66,26 +66,22 @@ def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun, quad=Tru
     m.kern_g2.lengthscales = 0.5
     m.kern_g3.lengthscales = 0.5
 
-    m.kern_g1.variance = 1.
-    m.kern_g2.variance = 1.
-    m.kern_g3.variance = 1.
+    m.kern_g1.variance = 4.
+    m.kern_g2.variance = 4.
+    m.kern_g3.variance = 4.
 
     m.kern_g1.variance.fixed = varfix
     m.kern_g2.variance.fixed = varfix
     m.kern_g3.variance.fixed = varfix
 
     m.likelihood.variance = 1.
-    # envelope, latent, compon = get_env(y.copy(), win_size=500)
-    # m.q_mu2 = np.vstack([ latent[::dec_a1].reshape(-1,1).copy(), latent[-1].reshape(-1,1).copy() ])  # g1
-    # m.q_mu4 = np.vstack([ latent[::dec_a2].reshape(-1,1).copy(), latent[-1].reshape(-1,1).copy() ])  # g2
-    # m.q_mu6 = np.vstack([ latent[::dec_a3].reshape(-1,1).copy(), latent[-1].reshape(-1,1).copy() ])  # g3
     return m
 
 
 def predict_windowed(x, y, predfunc):
     st = time.time()
     n = y.size
-    nw = 1600
+    nw = 8001
     mf = [[], [], []]
     mg = [[], [], []]
     vf = [[], [], []]
@@ -198,11 +194,11 @@ class SsGP(gpflow.model.Model):
 
         # initialize variational parameters
         self.q_mu1 = gpflow.param.Param(np.zeros((self.Zc1.shape[0], 1)))  # f1
-        self.q_mu2 = gpflow.param.Param(3.*np.ones((self.Za1.shape[0], 1)))  # g1
+        self.q_mu2 = gpflow.param.Param(np.zeros((self.Za1.shape[0], 1)))  # g1
         self.q_mu3 = gpflow.param.Param(np.zeros((self.Zc2.shape[0], 1)))  # f2
-        self.q_mu4 = gpflow.param.Param(3.*np.ones((self.Za2.shape[0], 1)))  # g2
+        self.q_mu4 = gpflow.param.Param(np.zeros((self.Za2.shape[0], 1)))  # g2
         self.q_mu5 = gpflow.param.Param(np.zeros((self.Zc3.shape[0], 1)))  # f3
-        self.q_mu6 = gpflow.param.Param(3.*np.ones((self.Za3.shape[0], 1)))  # g3
+        self.q_mu6 = gpflow.param.Param(np.zeros((self.Za3.shape[0], 1)))  # g3
 
         q_sqrt_a1 = np.array([np.eye(self.num_inducing_a1) for _ in range(1)]).swapaxes(0, 2)
         q_sqrt_c1 = np.array([np.eye(self.num_inducing_c1) for _ in range(1)]).swapaxes(0, 2)

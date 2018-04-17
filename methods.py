@@ -177,7 +177,7 @@ def readaudio(fname, frames=-1, start=0, aug=False):
     return x, y, fs
 
 
-def segment(x, y, window_size=32000):
+def segment(x, y, window_size=32000, aug=True):
     """segments the input data into arrays of size nw. Returns a list with segments
         the augmentation corresponds to 50 miliseconds (800 samples) assuming 16kHz of sampling rate
     """
@@ -186,7 +186,10 @@ def segment(x, y, window_size=32000):
     for i in range(y.size/window_size):
         yaux = y[i*window_size : (i+1)*window_size].copy()
         xaux = x[i*window_size : (i+1)*window_size].copy()
-        xa, ya = augmentate(xaux, yaux)
+        if aug:
+            xa, ya = augmentate(xaux, yaux)
+        else:
+            xa, ya = xaux.copy(), yaux.copy()
         ys.append(ya)  
         xs.append(xa)  
     return xs, ys
@@ -201,10 +204,13 @@ def augmentate(x, y, augment_size=1600):
     return xaug, yaug
 
 
-def trim_n_merge(x, trim_size=1600):
+def trim_n_merge(x, trim_size=1600, aug=True):
     xl = []
     for i in range(len(x)):
-        xl.append(x[i][trim_size:-trim_size].copy().reshape(-1, 1))
+        if aug:
+            xl.append(x[i][trim_size:-trim_size].copy().reshape(-1, 1))        
+        else:
+            xl.append(x[i].copy().reshape(-1, 1))
     xl = np.asarray(xl).reshape(-1, 1)
     return xl
 
