@@ -121,8 +121,8 @@ def get_lists_save_results():
     return [], [], [], [], [], [], [[], [], []], [[], [], []], [[], [], []], [[], [], []]
 
 
-def learning_on_notebook(gpu='0', inst=0, nivps=[50, 200], maxiter=[10000, 20000], learning_rate=[0.0025, 0.0025], minibatch_size=1000,
-                         frames=-1, start=0, opt_za=True, window_size=32000, disp=True, varfix=False, overlap=False):
+def learning_on_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[1000, 1000], learning_rate=[0.0025, 0.0025], minibatch_size=None,
+                         frames=14*16000, start=0, opt_za=True, window_size=8001, disp=False, varfix=False, overlap=True):
     """
     param nivps: number of inducing variables per second, for activations and components
     """
@@ -148,14 +148,17 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[50, 200], maxiter=[10000, 20000
 
     xall, yall, fs = gpitch.readaudio(test_data_dir + lfiles[0], aug=False, start=start, frames=frames)
     
+    yall2 = np.vstack((  yall.copy(), 0.  ))
+    xall2 = np.vstack((  xall.copy(), xall[-1].copy() + xall[1].copy()  ))
+    
     if overlap:
-        x, y = window_overlap.windowed(xall.copy(), yall.copy(), ws=window_size)  # return list of segments
+        x, y = window_overlap.windowed(xall2.copy(), yall2.copy(), ws=window_size)  # return list of segments
     else:
-        x, y = gpitch.segment(xall.copy(), yall.copy(), window_size=window_size, aug=False)  # return list of segments
+        x, y = gpitch.segment(xall2.copy(), yall2.copy(), window_size=window_size, aug=False)  # return list of segments
 
     nlinfun = gpitch.logistic_tf  # use gaussian as non-linear transform for activations
     mpd = gpitch.ssgp.init_model(x=x[0].copy(), y=y[0].copy(), m1=m[0], m2=m[1], m3=m[2], niv_a=nivps[0], niv_c=nivps[1],
-                                 minibatch_size=minibatch_size, nlinfun=nlinfun, quad=True, varfix=varfix)  # init pitch detection model
+                                 minibatch_size=minibatch_size, nlinfun=nlinfun, quad=True, varfix=varfix)  # init pitch detec model
 
     mf_l, mg_l, vf_l, vg_l, x_l, y_l, q_mu_acts_l, q_mu_comps_l, q_sqrt_acts_l, q_sqrt_comps_l = get_lists_save_results()
 
@@ -168,7 +171,7 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[50, 200], maxiter=[10000, 20000
         plt.figure(5), plt.title("Test data  " + lfiles[0])
         plt.plot(x[i], y[i])
             
-        st = time.time()  # run optimization
+        # st = time.time()  # run optimization
 
         if minibatch_size is None:
             print ("Optimizing using VI")
@@ -177,14 +180,14 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[50, 200], maxiter=[10000, 20000
             print ("Optimizing using SVI")
             mpd.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate[0], epsilon=0.1), maxiter=maxiter[0])
 
-        print("Time {} secs".format(time.time() - st))
+        # print("Time {} secs".format(time.time() - st))
 
         if opt_za: # if True, optimize location inducing variables of activations
             mpd.Za1.fixed = False
             mpd.Za2.fixed = False
             mpd.Za3.fixed = False
 
-            st = time.time()
+            # st = time.time()
 
             if minibatch_size is None:
                 print ("Optimizing location inducing variables using VI")
@@ -193,7 +196,7 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[50, 200], maxiter=[10000, 20000
                 print ("Optimizing location inducing variables using SVI")
                 mpd.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate[1], epsilon=0.1), maxiter=maxiter[1])           
 
-            print("Time {} secs".format(time.time() - st))
+            # print("Time {} secs".format(time.time() - st))
             
             mpd.Za1.fixed = True
             mpd.Za2.fixed = True
@@ -246,18 +249,15 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[50, 200], maxiter=[10000, 20000
 
     results_l = [mf_l, mg_l, vf_l, vg_l, x_l, y_l, q_mu_acts_l, q_mu_comps_l, q_sqrt_acts_l, q_sqrt_comps_l]
     
-    # results_array = [[], [], [], [], [], []]
-    # for i in range(6):
-    #     for j in range(3):
-    #         results_array[i].append(gpitch.trim(results_l[i][j]))
-                             
-    return mpd, results_l
-
-    # group results
-
-    # return prediction mf ,vf, mg, vg, lists with tree arrays each.
-    # return vartiational parameters and location inducing variables
-    #return np.pi
+    
+    rm = window_overlap.merge_all(results_l)  # results merged
+    s1_l, s2_l, s3_l = window_overlap.append_sources(rm)  # get patches of sources
+    window_overlap.plot_patches(rm, s1_l, s2_l, s3_l)
+    x, y, s = window_overlap.get_results_arrays(sl=[s1_l, s2_l, s3_l], rm=rm)
+    window_overlap.plot_sources(x, y, s)
+    final_results = [x, y, s]
+    
+    return mpd, final_results
 
 
 

@@ -79,7 +79,7 @@ def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun, quad=Tru
 
 
 def predict_windowed(x, y, predfunc):
-    st = time.time()
+    # st = time.time()
     n = y.size
     nw = 8001
     mf = [[], [], []]
@@ -131,7 +131,7 @@ def predict_windowed(x, y, predfunc):
     x_plot = np.asarray(x_plot).reshape(-1, 1)
     y_plot = np.asarray(y_plot).reshape(-1, 1)
 
-    print("Time predicting {} secs".format(time.time() - st))
+    # print("Time predicting {} secs".format(time.time() - st))
 
     return mf, vf, mg, vg, x_plot, y_plot
 
