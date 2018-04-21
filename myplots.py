@@ -497,19 +497,23 @@ def plot_ssgp_full(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results', 
     plt.suptitle(title)
 
 
+def plot_predict(x, mean, var, z, latent=False):    
+    if latent:
+        plt.plot(x, logistic(mean), 'C0', lw=2)
+        plt.fill_between(x[:,0], logistic(mean[:,0] - 2*np.sqrt(var[:,0])), 
+                                 logistic(mean[:,0] + 2*np.sqrt(var[:,0])), color='C0', alpha=0.2)
+        
+        plt.twinx()
+        
+        plt.plot(x, mean, 'C2', lw=2, alpha=0.5)
+        plt.fill_between(x[:,0], mean[:,0] - 2*np.sqrt(var[:,0]), 
+                                 mean[:,0] + 2*np.sqrt(var[:,0]), color='C2', alpha=0.1)
+    else:
+        plt.plot(x, mean, 'C0', lw=2)
+        plt.fill_between(x[:,0], mean[:,0] - 2*np.sqrt(var[:,0]), 
+                                 mean[:,0] + 2*np.sqrt(var[:,0]), color='C0', alpha=0.2)
 
-
-
-
-
-
-
-
-
-
-
-
-
+    plt.plot(z, 0.*z, '|C3', mew=2)
 
 
 

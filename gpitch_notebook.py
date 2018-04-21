@@ -12,8 +12,6 @@ from IPython.display import display
 from gpitch import window_overlap
 
 
-plt.rcParams['figure.figsize'] = (16, 2)  # set plot size
-
 def plot_results(mean_f, var_f, mean_g, var_g, x_plot, y, za, zc, xlim):
 
     mean_act = gpitch.gaussfunc(mean_g)
@@ -121,7 +119,7 @@ def get_lists_save_results():
     return [], [], [], [], [], [], [[], [], []], [[], [], []], [[], [], []], [[], [], []]
 
 
-def learning_on_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[1000, 1000], learning_rate=[0.0025, 0.0025], minibatch_size=None,
+def learning_on_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[2000, 2000], learning_rate=[0.0025, 0.0025], minibatch_size=None,
                          frames=14*16000, start=0, opt_za=True, window_size=8001, disp=False, varfix=False, overlap=True):
     """
     param nivps: number of inducing variables per second, for activations and components
@@ -203,7 +201,7 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[1000, 1000]
             mpd.Za3.fixed = True          
 
         mf, vf, mg, vg, x_plot, y_plot =  gpitch.ssgp.predict_windowed(x=x[i], y=y[i], predfunc=mpd.predictall)  # predict
-        #gpitch.myplots.plot_ssgp(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)  # plot results
+        # gpitch.myplots.plot_ssgp(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)  # plot results
 
 
         mf_l.append(list(mf))

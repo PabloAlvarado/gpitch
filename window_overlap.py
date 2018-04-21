@@ -11,16 +11,16 @@ def windowed(x, y, ws=8001):
     yout = []
     nw = (n - ws)/l + 1
     for i in range(nw):
-        if i == 0 :
-            win = signal.hann(ws).reshape(-1, 1)
-            win[0:l] = 1.
-        elif i == nw-1:
-            win = signal.hann(ws).reshape(-1, 1)
-            win[-l:] = 1.
-        else:
-            win = signal.hann(ws).reshape(-1, 1)
+        # if i == 0 :
+        #     win = signal.hann(ws).reshape(-1, 1)
+        #     win[0:l] = 1.
+        # elif i == nw-1:
+        #     win = signal.hann(ws).reshape(-1, 1)
+        #     win[-l:] = 1.
+        # else:
+        #     win = signal.hann(ws).reshape(-1, 1)
         xout.append(x[i*l : i*l + ws].copy().reshape(-1, 1))
-        yout.append(y[i*l : i*l + ws].copy().reshape(-1, 1)*win)
+        yout.append(y[i*l : i*l + ws].copy().reshape(-1, 1))
         
     return xout, yout
 
@@ -29,8 +29,30 @@ def merged_y(y, ws=8001):
     l = (ws-1)/2
     nw = len(y)
     n = (ws-1)/2 * (nw - 1) + ws
-    yout = np.zeros((n, 1))
     
+    # for i in range(len(y)):
+    #     if i == 0 :
+    #         win = signal.hann(ws).reshape(-1, 1)
+    #         win[0:l] = 1.
+    #     elif i == nw-1:
+    #         win = signal.hann(ws).reshape(-1, 1)
+    #         win[-l:] = 1.
+    #     else:
+    #         win = signal.hann(ws).reshape(-1, 1)
+    #     y[i] = y[i]/(win + 0.0001)
+    
+    for i in range(len(y)):
+        if i == 0 :
+            win = signal.hann(ws).reshape(-1, 1)
+            win[0:l] = 1.
+        elif i == nw-1:
+            win = signal.hann(ws).reshape(-1, 1)
+            win[-l:] = 1.
+        else:
+            win = signal.hann(ws).reshape(-1, 1)
+        y[i] = y[i]*win
+    
+    yout = np.zeros((n, 1))
     yout[0:l] = y[0][0:l]
     yout[-l-1:] = y[-1][-l-1:]
     

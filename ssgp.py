@@ -9,6 +9,8 @@ import time
 from gpitch.kernels import Matern32sm
 from gpitch import get_act_params, get_com_params, get_env
 from gpflow.kernels import Matern32, Matern12
+from gpflow.param import transforms
+
 
 
 jitter = settings.numerics.jitter_level
@@ -21,6 +23,9 @@ def init_kernels(m, alpha=1.0):
     var_com, fre_com, ls_com = get_com_params(m.kern_com.get_parameter_dict())
 
     k_a = Matern12(input_dim=1, lengthscales=ls_act[0], variance=var_act[0])
+    #k_a.lengthscales.transform = transforms.Logistic(0., 1.)
+    #k_a.variance.transform = transforms.Logistic(1., 10.)
+    
     k_c = Matern32sm(input_dim=1, numc=fre_com.size, lengthscales=ls_com[0], variances=alpha*var_com, frequencies=fre_com)
     return k_a, k_c
 

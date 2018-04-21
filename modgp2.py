@@ -37,7 +37,7 @@ class Modgp2(gpflow.model.Model):
         self.zc = gpflow.param.Param(zc)
         self.kern_com = kern[0]
         self.kern_act = kern[1]
-        self.likelihood = ModLik(transfunc=gpitch.gaussfunc_tf)
+        self.likelihood = ModLik(transfunc=gpitch.logistic_tf)
         self.whiten = whiten
         self.q_mu_com = gpflow.param.Param(np.zeros((self.zc.shape[0], 1)))  # initialize variational parameters
         self.q_mu_act = gpflow.param.Param(-np.ones((self.za.shape[0], 1)))
