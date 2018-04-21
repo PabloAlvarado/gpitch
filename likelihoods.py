@@ -44,6 +44,29 @@ def hermgauss1d(mean_g, var_g, H, nlinfun):
     E2 = tf.reshape(tf.matmul(evaluations**2, gh_w), shape)
     return E1, E2
 
+def log_lik_exp(Y, mean_g, var_g, mean_f, var_f, E1, E2, noise_var, K):
+    A_l = K*[None]
+    B_l = K*[None]
+    C_l = []
+    
+    for i in range(K):
+        A_l[i] = E1[i]*mean_f[i]
+        B_l[i] = E2[i]*(var_f[i] + mean_f[i]**2)
+        
+    for i in range(K-1):
+        for j in range(i+1, K):
+            C_l.append(E1[i]*mean_f[i]*E1[j]*mean_f[j])
+    
+    A = tf.add_n(A_l)
+    B = tf.add_n(B_l)
+    if K == 1:
+        C = 0.*mean_f[0]
+    else:
+        C = 2.*tf.add_n(C_l)
+    
+    var_exp = -0.5*( (1./noise_var)*(Y**2 - 2.*Y*A + B + C) + np.log(2.*np.pi) + tf.log(noise_var) )
+    return var_exp
+
 class LooLik(gpflow.likelihoods.Likelihood):
     '''Leave One Out likelihood'''
     def __init__(self, version):
@@ -300,103 +323,127 @@ class MpdLik(gpflow.likelihoods.Likelihood):
 
     # variational expectations function, Pablo Alvarado implementation
     def variational_expectations(self, Fmu, Fvar, Y):
-        if self.num_sources == 1:
+#         if self.num_sources == 1:
 
-            mean_f = Fmu[:, 1]  # get mean and var of each q distribution, and reshape
-            mean_g = Fmu[:, 0]
+#             mean_f = Fmu[:, 1]  # get mean and var of each q distribution, and reshape
+#             mean_g = Fmu[:, 0]
             
-            var_f = Fvar[:, 1]
-            var_g = Fvar[:, 0]
+#             var_f = Fvar[:, 1]
+#             var_g = Fvar[:, 0]
             
-            mean_f, mean_g, var_f, var_g = [tf.reshape(e, [-1, 1]) for e in (mean_f,
-                                            mean_g, var_f, var_g)]
+#             mean_f, mean_g, var_f, var_g = [tf.reshape(e, [-1, 1]) for e in (mean_f,
+#                                             mean_g, var_f, var_g)]
             
-            H = 20  # get eval points and weights
-            E1, E2 = hermgauss1d(mean_g, var_g, H, self.nlinfun)
+#             H = 20  # get eval points and weights
+#             E1, E2 = hermgauss1d(mean_g, var_g, H, self.nlinfun)
 
-            # compute log-lik expectations under variational distribution
-            var_exp = -0.5*((1./self.variance)*(Y**2 - 2.*Y*mean_f*E1 +
-                      (var_f + mean_f**2)*E2) + np.log(2.*np.pi) +
-                      tf.log(self.variance))
+#             # compute log-lik expectations under variational distribution
+#             var_exp = -0.5*((1./self.variance)*(Y**2 - 2.*Y*mean_f*E1 +
+#                       (var_f + mean_f**2)*E2) + np.log(2.*np.pi) +
+#                       tf.log(self.variance))
         
-        elif self.num_sources == 2:
-            mean_g1 = Fmu[:, 0] # get mean and var of each q dist, and reshape
-            mean_g2 = Fmu[:, 1]
-            mean_f1 = Fmu[:, 2] 
-            mean_f2 = Fmu[:, 3] 
+#         elif self.num_sources == 2:
+#             mean_g1 = Fmu[:, 0] # get mean and var of each q dist, and reshape
+#             mean_g2 = Fmu[:, 1]
+#             mean_f1 = Fmu[:, 2] 
+#             mean_f2 = Fmu[:, 3] 
             
-            var_g1 = Fvar[:, 0]
-            var_g2 = Fvar[:, 1]
-            var_f1 = Fvar[:, 2]
-            var_f2 = Fvar[:, 3]
+#             var_g1 = Fvar[:, 0]
+#             var_g2 = Fvar[:, 1]
+#             var_f1 = Fvar[:, 2]
+#             var_f2 = Fvar[:, 3]
 
-            mean_f1, mean_g1, var_f1, var_g1 = [tf.reshape(e, [-1, 1]) for e in
-                                               (mean_f1, mean_g1, var_f1, var_g1)]
+#             mean_f1, mean_g1, var_f1, var_g1 = [tf.reshape(e, [-1, 1]) for e in
+#                                                (mean_f1, mean_g1, var_f1, var_g1)]
 
-            mean_f2, mean_g2, var_f2, var_g2 = [tf.reshape(e, [-1, 1]) for e in
-                                               (mean_f2, mean_g2, var_f2, var_g2)]
-            H = 20
-            # calculate required quadratures
-            E1, E2 = hermgauss1d(mean_g1, var_g1, H, self.nlinfun)
-            E3, E4 = hermgauss1d(mean_g2, var_g2, H, self.nlinfun)
+#             mean_f2, mean_g2, var_f2, var_g2 = [tf.reshape(e, [-1, 1]) for e in
+#                                                (mean_f2, mean_g2, var_f2, var_g2)]
+#             H = 20
+#             # calculate required quadratures
+#             E1, E2 = hermgauss1d(mean_g1, var_g1, H, self.nlinfun)
+#             E3, E4 = hermgauss1d(mean_g2, var_g2, H, self.nlinfun)
 
-            # compute log-lik expectations under variational distribution
-            var_exp = -0.5*((1./self.variance)*(Y**2 -
-                       2.*Y*(mean_f1*E1 + mean_f2*E3) +
-                      (var_f1 + mean_f1**2)*E2 +
-                      2.* mean_f1*E1 * mean_f2*E3 +
-                      (var_f2 + mean_f2**2)*E4) +
-                      np.log(2.*np.pi) +
-                      tf.log(self.variance))
+#             # compute log-lik expectations under variational distribution
+#             var_exp = -0.5*((1./self.variance)*(Y**2 -
+#                        2.*Y*(mean_f1*E1 + mean_f2*E3) +
+#                       (var_f1 + mean_f1**2)*E2 +
+#                       2.* mean_f1*E1 * mean_f2*E3 +
+#                       (var_f2 + mean_f2**2)*E4) +
+#                       np.log(2.*np.pi) +
+#                       tf.log(self.variance))
             
-        elif self.num_sources == 3:
-            # variational expectations function, Pablo Alvarado implementation
-            mean_g1 = Fmu[:, 0]
-            mean_g2 = Fmu[:, 1]
-            mean_g3 = Fmu[:, 2]
+#         elif self.num_sources == 3:
+#             # variational expectations function, Pablo Alvarado implementation
+#             mean_g1 = Fmu[:, 0]
+#             mean_g2 = Fmu[:, 1]
+#             mean_g3 = Fmu[:, 2]
 
-            mean_f1 = Fmu[:, 3] 
-            mean_f2 = Fmu[:, 4]  
-            mean_f3 = Fmu[:, 5]  
+#             mean_f1 = Fmu[:, 3] 
+#             mean_f2 = Fmu[:, 4]  
+#             mean_f3 = Fmu[:, 5]  
 
-            var_g1 = Fvar[:, 0]
-            var_g2 = Fvar[:, 1]
-            var_g3 = Fvar[:, 2]
+#             var_g1 = Fvar[:, 0]
+#             var_g2 = Fvar[:, 1]
+#             var_g3 = Fvar[:, 2]
             
-            var_f1 = Fvar[:, 3]
-            var_f2 = Fvar[:, 4]            
-            var_f3 = Fvar[:, 5]
+#             var_f1 = Fvar[:, 3]
+#             var_f2 = Fvar[:, 4]            
+#             var_f3 = Fvar[:, 5]
 
 
-            mean_f1, mean_g1, var_f1, var_g1 = [tf.reshape(e, [-1, 1]) for e in
-                                               (mean_f1, mean_g1, var_f1, var_g1)]
+#             mean_f1, mean_g1, var_f1, var_g1 = [tf.reshape(e, [-1, 1]) for e in
+#                                                (mean_f1, mean_g1, var_f1, var_g1)]
 
-            mean_f2, mean_g2, var_f2, var_g2 = [tf.reshape(e, [-1, 1]) for e in
-                                               (mean_f2, mean_g2, var_f2, var_g2)]
+#             mean_f2, mean_g2, var_f2, var_g2 = [tf.reshape(e, [-1, 1]) for e in
+#                                                (mean_f2, mean_g2, var_f2, var_g2)]
 
-            mean_f3, mean_g3, var_f3, var_g3 = [tf.reshape(e, [-1, 1]) for e in
-                                               (mean_f3, mean_g3, var_f3, var_g3)]
+#             mean_f3, mean_g3, var_f3, var_g3 = [tf.reshape(e, [-1, 1]) for e in
+#                                                (mean_f3, mean_g3, var_f3, var_g3)]
 
-            # calculate required quadratures
-            H = 20
-            E1, E2 = hermgauss1d(mean_g1, var_g1, H, self.nlinfun)
-            E3, E4 = hermgauss1d(mean_g2, var_g2, H, self.nlinfun)
-            E5, E6 = hermgauss1d(mean_g3, var_g3, H, self.nlinfun)
+#             # calculate required quadratures
+#             H = 20
+#             E1, E2 = hermgauss1d(mean_g1, var_g1, H, self.nlinfun)
+#             E3, E4 = hermgauss1d(mean_g2, var_g2, H, self.nlinfun)
+#             E5, E6 = hermgauss1d(mean_g3, var_g3, H, self.nlinfun)
 
 
 
-            # compute log-lik expectations under variational distribution
-            var_exp = -0.5*((1./self.variance)*(Y**2 -
-                       2.*Y*(mean_f1*E1 + mean_f2*E3 + mean_f3*E5) +
-                      (var_f1 + mean_f1**2)*E2 +
-                      (var_f2 + mean_f2**2)*E4 +
-                      (var_f3 + mean_f3**2)*E6 +
-                      2.* (mean_f1*E1 * mean_f2*E3 + mean_f1*E1 * mean_f3*E5 + mean_f2*E3 * mean_f3*E5)) +
-                      np.log(2.*np.pi) +
-                      tf.log(self.variance))
-        else:
-            pass
-        
+#             # compute log-lik expectations under variational distribution
+#             var_exp = -0.5*((1./self.variance)*(Y**2 -
+#                        2.*Y*(mean_f1*E1 + mean_f2*E3 + mean_f3*E5) +
+#                       (var_f1 + mean_f1**2)*E2 +
+#                       (var_f2 + mean_f2**2)*E4 +
+#                       (var_f3 + mean_f3**2)*E6 +
+#                       2.* (mean_f1*E1 * mean_f2*E3 + mean_f1*E1 * mean_f3*E5 + mean_f2*E3 * mean_f3*E5)) +
+#                       np.log(2.*np.pi) +
+#                       tf.log(self.variance))
+#         else:
+
+        init_l = self.num_sources*[None] 
+        mean_g_l = list(init_l)
+        mean_f_l = list(init_l)
+        var_g_l = list(init_l)
+        var_f_l = list(init_l)
+        Evalue1 = list(init_l) 
+        Evalue2 = list(init_l)
+        H = 20
+        for i in range(self.num_sources):
+            mean_g_l[i] = Fmu[:, i]
+            mean_f_l[i] = Fmu[:, i + self.num_sources]
+
+            var_g_l[i] = Fvar[:, i]
+            var_f_l[i] = Fvar[:, i + self.num_sources]
+
+            mean_g_l[i] = tf.reshape(mean_g_l[i], [-1, 1])
+            mean_f_l[i] = tf.reshape(mean_f_l[i], [-1, 1])
+
+            var_g_l[i] = tf.reshape(var_g_l[i], [-1, 1])
+            var_f_l[i] = tf.reshape(var_f_l[i], [-1, 1])
+
+            Evalue1[i], Evalue2[i] = hermgauss1d(mean_g_l[i], var_g_l[i], H, self.nlinfun)
+
+        var_exp = log_lik_exp(Y, mean_g_l, var_g_l, mean_f_l, var_f_l, Evalue1, Evalue2, self.variance, self.num_sources) 
+ 
         return var_exp
 
 
