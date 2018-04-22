@@ -496,7 +496,31 @@ def plot_ssgp_full(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results', 
     plt.xlim(xlim)
     plt.suptitle(title)
 
+    
+def plot_data(x, y, source=None):
+    if source == None:
+        num_sources = 0
+    else:
+        num_sources = len(source)
+    
+    nrow = num_sources + 1
+    ncol = 1
+    
+    fig, ax = plt.subplots(nrow, sharex=True, sharey=False, figsize=(12, 2*(num_sources+1)))
+    fig.subplots_adjust(hspace=0)
+    
+    if source == None:
+        ax.plot(x, y)
+    else:
+        ax[0].plot(x, y)
+    plt.xlim(x[0], x[-1])
+    
+    if source is not None:
+        for i in range(num_sources):
+            plt.xlim(x[0], x[-1])
+            ax[i + 1].plot(x, source[i])
 
+            
 def plot_predict(x, mean, var, z, latent=False):    
     if latent:
         plt.plot(x, logistic(mean), 'C0', lw=2)
