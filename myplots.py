@@ -497,28 +497,37 @@ def plot_ssgp_full(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results', 
     plt.suptitle(title)
 
     
-def plot_data(x, y, source=None):
+def plot_data(x, y, source=None, maxncol=4):
     if source == None:
         num_sources = 0
     else:
         num_sources = len(source)
-    
-    nrow = num_sources + 1
-    ncol = 1
-    
-    fig, ax = plt.subplots(nrow, sharex=True, sharey=False, figsize=(12, 2*(num_sources+1)))
-    fig.subplots_adjust(hspace=0)
-    
-    if source == None:
-        ax.plot(x, y)
+        
+    if num_sources < maxncol:
+        ncol = num_sources
+
     else:
-        ax[0].plot(x, y)
-    plt.xlim(x[0], x[-1])
+        ncol = maxncol
+        
+    if num_sources == 0:
+        ncol = 1
+        nrow = 1
+    else:
+        nrow = 2 + int((num_sources-1)/maxncol)
     
+    
+    plt.figure(figsize=(16, 4*nrow))
+    plt.subplot(nrow, ncol, (1, ncol))
+    plt.plot(x,y)
+    plt.xlim(x[0], x[-1])
+    plt.legend(["Data"], loc=1)
+        
     if source is not None:
         for i in range(num_sources):
+            plt.subplot(nrow, ncol, i + 1 + ncol)
+            plt.plot(x, source[i])
             plt.xlim(x[0], x[-1])
-            ax[i + 1].plot(x, source[i])
+            plt.legend(["Source " + str(i + 1)], loc=1)
 
             
 def plot_predict(x, mean, var, z, latent=False):    
@@ -541,5 +550,61 @@ def plot_predict(x, mean, var, z, latent=False):
 
 
 
+def plot_predict_all(x, mean_act, var_act, mean_com, var_com, m):
+    num_sources = len(mean_act)
+    ncol = 4
+    nrow = 2*(1 + int( (num_sources-1)/ncol ))
+    plt.figure(figsize=(12, 3*2*(num_sources/ncol)))
+    for i in range(num_sources):
+        plt.subplot(nrow, ncol, ncol*(i/ncol) + i + 1)
+        plot_predict(x, mean_act[i], var_act[i], m.za[i].value, True);
+        
+        plt.subplot(nrow, ncol, ncol*(i/ncol + 1) + i + 1)
+        plot_predict(x, mean_com[i], var_com[i], m.zc[i].value);
 
+        
+        
+def plot_sources_all(x, y, esource, source=None, maxncol=4):
+    
+    
+    if esource == None:
+        num_sources = 0
+    else:
+        num_sources = len(esource)
+        
+    if num_sources < maxncol:
+        ncol = num_sources
+
+    else:
+        ncol = maxncol
+        
+    if num_sources == 0:
+        ncol = 1
+        nrow = 1
+    else:
+        nrow = 2 + int((num_sources-1)/maxncol)
+    
+    
+    all_prediction = np.zeros((x.size, 1))
+    for i in range(num_sources):
+        all_prediction += esource[i]
+    
+    
+    plt.figure(figsize=(16, 4*nrow))
+    plt.subplot(nrow, ncol, (1, ncol))
+    plt.plot(x, y, 'xk')
+    plt.plot(x, all_prediction, lw=2)
+    plt.xlim(x[0], x[-1])
+    plt.legend(["Data"], loc=1)
+        
+    
+    for i in range(num_sources):
+        plt.subplot(nrow, ncol, i + 1 + ncol)
+        if source is not None:
+            plt.plot(x, source[i], 'xk')
+        plt.plot(x, esource[i], lw=2)
+        plt.legend(["Real source " + str(i + 1), "Estimated source " + str(i + 1)], loc=1)
+        plt.xlim(x[0], x[-1])
+       
+         
 #
