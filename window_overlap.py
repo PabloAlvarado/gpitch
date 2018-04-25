@@ -4,7 +4,7 @@ from scipy import signal
 from gpitch import logistic
 
 
-def windowed(x, y, ws=8001):
+def windowed(x, y, ws):
     n = x.size
     l = (ws-1)/2
     xout = []
@@ -25,7 +25,7 @@ def windowed(x, y, ws=8001):
     return xout, yout
 
 
-def merged_y(y, ws=8001):
+def merged_y(y, ws):
     l = (ws-1)/2
     nw = len(y)
     n = (ws-1)/2 * (nw - 1) + ws
@@ -61,7 +61,7 @@ def merged_y(y, ws=8001):
     return yout
 
 
-def merged_x(x, ws=8001):
+def merged_x(x, ws):
     l = (ws-1)/2
     nw = len(x)
     n = (ws-1)/2 * (nw - 1) + ws
@@ -105,13 +105,13 @@ def append_sources(rmerged):
     return s1_l, s2_l, s3_l
 
 
-def get_results_arrays(sl, rm):
-    s1 = merged_y(sl[0])
-    s2 = merged_y(sl[1])
-    s3 = merged_y(sl[2])
+def get_results_arrays(sl, rm, ws):
+    s1 = merged_y(sl[0], ws)
+    s2 = merged_y(sl[1], ws)
+    s3 = merged_y(sl[2], ws)
 
-    x = merged_x(rm[4])
-    y = merged_y(rm[5])
+    x = merged_x(rm[4], ws)
+    y = merged_y(rm[5], ws)
 
     s1_trim = s1[0:-1].reshape(-1, 1)
     s2_trim = s2[0:-1].reshape(-1, 1)

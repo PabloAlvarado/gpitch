@@ -83,10 +83,9 @@ def init_model(x, y, m1, m2, m3, niv_a, niv_c, minibatch_size, nlinfun, quad=Tru
     return m
 
 
-def predict_windowed(x, y, predfunc):
-    # st = time.time()
+def predict_windowed(x, y, predfunc, nw):
+    # st = time.time() 
     n = y.size
-    nw = 8001
     mf = [[], [], []]
     mg = [[], [], []]
     vf = [[], [], []]

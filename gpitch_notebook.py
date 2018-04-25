@@ -119,16 +119,15 @@ def get_lists_save_results():
     return [], [], [], [], [], [], [[], [], []], [[], [], []], [[], [], []], [[], [], []]
 
 
-def learning_on_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[2000, 2000], learning_rate=[0.0025, 0.0025], minibatch_size=None,
-                         frames=14*16000, start=0, opt_za=True, window_size=8001, disp=False, varfix=False, overlap=True):
+def learning_on_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20], learning_rate=[0.0025, 0.0025], minibatch_size=None,
+                         frames=4000, start=0, opt_za=False, window_size=2001, disp=False, varfix=False, overlap=True):
     """
     param nivps: number of inducing variables per second, for activations and components
     """
 
     if frames < window_size:
         window_size = frames
-
-
+    
     sess = gpitch.init_settings(gpu)  # select gpu to use
 
     linst = ['011PFNOM', '131EGLPM', '311CLNOM', 'ALVARADO']  # list of instruments
@@ -161,7 +160,6 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[2000, 2000]
     mf_l, mg_l, vf_l, vg_l, x_l, y_l, q_mu_acts_l, q_mu_comps_l, q_sqrt_acts_l, q_sqrt_comps_l = get_lists_save_results()
 
     for i in range(len(y)):
-
 
         if i is not 0:
             re_init_params(m=mpd, x=x[i].copy(), y=y[i].copy(), nivps=nivps)
@@ -200,8 +198,8 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[2000, 2000]
             mpd.Za2.fixed = True
             mpd.Za3.fixed = True          
 
-        mf, vf, mg, vg, x_plot, y_plot =  gpitch.ssgp.predict_windowed(x=x[i], y=y[i], predfunc=mpd.predictall)  # predict
-        # gpitch.myplots.plot_ssgp(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)  # plot results
+        mf, vf, mg, vg, x_plot, y_plot =  gpitch.ssgp.predict_windowed(x=x[i], y=y[i], predfunc=mpd.predictall, nw=window_size)  # predict
+        gpitch.myplots.plot_ssgp(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)  # plot results
 
 
         mf_l.append(list(mf))
@@ -244,18 +242,18 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[2000, 2000]
                                                           mpd.kern_f2.lengthscales.value[0].copy(),
                                                           mpd.kern_f3.lengthscales.value[0].copy()]})
             display(data_com_kern)
-
+    
     results_l = [mf_l, mg_l, vf_l, vg_l, x_l, y_l, q_mu_acts_l, q_mu_comps_l, q_sqrt_acts_l, q_sqrt_comps_l]
     
     
-    rm = window_overlap.merge_all(results_l)  # results merged
-    s1_l, s2_l, s3_l = window_overlap.append_sources(rm)  # get patches of sources
-    window_overlap.plot_patches(rm, s1_l, s2_l, s3_l)
-    x, y, s = window_overlap.get_results_arrays(sl=[s1_l, s2_l, s3_l], rm=rm)
-    window_overlap.plot_sources(x, y, s)
-    final_results = [x, y, s]
+    #rm = window_overlap.merge_all(results_l)  # results merged
+    #s1_l, s2_l, s3_l = window_overlap.append_sources(rm)  # get patches of sources
+    #window_overlap.plot_patches(rm, s1_l, s2_l, s3_l)
+    #x, y, s = window_overlap.get_results_arrays(sl=[s1_l, s2_l, s3_l], rm=rm, ws=window_size)
+    #window_overlap.plot_sources(x, y, s)
+    #final_results = [x, y, s]
     
-    return mpd, final_results
+    #return all_models_list, final_results
 
 
 
