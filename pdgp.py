@@ -65,7 +65,7 @@ class Pdgp(gpflow.model.Model):
             za_l.append(Param(z[0][i].copy() ))
             zc_l.append(Param(z[1][i].copy() ))
 
-            q_mu_act_l.append(Param(0.5*np.pi + np.zeros(z[0][i].shape)))
+            q_mu_act_l.append(Param(np.zeros(z[0][i].shape)))
             q_mu_com_l.append(Param(np.zeros(z[1][i].shape)))
 
             q_sqrt_act_l.append(Param(np.array([np.eye(self.num_inducing_a[i]) for _ in range(1)]).swapaxes(0, 2)))
