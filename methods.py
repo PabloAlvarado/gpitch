@@ -15,129 +15,148 @@ import pickle
 import loogp
 import time
 
-def init_vv(x, y, niv, kern_com, kern_act, maxiter=100):
+
+def init_iv(x, num_sources, nivps_a, nivps_c, fs=16000):
     """
-    Initializer of variational variables for the LOO model
+    Initialize inducing variables
     :param x: time vector
-    :param y: audio data
-    :param niv: number of inducing variables per window
-    :param kernels: list with 4 elements [kern_com1, kern_act1, kern_com2, kern_act2]
-    :param maxiter: maximun number of iterations per window
-    :return: list with q_mu and q_sqrt for each process
+    :param fs: sample frequency
+    :param nivps_a: number inducing variables per second for activation
+    :param nivps_c: number inducing variables per second for component
     """
-
-    def get_predict(x, y, xnew, m):
-        m.X = x
-        m.Y = y
-        return m.predict_f(xnew)
-
-    l_q_mu1 = []  # list to save variational parameteres
-    l_q_mu2 = []
-    l_q_mu3 = []
-    l_q_mu4 = []
-    l_q_sqrt1 = []
-    l_q_sqrt2 = []
-    l_q_sqrt3 = []
-    l_q_sqrt4 = []
-    l_z = []
-
-    n = y.size  # size of data
-    nsw = 16000  # number samples per window
-    nw = n / nsw  # number of windows
-    x_win = [x[i * nsw: (i + 1) * nsw].copy() for i in range(nw)]
-    y_win = [y[i*nsw : (i+1)*nsw].copy() for i in range(nw)]
-    zinit = np.linspace(x_win[0][0], x_win[0][-1], niv).reshape(-1, 1)
-    model = loogp.LooGP(X=x_win[0].copy(), Y=y_win[0].copy(), kf=kern_com, kg=kern_act, Z=zinit)
-
-    for i in range(nw):
-        model.X = x_win[i].reshape(-1, 1)
-        model.Y = y_win[i].reshape(-1, 1)
-        model.Z = np.linspace(x_win[i][0], x_win[i][-1], niv).reshape(-1, 1)
-
-        model.q_mu1 = np.zeros((model.Z.value.shape[0], 1))  # f1
-        model.q_mu3 = np.zeros((model.Z.value.shape[0], 1))  # f2
-        model.q_mu2 = -2.1972 * np.ones((model.Z.value.shape[0], 1))  # g1
-        model.q_mu4 = -2.1972 * np.ones((model.Z.value.shape[0], 1))  # g2
-
-        q_sqrt = np.array([np.eye(model.Z.value.shape[0]) for _ in range(1)]).swapaxes(0, 2)
-
-        model.q_sqrt1, model.q_sqrt2, model.q_sqrt3, model.q_sqrt4 = [q_sqrt.copy() for _ in range(4)]
-
-        st = time.time()
-        model.optimize(disp=1, maxiter=maxiter)
-        print(time.time() - st)
-
-        l_q_mu1.append(model.q_mu1.value)  # f1
-        l_q_mu2.append(model.q_mu2.value)  # g1
-        l_q_mu3.append(model.q_mu3.value)  # f2
-        l_q_mu4.append(model.q_mu4.value)  # g2
-
-        l_q_sqrt1.append(model.q_sqrt1.value)
-        l_q_sqrt2.append(model.q_sqrt2.value)
-        l_q_sqrt3.append(model.q_sqrt3.value)
-        l_q_sqrt4.append(model.q_sqrt4.value)
-
-        l_z.append(model.Z.value)
-
-    m_iv_com1 = gpflow.gpr.GPR(l_z[0].copy(), l_q_mu1[0].copy(), kern_com[0])  # f1
-    m_iv_act1 = gpflow.gpr.GPR(l_z[0].copy(), l_q_mu2[0].copy(), kern_act[0])  # g1
-    m_iv_com2 = gpflow.gpr.GPR(l_z[0].copy(), l_q_mu3[0].copy(), kern_com[1])  # f2
-    m_iv_act2 = gpflow.gpr.GPR(l_z[0].copy(), l_q_mu4[0].copy(), kern_act[1])  # g2
-
-
-    l_q_mu1_hr = []  # list to save variational parameteres hihg resolution
-    l_q_mu2_hr = []
-    l_q_mu3_hr = []
-    l_q_mu4_hr = []
-    l_q_sqrt1_hr = []
-    l_q_sqrt2_hr = []
-    l_q_sqrt3_hr = []
-    l_q_sqrt4_hr = []
-    l_z_hr = []
-    for i in range(nw):
-        x_pred = np.linspace(i, i + 1, 100).reshape(-1, 1)
-        mean_com1, var_com1 = get_predict(x=l_z[i], y=l_q_mu1[i], xnew=x_pred, m=m_iv_com1)
-        mean_act1, var_act1 = get_predict(x=l_z[i], y=l_q_mu2[i], xnew=x_pred, m=m_iv_act1)
-        mean_com2, var_com2 = get_predict(x=l_z[i], y=l_q_mu3[i], xnew=x_pred, m=m_iv_com2)
-        mean_act2, var_act2 = get_predict(x=l_z[i], y=l_q_mu4[i], xnew=x_pred, m=m_iv_act2)
-
-        l_q_mu1_hr.append(mean_com1)
-        l_q_mu2_hr.append(mean_act1)
-        l_q_mu3_hr.append(mean_com2)
-        l_q_mu4_hr.append(mean_act2)
-        l_q_sqrt1_hr.append(var_com1)
-        l_q_sqrt2_hr.append(var_act1)
-        l_q_sqrt3_hr.append(var_com2)
-        l_q_sqrt4_hr.append(var_act2)
-        l_z_hr.append(x_pred)
-
-    q_mu1 = np.asarray(l_q_mu1).reshape(-1, 1)
-    q_mu2 = np.asarray(l_q_mu2).reshape(-1, 1)
-    q_mu3 = np.asarray(l_q_mu3).reshape(-1, 1)
-    q_mu4 = np.asarray(l_q_mu4).reshape(-1, 1)
-    #q_sqrt1 = np.asarray(l_q_sqrt1).reshape(-1, 1)
-    #q_sqrt2 = np.asarray(l_q_sqrt2).reshape(-1, 1)
-    #q_sqrt3 = np.asarray(l_q_sqrt3).reshape(-1, 1)
-    #q_sqrt4 = np.asarray(l_q_sqrt4).reshape(-1, 1)
-
-
-    q_mu1_hr = np.asarray(l_q_mu1_hr).reshape(-1, 1)
-    q_mu2_hr = np.asarray(l_q_mu2_hr).reshape(-1, 1)
-    q_mu3_hr = np.asarray(l_q_mu3_hr).reshape(-1, 1)
-    q_mu4_hr = np.asarray(l_q_mu4_hr).reshape(-1, 1)
-    q_sqrt1_hr = np.asarray(l_q_sqrt1_hr).reshape(-1, 1)
-    q_sqrt2_hr = np.asarray(l_q_sqrt2_hr).reshape(-1, 1)
-    q_sqrt3_hr = np.asarray(l_q_sqrt3_hr).reshape(-1, 1)
-    q_sqrt4_hr = np.asarray(l_q_sqrt4_hr).reshape(-1, 1)
-
-    z = np.asarray(l_z).reshape(-1, 1)
-
-    q_mu = [q_mu1, q_mu2, q_mu3, q_mu4]
-    q_sqrt = [l_q_sqrt1, l_q_sqrt2, l_q_sqrt3, l_q_sqrt4]
-
-    q_mean_hr = [q_mu1_hr, q_mu2_hr, q_mu3_hr, q_mu4_hr]
-    q_var_hr = [q_sqrt1_hr, q_sqrt2_hr, q_sqrt3_hr, q_sqrt4_hr]
-    return q_mu, q_sqrt, z, q_mean_hr, q_var_hr
+    dec_a = fs/nivps_a
+    dec_c = fs/nivps_c
+    za = []
+    zc = []
+    for i in range(num_sources):
+        za.append(np.vstack([x[::dec_a].copy(), x[-1].copy()]))  # location ind v act
+        zc.append(np.vstack([x[::dec_c].copy(), x[-1].copy()]))  # location ind v comp
+    z = [za, zc]
+    return z
+    
+# def init_vv(x, y, niv, kern_com, kern_act, maxiter=100):
+#     """
+#     Initializer of variational variables for the LOO model
+#     :param x: time vector
+#     :param y: audio data
+#     :param niv: number of inducing variables per window
+#     :param kernels: list with 4 elements [kern_com1, kern_act1, kern_com2, kern_act2]
+#     :param maxiter: maximun number of iterations per window
+#     :return: list with q_mu and q_sqrt for each process
+#     """
+#
+#     def get_predict(x, y, xnew, m):
+#         m.X = x
+#         m.Y = y
+#         return m.predict_f(xnew)
+#
+#     l_q_mu1 = []  # list to save variational parameteres
+#     l_q_mu2 = []
+#     l_q_mu3 = []
+#     l_q_mu4 = []
+#     l_q_sqrt1 = []
+#     l_q_sqrt2 = []
+#     l_q_sqrt3 = []
+#     l_q_sqrt4 = []
+#     l_z = []
+#
+#     n = y.size  # size of data
+#     nsw = 16000  # number samples per window
+#     nw = n / nsw  # number of windows
+#     x_win = [x[i * nsw: (i + 1) * nsw].copy() for i in range(nw)]
+#     y_win = [y[i*nsw : (i+1)*nsw].copy() for i in range(nw)]
+#     zinit = np.linspace(x_win[0][0], x_win[0][-1], niv).reshape(-1, 1)
+#     model = loogp.LooGP(X=x_win[0].copy(), Y=y_win[0].copy(), kf=kern_com, kg=kern_act, Z=zinit)
+#
+#     for i in range(nw):
+#         model.X = x_win[i].reshape(-1, 1)
+#         model.Y = y_win[i].reshape(-1, 1)
+#         model.Z = np.linspace(x_win[i][0], x_win[i][-1], niv).reshape(-1, 1)
+#
+#         model.q_mu1 = np.zeros((model.Z.value.shape[0], 1))  # f1
+#         model.q_mu3 = np.zeros((model.Z.value.shape[0], 1))  # f2
+#         model.q_mu2 = -2.1972 * np.ones((model.Z.value.shape[0], 1))  # g1
+#         model.q_mu4 = -2.1972 * np.ones((model.Z.value.shape[0], 1))  # g2
+#
+#         q_sqrt = np.array([np.eye(model.Z.value.shape[0]) for _ in range(1)]).swapaxes(0, 2)
+#
+#         model.q_sqrt1, model.q_sqrt2, model.q_sqrt3, model.q_sqrt4 = [q_sqrt.copy() for _ in range(4)]
+#
+#         st = time.time()
+#         model.optimize(disp=1, maxiter=maxiter)
+#         print(time.time() - st)
+#
+#         l_q_mu1.append(model.q_mu1.value)  # f1
+#         l_q_mu2.append(model.q_mu2.value)  # g1
+#         l_q_mu3.append(model.q_mu3.value)  # f2
+#         l_q_mu4.append(model.q_mu4.value)  # g2
+#
+#         l_q_sqrt1.append(model.q_sqrt1.value)
+#         l_q_sqrt2.append(model.q_sqrt2.value)
+#         l_q_sqrt3.append(model.q_sqrt3.value)
+#         l_q_sqrt4.append(model.q_sqrt4.value)
+#
+#         l_z.append(model.Z.value)
+#
+#     m_iv_com1 = gpflow.gpr.GPR(l_z[0].copy(), l_q_mu1[0].copy(), kern_com[0])  # f1
+#     m_iv_act1 = gpflow.gpr.GPR(l_z[0].copy(), l_q_mu2[0].copy(), kern_act[0])  # g1
+#     m_iv_com2 = gpflow.gpr.GPR(l_z[0].copy(), l_q_mu3[0].copy(), kern_com[1])  # f2
+#     m_iv_act2 = gpflow.gpr.GPR(l_z[0].copy(), l_q_mu4[0].copy(), kern_act[1])  # g2
+#
+#
+#     l_q_mu1_hr = []  # list to save variational parameteres hihg resolution
+#     l_q_mu2_hr = []
+#     l_q_mu3_hr = []
+#     l_q_mu4_hr = []
+#     l_q_sqrt1_hr = []
+#     l_q_sqrt2_hr = []
+#     l_q_sqrt3_hr = []
+#     l_q_sqrt4_hr = []
+#     l_z_hr = []
+#     for i in range(nw):
+#         x_pred = np.linspace(i, i + 1, 100).reshape(-1, 1)
+#         mean_com1, var_com1 = get_predict(x=l_z[i], y=l_q_mu1[i], xnew=x_pred, m=m_iv_com1)
+#         mean_act1, var_act1 = get_predict(x=l_z[i], y=l_q_mu2[i], xnew=x_pred, m=m_iv_act1)
+#         mean_com2, var_com2 = get_predict(x=l_z[i], y=l_q_mu3[i], xnew=x_pred, m=m_iv_com2)
+#         mean_act2, var_act2 = get_predict(x=l_z[i], y=l_q_mu4[i], xnew=x_pred, m=m_iv_act2)
+#
+#         l_q_mu1_hr.append(mean_com1)
+#         l_q_mu2_hr.append(mean_act1)
+#         l_q_mu3_hr.append(mean_com2)
+#         l_q_mu4_hr.append(mean_act2)
+#         l_q_sqrt1_hr.append(var_com1)
+#         l_q_sqrt2_hr.append(var_act1)
+#         l_q_sqrt3_hr.append(var_com2)
+#         l_q_sqrt4_hr.append(var_act2)
+#         l_z_hr.append(x_pred)
+#
+#     q_mu1 = np.asarray(l_q_mu1).reshape(-1, 1)
+#     q_mu2 = np.asarray(l_q_mu2).reshape(-1, 1)
+#     q_mu3 = np.asarray(l_q_mu3).reshape(-1, 1)
+#     q_mu4 = np.asarray(l_q_mu4).reshape(-1, 1)
+#     #q_sqrt1 = np.asarray(l_q_sqrt1).reshape(-1, 1)
+#     #q_sqrt2 = np.asarray(l_q_sqrt2).reshape(-1, 1)
+#     #q_sqrt3 = np.asarray(l_q_sqrt3).reshape(-1, 1)
+#     #q_sqrt4 = np.asarray(l_q_sqrt4).reshape(-1, 1)
+#
+#
+#     q_mu1_hr = np.asarray(l_q_mu1_hr).reshape(-1, 1)
+#     q_mu2_hr = np.asarray(l_q_mu2_hr).reshape(-1, 1)
+#     q_mu3_hr = np.asarray(l_q_mu3_hr).reshape(-1, 1)
+#     q_mu4_hr = np.asarray(l_q_mu4_hr).reshape(-1, 1)
+#     q_sqrt1_hr = np.asarray(l_q_sqrt1_hr).reshape(-1, 1)
+#     q_sqrt2_hr = np.asarray(l_q_sqrt2_hr).reshape(-1, 1)
+#     q_sqrt3_hr = np.asarray(l_q_sqrt3_hr).reshape(-1, 1)
+#     q_sqrt4_hr = np.asarray(l_q_sqrt4_hr).reshape(-1, 1)
+#
+#     z = np.asarray(l_z).reshape(-1, 1)
+#
+#     q_mu = [q_mu1, q_mu2, q_mu3, q_mu4]
+#     q_sqrt = [l_q_sqrt1, l_q_sqrt2, l_q_sqrt3, l_q_sqrt4]
+#
+#     q_mean_hr = [q_mu1_hr, q_mu2_hr, q_mu3_hr, q_mu4_hr]
+#     q_var_hr = [q_sqrt1_hr, q_sqrt2_hr, q_sqrt3_hr, q_sqrt4_hr]
+#     return q_mu, q_sqrt, z, q_mean_hr, q_var_hr
 
 
 
@@ -190,15 +209,15 @@ def segment(x, y, window_size=32000, aug=True):
             xa, ya = augmentate(xaux, yaux)
         else:
             xa, ya = xaux.copy(), yaux.copy()
-        ys.append(ya)  
-        xs.append(xa)  
+        ys.append(ya)
+        xs.append(xa)
     return xs, ys
 
 def augmentate(x, y, augment_size=1600):
     addzeros = np.zeros((augment_size, 1)) # patch of zeros to add at the begining and end
     yaug1 = np.append(addzeros, y.copy()).reshape(-1, 1)
     yaug = np.append(yaug1, addzeros).reshape(-1, 1)
-    
+
     alpha = augment_size/16000.
     xaug = np.linspace(x[0] - alpha, x[-1] + alpha, x.size + 2*augment_size).reshape(-1, 1)  # time vector
     return xaug, yaug
@@ -208,18 +227,18 @@ def trim_n_merge(x, trim_size=1600, aug=True):
     xl = []
     for i in range(len(x)):
         if aug:
-            xl.append(x[i][trim_size:-trim_size].copy().reshape(-1, 1))        
+            xl.append(x[i][trim_size:-trim_size].copy().reshape(-1, 1))
         else:
             xl.append(x[i].copy().reshape(-1, 1))
     xl = np.asarray(xl).reshape(-1, 1)
     return xl
 
 def merge_all(inlist):
-    outlist = [[[], [], []], 
+    outlist = [[[], [], []],
                [[], [], []],
                [[], [], []],
                [[], [], []],
-               [], 
+               [],
                []]
     for j in range(4):
         for i in range(2):
@@ -228,14 +247,14 @@ def merge_all(inlist):
             outlist[j][2].append(inlist[j][i][2])
     outlist[4] = inlist[4]
     outlist[5] = inlist[5]
-    
+
     for j in range(4):
         outlist[j][0] = trim_n_merge(outlist[j][0])
         outlist[j][1] = trim_n_merge(outlist[j][1])
         outlist[j][2] = trim_n_merge(outlist[j][2])
     outlist[4] =  trim_n_merge(outlist[4])
     outlist[5] =  trim_n_merge(outlist[5])
-    
+
     return outlist
 
 
@@ -474,7 +493,7 @@ def isoftplus(x):
     """ inverse softplus function """
     return np.log(np.exp(x) - 1.)
 
-def gaussfunc(x):
+def gaussfun(x):
     return np.exp(-2.*(x - np.pi)**2)
 
 def logistic_tf(x):
@@ -493,7 +512,7 @@ def ilogistic_tf(x):
     """inverse logistic function using tensorflow"""
     return - tf.log(1./x - 1.)
 
-def gaussfunc_tf(x):
+def gaussfun_tf(x):
     return tf.exp(-2.*(x - np.pi)**2)
 
 

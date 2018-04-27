@@ -2,7 +2,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 sys.path.append('../../')
-from gpitch import logistic, gaussfunc
+from gpitch import logistic, gaussfun
 from scipy.fftpack import fft, ifft, ifftshift
 
 
@@ -530,11 +530,11 @@ def plot_data(x, y, source=None, maxncol=4):
             plt.legend(["Source " + str(i + 1)], loc=1)
 
             
-def plot_predict(x, mean, var, z, latent=False):    
+def plot_predict(x, mean, var, z, nlinfun=logistic, latent=False):
     if latent:
-        plt.plot(x, logistic(mean), 'C0', lw=2)
-        plt.fill_between(x[:,0], logistic(mean[:,0] - 2*np.sqrt(var[:,0])), 
-                                 logistic(mean[:,0] + 2*np.sqrt(var[:,0])), color='C0', alpha=0.2)
+        plt.plot(x, nlinfun(mean), 'C0', lw=2)
+        plt.fill_between(x[:,0], nlinfun(mean[:,0] - 2*np.sqrt(var[:,0])), 
+                                 nlinfun(mean[:,0] + 2*np.sqrt(var[:,0])), color='C0', alpha=0.2)
         
         plt.twinx()
         
@@ -550,17 +550,17 @@ def plot_predict(x, mean, var, z, latent=False):
 
 
 
-def plot_predict_all(x, mean_act, var_act, mean_com, var_com, m):
+def plot_predict_all(x, mean_act, var_act, mean_com, var_com, m, nlinfun=logistic):
     num_sources = len(mean_act)
     ncol = 4
     nrow = 2*(1 + int( (num_sources-1)/ncol ))
     plt.figure(figsize=(12, 3*2*(num_sources/ncol)))
     for i in range(num_sources):
         plt.subplot(nrow, ncol, ncol*(i/ncol) + i + 1)
-        plot_predict(x, mean_act[i], var_act[i], m.za[i].value, True);
+        plot_predict(x, mean_act[i], var_act[i], m.za[i].value, nlinfun, True);
         
         plt.subplot(nrow, ncol, ncol*(i/ncol + 1) + i + 1)
-        plot_predict(x, mean_com[i], var_com[i], m.zc[i].value);
+        plot_predict(x, mean_com[i], var_com[i], m.zc[i].value, nlinfun);
 
         
         

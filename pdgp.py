@@ -7,16 +7,17 @@ from gpflow.minibatch import MinibatchData
 from likelihoods import MpdLik
 from gpflow.param import Param, ParamList
 from gpflow.kullback_leiblers import gauss_kl
+from gpitch.methods import logistic_tf, gaussfun_tf
 
 
 float_type = settings.dtypes.float_type
 jitter = settings.numerics.jitter_level
 
 
-class Mpdgp(gpflow.model.Model):
-    def __init__(self, x, y, za, zc, kern_act, kern_com, whiten=True, minibatch_size=None):
+class Pdgp(gpflow.model.Model):
+    def __init__(self, x, y, z, kern, whiten=True, minibatch_size=None, nlinfun=logistic_tf):
         """
-        Gaussian process multi pitch detector class.
+        Pitch detection using Gaussian process.
 
         Constructor.
         :param x:
@@ -36,42 +37,43 @@ class Mpdgp(gpflow.model.Model):
 
         self.minibatch_size = minibatch_size
         self.num_data = x.shape[0]
-        self.num_sources = len(kern_act)
+        self.num_sources = len(kern[0])
         self.whiten = whiten
-        self.likelihood = MpdLik(nlinfun=gpitch.logistic_tf, num_sources=len(kern_act))
+        self.nlinfun = nlinfun
+        self.likelihood = MpdLik(nlinfun=self.nlinfun, num_sources=self.num_sources)
 
         self.x = MinibatchData(x, minibatch_size, np.random.RandomState(0))
         self.y = MinibatchData(y, minibatch_size, np.random.RandomState(0))
 
-        self.kern_act = ParamList(kern_act)
-        self.kern_com = ParamList(kern_com)
+        self.kern_act = ParamList(kern[0])
+        self.kern_com = ParamList(kern[1])
 
         self.num_inducing_c = []
         self.num_inducing_a = []
-        
-        za_l = []  
-        zc_l = []  
+
+        za_l = []
+        zc_l = []
         q_mu_com_l = []
         q_mu_act_l = []
         q_sqrt_com_l = []
         q_sqrt_act_l = []
 
         for i in range(self.num_sources):
-            self.num_inducing_a.append(za[i].size)
-            self.num_inducing_c.append(zc[i].size)
-            
-            za_l.append(Param(za[i].copy() ))
-            zc_l.append(Param(zc[i].copy() ))
-            
-            q_mu_act_l.append(Param(np.zeros(za[i].shape)))
-            q_mu_com_l.append(Param(np.zeros(zc[i].shape)))
+            self.num_inducing_a.append(z[0][i].size)
+            self.num_inducing_c.append(z[1][i].size)
+
+            za_l.append(Param(z[0][i].copy() ))
+            zc_l.append(Param(z[1][i].copy() ))
+
+            q_mu_act_l.append(Param(0.5*np.pi + np.zeros(z[0][i].shape)))
+            q_mu_com_l.append(Param(np.zeros(z[1][i].shape)))
 
             q_sqrt_act_l.append(Param(np.array([np.eye(self.num_inducing_a[i]) for _ in range(1)]).swapaxes(0, 2)))
             q_sqrt_com_l.append(Param(np.array([np.eye(self.num_inducing_c[i]) for _ in range(1)]).swapaxes(0, 2)))
-            
-        
-        self.za = ParamList(za_l) 
-        self.zc = ParamList(zc_l) 
+
+
+        self.za = ParamList(za_l)
+        self.zc = ParamList(zc_l)
         self.q_mu_com = ParamList(q_mu_com_l)
         self.q_mu_act = ParamList(q_mu_act_l)
         self.q_sqrt_com = ParamList(q_sqrt_com_l)
@@ -94,7 +96,7 @@ class Mpdgp(gpflow.model.Model):
                 k_com.append(self.kern_com[i].K(self.zc[i]) + tf.eye(self.num_inducing_c[i], dtype=float_type)*jitter)
                 kl_act.append(gauss_kl(self.q_mu_act[i], self.q_sqrt_act[i], k_act[i]))
                 kl_com.append(gauss_kl(self.q_mu_com[i], self.q_sqrt_com[i], k_com[i]))
-                
+
         return tf.reduce_sum(kl_act) + tf.reduce_sum(kl_com)
 
     def build_likelihood(self):
@@ -153,3 +155,23 @@ class Mpdgp(gpflow.model.Model):
                                                               self.q_mu_com[i], q_sqrt=self.q_sqrt_com[i],
                                                               full_cov=False, whiten=self.whiten)
         return mean, var
+    
+    @gpflow.param.AutoFlow((tf.float64, [None, None]))
+    def predict_act_n_com(self, xnew):
+        
+        mean_a, var_a = self.num_sources*[None], self.num_sources*[None]
+        mean_c, var_c = self.num_sources*[None], self.num_sources*[None]
+        mean_source = self.num_sources*[None]
+
+
+        for i in range(self.num_sources):
+            mean_a[i], var_a[i] = gpflow.conditionals.conditional(xnew, self.za[i], self.kern_act[i],
+                                                                  self.q_mu_act[i], q_sqrt=self.q_sqrt_act[i],
+                                                                  full_cov=False, whiten=self.whiten)
+            
+            mean_c[i], var_c[i] = gpflow.conditionals.conditional(xnew, self.zc[i], self.kern_com[i],
+                                                                  self.q_mu_com[i], q_sqrt=self.q_sqrt_com[i],
+                                                                  full_cov=False, whiten=self.whiten)
+            
+            mean_source[i] = self.nlinfun(mean_a[i])*mean_c[i]
+        return mean_a, var_a, mean_c, var_c, mean_source

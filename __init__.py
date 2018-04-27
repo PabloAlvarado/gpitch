@@ -6,6 +6,6 @@ from . import loogp
 from . import modgp
 from . import loogp2
 from . import modgp2
-from . import mpdgp
+from . import pdgp
 from . import ssgp
 from gpitch_notebook import *
