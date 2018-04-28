@@ -155,10 +155,10 @@ class Pdgp(gpflow.model.Model):
                                                               self.q_mu_com[i], q_sqrt=self.q_sqrt_com[i],
                                                               full_cov=False, whiten=self.whiten)
         return mean, var
-    
+
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_act_n_com(self, xnew):
-        
+
         mean_a, var_a = self.num_sources*[None], self.num_sources*[None]
         mean_c, var_c = self.num_sources*[None], self.num_sources*[None]
         mean_source = self.num_sources*[None]
@@ -168,10 +168,10 @@ class Pdgp(gpflow.model.Model):
             mean_a[i], var_a[i] = gpflow.conditionals.conditional(xnew, self.za[i], self.kern_act[i],
                                                                   self.q_mu_act[i], q_sqrt=self.q_sqrt_act[i],
                                                                   full_cov=False, whiten=self.whiten)
-            
+
             mean_c[i], var_c[i] = gpflow.conditionals.conditional(xnew, self.zc[i], self.kern_com[i],
                                                                   self.q_mu_com[i], q_sqrt=self.q_sqrt_com[i],
                                                                   full_cov=False, whiten=self.whiten)
-            
+
             mean_source[i] = self.nlinfun(mean_a[i])*mean_c[i]
         return mean_a, var_a, mean_c, var_c, mean_source

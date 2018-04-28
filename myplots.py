@@ -148,14 +148,14 @@ def plot_loo3(mean_f, var_f, mean_g, var_g, x_plot, y, z, xlim):
 
     ncol, nrow = 5, 2
     plt.figure(figsize=(16, 10))
-    
+
     plt.subplot(ncol, nrow, 1)#, plt.title('activation 1')
     plt.plot(x_plot, logistic(mean_g1), 'C0')
     plt.fill_between(x_plot, logistic(mean_g1-2*np.sqrt(var_g1)),
                      logistic(mean_g1+2*np.sqrt(var_g1)), color='C0', alpha=0.2)
     plt.plot(z[0], np.zeros((z[0].shape)), '|C3', mew=2)
     plt.xlim(xlim)
-    
+
     plt.subplot(ncol, nrow, 2)#, plt.title('activation 2')
     plt.plot(x_plot, logistic(mean_g2), 'C0')
     plt.fill_between(x_plot, logistic(mean_g2-2*np.sqrt(var_g2)),
@@ -177,7 +177,7 @@ def plot_loo3(mean_f, var_f, mean_g, var_g, x_plot, y, z, xlim):
                              mean_f2 + 2*np.sqrt(var_f2), color='C0', alpha=0.2)
     plt.plot(z[3], np.zeros((z[3].shape)), '|C3', mew=2)
     plt.xlim(xlim)
-    
+
     plt.subplot(ncol, nrow, 5)#, plt.title('source 1')
     plt.plot(x_plot, logistic(mean_g1)*mean_f1)
     plt.ylim([-1, 1])
@@ -192,7 +192,7 @@ def plot_loo3(mean_f, var_f, mean_g, var_g, x_plot, y, z, xlim):
     plt.plot(x_plot, y, 'C0')
     plt.ylim([-1, 1])
     plt.xlim(xlim)
-    
+
     plt.subplot(ncol, nrow, (8))#, plt.title('approximation')
     plt.plot(x_plot, logistic(mean_g1)*mean_f1 + logistic(mean_g2)*mean_f2, 'C0')
     plt.ylim([-1, 1])
@@ -213,7 +213,7 @@ def plot_ssgp(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results'):
     z = [m.Za1.value, m.Zc1.value, m.Za2.value, m.Zc2.value, m.Za3.value, m.Zc3.value]
     ncol, nrow = 4, 3
     plt.figure(figsize=(16, 10))
-    
+
     plt.subplot(ncol, nrow, 1)#, plt.title('activation 1')
     plt.plot(x_plot, logistic(mean_g1), 'C0')
     plt.fill_between(x_plot, logistic(mean_g1-2*np.sqrt(var_g1)),
@@ -221,11 +221,11 @@ def plot_ssgp(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results'):
     plt.twinx()
     plt.plot(x_plot, mean_g1, 'C2', alpha=0.5)
     plt.fill_between(x_plot, mean_g1-2*np.sqrt(var_g1), mean_g1+2*np.sqrt(var_g1), color='C2', alpha=0.1)
-    
+
     plt.plot(z[0], np.zeros((z[0].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
-    
-    
+
+
     plt.subplot(ncol, nrow, 2)#, plt.title('activation 2')
     plt.plot(x_plot, logistic(mean_g2), 'C0')
     plt.fill_between(x_plot, logistic(mean_g2-2*np.sqrt(var_g2)),
@@ -233,10 +233,10 @@ def plot_ssgp(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results'):
     plt.twinx()
     plt.plot(x_plot, mean_g2, 'C2', alpha=0.5)
     plt.fill_between(x_plot, mean_g2-2*np.sqrt(var_g2), mean_g2+2*np.sqrt(var_g2), color='C2', alpha=0.1)
-    
+
     plt.plot(z[2], np.zeros((z[2].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
-    
+
     plt.subplot(ncol, nrow, 3)#, plt.title('activation 3')
     plt.plot(x_plot, logistic(mean_g3), 'C0')
     plt.fill_between(x_plot, logistic(mean_g3-2*np.sqrt(var_g3)),
@@ -244,7 +244,7 @@ def plot_ssgp(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results'):
     plt.twinx()
     plt.plot(x_plot, mean_g3, 'C2', alpha=0.5)
     plt.fill_between(x_plot, mean_g3-2*np.sqrt(var_g3), mean_g3+2*np.sqrt(var_g3), color='C2', alpha=0.1)
-    
+
     plt.plot(z[4], np.zeros((z[4].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
 
@@ -262,16 +262,16 @@ def plot_ssgp(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results'):
                              mean_f2 + 2*np.sqrt(var_f2), color='C0', alpha=0.2)
     plt.plot(z[3], np.zeros((z[3].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
-    
-    
+
+
     plt.subplot(ncol, nrow, 6)
     plt.plot(x_plot, mean_f3, 'C0')#, plt.title('component 2')
     plt.fill_between(x_plot, mean_f3 - 2*np.sqrt(var_f3),
                              mean_f3 + 2*np.sqrt(var_f3), color='C0', alpha=0.2)
     plt.plot(z[5], np.zeros((z[5].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
-    
-    
+
+
     plt.subplot(ncol, nrow, 7)#, plt.title('source 1')
     plt.plot(x_plot, logistic(mean_g1)*mean_f1)
     plt.ylim([-1, 1])
@@ -281,7 +281,7 @@ def plot_ssgp(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results'):
     plt.plot(x_plot, logistic(mean_g2)*mean_f2)
     plt.ylim([-1, 1])
     plt.xlim(xlim)
-    
+
     plt.subplot(ncol, nrow, 9)#, plt.title('source 2')
     plt.plot(x_plot, logistic(mean_g3)*mean_f3)
     plt.ylim([-1, 1])
@@ -293,11 +293,11 @@ def plot_ssgp(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results'):
     plt.ylim([-1, 1])
     plt.xlim(xlim)
     plt.suptitle(title)
-    
-    
-    
-    
-    
+
+
+
+
+
 def plot_ssgp_gauss(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results'):
     mean_f1, mean_f2, mean_f3 = mean_f[0].reshape(-1,), mean_f[1].reshape(-1,), mean_f[2].reshape(-1,)
     mean_g1, mean_g2, mean_g3 = mean_g[0].reshape(-1,), mean_g[1].reshape(-1,), mean_g[2].reshape(-1,)
@@ -311,7 +311,7 @@ def plot_ssgp_gauss(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results')
     z = [m.Za1.value, m.Zc1.value, m.Za2.value, m.Zc2.value, m.Za3.value, m.Zc3.value]
     ncol, nrow = 4, 3
     plt.figure(figsize=(16, 10))
-    
+
     plt.subplot(ncol, nrow, 1)#, plt.title('activation 1')
     plt.plot(x_plot, gaussfunc(mean_g1), 'C0')
     plt.fill_between(x_plot, gaussfunc(mean_g1-2*np.sqrt(var_g1)),
@@ -320,10 +320,10 @@ def plot_ssgp_gauss(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results')
     plt.twinx()
     plt.plot(x_plot, mean_g1, 'C2', alpha=0.5)
     plt.fill_between(x_plot, mean_g1-2*np.sqrt(var_g1), mean_g1+2*np.sqrt(var_g1), color='C2', alpha=0.1)
-    
+
     plt.plot(z[0], np.zeros((z[0].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
-    
+
     plt.subplot(ncol, nrow, 2)#, plt.title('activation 2')
     plt.plot(x_plot, gaussfunc(mean_g2), 'C0')
     plt.fill_between(x_plot, gaussfunc(mean_g2-2*np.sqrt(var_g2)),
@@ -332,10 +332,10 @@ def plot_ssgp_gauss(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results')
     plt.twinx()
     plt.plot(x_plot, mean_g2, 'C2', alpha=0.5)
     plt.fill_between(x_plot, mean_g2-2*np.sqrt(var_g2), mean_g2+2*np.sqrt(var_g2), color='C2', alpha=0.1)
-    
+
     plt.plot(z[2], np.zeros((z[2].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
-    
+
     plt.subplot(ncol, nrow, 3)#, plt.title('activation 3')
     plt.plot(x_plot, gaussfunc(mean_g3), 'C0')
     plt.fill_between(x_plot, gaussfunc(mean_g3-2*np.sqrt(var_g3)),
@@ -345,7 +345,7 @@ def plot_ssgp_gauss(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results')
     plt.plot(x_plot, mean_g3, 'C2', alpha=0.5)
     plt.fill_between(x_plot, mean_g3-2*np.sqrt(var_g3), mean_g3+2*np.sqrt(var_g3), color='C2', alpha=0.1)
     plt.plot(z[4], np.zeros((z[4].shape)), '|C3', mew=mew)
-    
+
     plt.xlim(xlim)
 
 
@@ -362,16 +362,16 @@ def plot_ssgp_gauss(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results')
                              mean_f2 + 2*np.sqrt(var_f2), color='C0', alpha=0.2)
     plt.plot(z[3], np.zeros((z[3].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
-    
-    
+
+
     plt.subplot(ncol, nrow, 6)
     plt.plot(x_plot, mean_f3, 'C0')#, plt.title('component 2')
     plt.fill_between(x_plot, mean_f3 - 2*np.sqrt(var_f3),
                              mean_f3 + 2*np.sqrt(var_f3), color='C0', alpha=0.2)
     plt.plot(z[5], np.zeros((z[5].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
-    
-    
+
+
     plt.subplot(ncol, nrow, 7)#, plt.title('source 1')
     plt.plot(x_plot, gaussfunc(mean_g1)*mean_f1)
     plt.ylim([-1, 1])
@@ -381,7 +381,7 @@ def plot_ssgp_gauss(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results')
     plt.plot(x_plot, gaussfunc(mean_g2)*mean_f2)
     plt.ylim([-1, 1])
     plt.xlim(xlim)
-    
+
     plt.subplot(ncol, nrow, 9)#, plt.title('source 2')
     plt.plot(x_plot, gaussfunc(mean_g3)*mean_f3)
     plt.ylim([-1, 1])
@@ -393,13 +393,13 @@ def plot_ssgp_gauss(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results')
     plt.ylim([-1, 1])
     plt.xlim(xlim)
     plt.suptitle(title)
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
 def plot_ssgp_full(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results', parts=None):
     mean_f1, mean_f2, mean_f3 = mean_f[0].reshape(-1,), mean_f[1].reshape(-1,), mean_f[2].reshape(-1,)
     mean_g1, mean_g2, mean_g3 = mean_g[0].reshape(-1,), mean_g[1].reshape(-1,), mean_g[2].reshape(-1,)
@@ -413,21 +413,21 @@ def plot_ssgp_full(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results', 
     z = [m.Za1.value, m.Zc1.value, m.Za2.value, m.Zc2.value, m.Za3.value, m.Zc3.value]
     ncol, nrow = 5, 3
     plt.figure(figsize=(16, 18))
-    
+
     plt.subplot(ncol, nrow, 1), plt.title('activation 1')
     plt.plot(x_plot, logistic(mean_g1), 'C0')
     plt.fill_between(x_plot, logistic(mean_g1-2*np.sqrt(var_g1)),
                      logistic(mean_g1+2*np.sqrt(var_g1)), color='C0', alpha=0.2)
     plt.plot(z[0], np.zeros((z[0].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
-    
+
     plt.subplot(ncol, nrow, 2), plt.title('activation 2')
     plt.plot(x_plot, logistic(mean_g2), 'C0')
     plt.fill_between(x_plot, logistic(mean_g2-2*np.sqrt(var_g2)),
                      logistic(mean_g2+2*np.sqrt(var_g2)), color='C0', alpha=0.2)
     plt.plot(z[2], np.zeros((z[2].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
-    
+
     plt.subplot(ncol, nrow, 3), plt.title('activation 3')
     plt.plot(x_plot, logistic(mean_g3), 'C0')
     plt.fill_between(x_plot, logistic(mean_g3-2*np.sqrt(var_g3)),
@@ -449,16 +449,16 @@ def plot_ssgp_full(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results', 
                              mean_f2 + 2*np.sqrt(var_f2), color='C0', alpha=0.2)
     plt.plot(z[3], np.zeros((z[3].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
-    
-    
+
+
     plt.subplot(ncol, nrow, 6)
     plt.plot(x_plot, mean_f3, 'C0'), plt.title('component 3')
     plt.fill_between(x_plot, mean_f3 - 2*np.sqrt(var_f3),
                              mean_f3 + 2*np.sqrt(var_f3), color='C0', alpha=0.2)
     plt.plot(z[5], np.zeros((z[5].shape)), '|C3', mew=mew)
     plt.xlim(xlim)
-    
-    
+
+
     plt.subplot(ncol, nrow, 7), plt.title('approximate source 1')
     plt.plot(x_plot, logistic(mean_g1)*mean_f1)
     plt.ylim([-1, 1])
@@ -468,12 +468,12 @@ def plot_ssgp_full(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results', 
     plt.plot(x_plot, logistic(mean_g2)*mean_f2)
     plt.ylim([-1, 1])
     plt.xlim(xlim)
-    
+
     plt.subplot(ncol, nrow, 9), plt.title('approximate source 3')
     plt.plot(x_plot, logistic(mean_g3)*mean_f3)
     plt.ylim([-1, 1])
     plt.xlim(xlim)
-    
+
     plt.subplot(ncol, nrow, 10), plt.title('real source 1')
     plt.plot(x_plot, parts[0])
     plt.ylim([-1, 1])
@@ -483,7 +483,7 @@ def plot_ssgp_full(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results', 
     plt.plot(x_plot, parts[1])
     plt.ylim([-1, 1])
     plt.xlim(xlim)
-    
+
     plt.subplot(ncol, nrow, 12), plt.title('real source 3')
     plt.plot(x_plot, parts[2])
     plt.ylim([-1, 1])
@@ -496,32 +496,32 @@ def plot_ssgp_full(m, mean_f, var_f, mean_g, var_g, x_plot, y, title='results', 
     plt.xlim(xlim)
     plt.suptitle(title)
 
-    
+
 def plot_data(x, y, source=None, maxncol=4):
     if source == None:
         num_sources = 0
     else:
         num_sources = len(source)
-        
+
     if num_sources < maxncol:
         ncol = num_sources
 
     else:
         ncol = maxncol
-        
+
     if num_sources == 0:
         ncol = 1
         nrow = 1
     else:
         nrow = 2 + int((num_sources-1)/maxncol)
-    
-    
+
+
     plt.figure(figsize=(16, 4*nrow))
     plt.subplot(nrow, ncol, (1, ncol))
     plt.plot(x,y)
     plt.xlim(x[0], x[-1])
     plt.legend(["Data"], loc=1)
-        
+
     if source is not None:
         for i in range(num_sources):
             plt.subplot(nrow, ncol, i + 1 + ncol)
@@ -529,21 +529,21 @@ def plot_data(x, y, source=None, maxncol=4):
             plt.xlim(x[0], x[-1])
             plt.legend(["Source " + str(i + 1)], loc=1)
 
-            
+
 def plot_predict(x, mean, var, z, nlinfun=logistic, latent=False):
     if latent:
         plt.plot(x, nlinfun(mean), 'C0', lw=2)
-        plt.fill_between(x[:,0], nlinfun(mean[:,0] - 2*np.sqrt(var[:,0])), 
+        plt.fill_between(x[:,0], nlinfun(mean[:,0] - 2*np.sqrt(var[:,0])),
                                  nlinfun(mean[:,0] + 2*np.sqrt(var[:,0])), color='C0', alpha=0.2)
-        
+
         plt.twinx()
-        
+
         plt.plot(x, mean, 'C2', lw=2, alpha=0.5)
-        plt.fill_between(x[:,0], mean[:,0] - 2*np.sqrt(var[:,0]), 
+        plt.fill_between(x[:,0], mean[:,0] - 2*np.sqrt(var[:,0]),
                                  mean[:,0] + 2*np.sqrt(var[:,0]), color='C2', alpha=0.1)
     else:
         plt.plot(x, mean, 'C0', lw=2)
-        plt.fill_between(x[:,0], mean[:,0] - 2*np.sqrt(var[:,0]), 
+        plt.fill_between(x[:,0], mean[:,0] - 2*np.sqrt(var[:,0]),
                                  mean[:,0] + 2*np.sqrt(var[:,0]), color='C0', alpha=0.2)
 
     plt.plot(z, 0.*z, '|C3', mew=2)
@@ -554,50 +554,50 @@ def plot_predict_all(x, mean_act, var_act, mean_com, var_com, m, nlinfun=logisti
     num_sources = len(mean_act)
     ncol = 4
     nrow = 2*(1 + int( (num_sources-1)/ncol ))
-    plt.figure(figsize=(12, 3*2*(num_sources/ncol)))
+    plt.figure(figsize=(16, 4*2*(num_sources/ncol)))
     for i in range(num_sources):
         plt.subplot(nrow, ncol, ncol*(i/ncol) + i + 1)
         plot_predict(x, mean_act[i], var_act[i], m.za[i].value, nlinfun, True);
-        
+
         plt.subplot(nrow, ncol, ncol*(i/ncol + 1) + i + 1)
         plot_predict(x, mean_com[i], var_com[i], m.zc[i].value, nlinfun);
 
-        
-        
+
+
 def plot_sources_all(x, y, esource, source=None, maxncol=4):
-    
-    
+
+
     if esource == None:
         num_sources = 0
     else:
         num_sources = len(esource)
-        
+
     if num_sources < maxncol:
         ncol = num_sources
 
     else:
         ncol = maxncol
-        
+
     if num_sources == 0:
         ncol = 1
         nrow = 1
     else:
         nrow = 2 + int((num_sources-1)/maxncol)
-    
-    
+
+
     all_prediction = np.zeros((x.size, 1))
     for i in range(num_sources):
         all_prediction += esource[i]
-    
-    
+
+
     plt.figure(figsize=(16, 4*nrow))
     plt.subplot(nrow, ncol, (1, ncol))
     plt.plot(x, y, 'xk')
     plt.plot(x, all_prediction, lw=2)
     plt.xlim(x[0], x[-1])
     plt.legend(["Data"], loc=1)
-        
-    
+
+
     for i in range(num_sources):
         plt.subplot(nrow, ncol, i + 1 + ncol)
         if source is not None:
@@ -605,6 +605,6 @@ def plot_sources_all(x, y, esource, source=None, maxncol=4):
         plt.plot(x, esource[i], lw=2)
         plt.legend(["Real source " + str(i + 1), "Estimated source " + str(i + 1)], loc=1)
         plt.xlim(x[0], x[-1])
-       
-         
+
+
 #
