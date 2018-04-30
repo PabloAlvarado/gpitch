@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
-from gpitch import logistic
+from gpitch.methods import logistic
 
 
 def windowed(x, y, ws):
@@ -21,7 +21,7 @@ def windowed(x, y, ws):
         #     win = signal.hann(ws).reshape(-1, 1)
         xout.append(x[i*l : i*l + ws].copy().reshape(-1, 1))
         yout.append(y[i*l : i*l + ws].copy().reshape(-1, 1))
-        
+
     return xout, yout
 
 
@@ -29,7 +29,7 @@ def merged_y(y, ws):
     l = (ws-1)/2
     nw = len(y)
     n = (ws-1)/2 * (nw - 1) + ws
-    
+
     # for i in range(len(y)):
     #     if i == 0 :
     #         win = signal.hann(ws).reshape(-1, 1)
@@ -40,7 +40,7 @@ def merged_y(y, ws):
     #     else:
     #         win = signal.hann(ws).reshape(-1, 1)
     #     y[i] = y[i]/(win + 0.0001)
-    
+
     for i in range(len(y)):
         if i == 0 :
             win = signal.hann(ws).reshape(-1, 1)
@@ -51,12 +51,12 @@ def merged_y(y, ws):
         else:
             win = signal.hann(ws).reshape(-1, 1)
         y[i] = y[i]*win
-    
+
     yout = np.zeros((n, 1))
     yout[0:l] = y[0][0:l]
     yout[-l-1:] = y[-1][-l-1:]
-    
-    for i in range(nw-1): 
+
+    for i in range(nw-1):
         yout[(i+1)*l : (i+2)*l] = y[i][-l-1:-1].copy() + y[i+1][0:l].copy()
     return yout
 
@@ -66,22 +66,22 @@ def merged_x(x, ws):
     nw = len(x)
     n = (ws-1)/2 * (nw - 1) + ws
     xout = np.zeros((n, 1))
-    
+
     xout[0:l] = x[0][0:l]
     xout[-l-1:] = x[-1][-l-1:]
-    
-    for i in range(nw-1): 
+
+    for i in range(nw-1):
         xout[(i+1)*l : (i+2)*l] = x[i][-l-1:-1].copy()
-    
+
     return xout
 
 
 def merge_all(inlist):
-    outlist = [[[], [], []], 
+    outlist = [[[], [], []],
                [[], [], []],
                [[], [], []],
                [[], [], []],
-               [], 
+               [],
                []]
     for j in range(4):
         for i in range(len(inlist[4])):
@@ -89,8 +89,8 @@ def merge_all(inlist):
             outlist[j][1].append(inlist[j][i][1])
             outlist[j][2].append(inlist[j][i][2])
     outlist[4] = inlist[4]
-    outlist[5] = inlist[5]  
-    
+    outlist[5] = inlist[5]
+
     return outlist
 
 
@@ -141,10 +141,10 @@ def plot_sources(x, y, s):
     plt.plot(x, y)
     plt.plot(x, s[2])
     plt.ylim(-1, 1)
-    
-    
+
+
 def plot_patches(rm, s1_l, s2_l, s3_l):
-    for i in range(len(rm[4])):    
+    for i in range(len(rm[4])):
         plt.figure(1, figsize=(16, 4))
         plt.plot(rm[4][i], i + s1_l[i], 'C0')
         plt.plot(rm[4][i], i + rm[5][i], 'C1')

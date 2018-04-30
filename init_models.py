@@ -1,12 +1,26 @@
 import numpy as np
 from scipy import signal
-import loogp
-import loogp2
-import myplots
+from gpitch import myplots
 from matplotlib import pyplot as plt
-from gpflow.kernels import Matern32
+from gpflow.kernels import Matern32, Matern12
 from gpitch.kernels import Matern32sm
-from gpitch.methods import ilogistic
+from gpitch.methods import ilogistic, find_ideal_f0, init_cparam
+
+
+def init_kernel_training(y, list_files, fs=16000, maxh=25):
+    num_pitches = len(list_files)
+    if0 = find_ideal_f0(list_files)  # ideal frequency for each pitch
+    iparam = []  # initilize component kernel parameters for each pitch model
+    kern_act = []
+    kern_com = []
+    for i in range(num_pitches):
+        iparam.append(init_cparam(y[i], fs=fs, maxh=maxh, ideal_f0=if0[i])) # init component kern params
+
+        kern_act.append(Matern12(1, lengthscales=0.1, variance=1.))
+        kern_com.append(Matern32sm(1, numc=len(iparam[i][1]), lengthscales=1., variances=iparam[i][1],
+                                   frequencies=iparam[i][0]))
+    kern = [kern_act, kern_com]
+    return kern, iparam # list of all required kernels and its initial parameters
 
 
 def get_act_params(indict):
