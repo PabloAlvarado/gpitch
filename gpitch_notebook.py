@@ -127,7 +127,7 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20],
 
     if frames < window_size:
         window_size = frames
-    
+
     sess = gpitch.init_settings(gpu)  # select gpu to use
 
     linst = ['011PFNOM', '131EGLPM', '311CLNOM', 'ALVARADO']  # list of instruments
@@ -144,10 +144,10 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20],
     lfiles += [i for i in os.listdir(test_data_dir) if instrument + '_mixture' in i]
 
     xall, yall, fs = gpitch.readaudio(test_data_dir + lfiles[0], aug=False, start=start, frames=frames)
-    
+
     yall2 = np.vstack((  yall.copy(), 0.  ))
     xall2 = np.vstack((  xall.copy(), xall[-1].copy() + xall[1].copy()  ))
-    
+
     if overlap:
         x, y = window_overlap.windowed(xall2.copy(), yall2.copy(), ws=window_size)  # return list of segments
     else:
@@ -166,7 +166,7 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20],
 
         plt.figure(5), plt.title("Test data  " + lfiles[0])
         plt.plot(x[i], y[i])
-            
+
         # st = time.time()  # run optimization
 
         if minibatch_size is None:
@@ -190,13 +190,13 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20],
                 mpd.optimize(disp=True, maxiter=maxiter[1])
             else:
                 print ("Optimizing location inducing variables using SVI")
-                mpd.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate[1], epsilon=0.1), maxiter=maxiter[1])           
+                mpd.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate[1], epsilon=0.1), maxiter=maxiter[1])
 
             # print("Time {} secs".format(time.time() - st))
-            
+
             mpd.Za1.fixed = True
             mpd.Za2.fixed = True
-            mpd.Za3.fixed = True          
+            mpd.Za3.fixed = True
 
         mf, vf, mg, vg, x_plot, y_plot =  gpitch.ssgp.predict_windowed(x=x[i], y=y[i], predfunc=mpd.predictall, nw=window_size)  # predict
         gpitch.myplots.plot_ssgp(mpd, mean_f=mf, var_f=vf, mean_g=mg, var_g=vg, x_plot=x_plot, y=y_plot)  # plot results
@@ -242,60 +242,61 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20],
                                                           mpd.kern_f2.lengthscales.value[0].copy(),
                                                           mpd.kern_f3.lengthscales.value[0].copy()]})
             display(data_com_kern)
-    
+
     results_l = [mf_l, mg_l, vf_l, vg_l, x_l, y_l, q_mu_acts_l, q_mu_comps_l, q_sqrt_acts_l, q_sqrt_comps_l]
-    
-    
+
+
     #rm = window_overlap.merge_all(results_l)  # results merged
     #s1_l, s2_l, s3_l = window_overlap.append_sources(rm)  # get patches of sources
     #window_overlap.plot_patches(rm, s1_l, s2_l, s3_l)
     #x, y, s = window_overlap.get_results_arrays(sl=[s1_l, s2_l, s3_l], rm=rm, ws=window_size)
     #window_overlap.plot_sources(x, y, s)
     #final_results = [x, y, s]
-    
+
     #return all_models_list, final_results
 
 
-
-
 def train_notebook(gpu='0', list_limits=[0,-1], maxiter=[100, 2000]):
-    sess = gpitch.init_settings(gpu)  # choose gpu 1 to work
+    sess = gpitch.init_settings(gpu)  # choose gpu to work
     plt.rcParams['figure.figsize'] = (16, 4)  # set plot size
-    
-    datadir = '/import/c4dm-04/alvarado/datasets/ss_amt/training_data/'  # import 12 audio files for training
+
+    # import 12 audio files for intializing component parameters
+    #_______________________________________________________________________________________________
+    datadir = '/import/c4dm-04/alvarado/datasets/ss_amt/training_data/'
     lfiles = gpitch.lfiles_training
     lfiles = lfiles[list_limits[0]:list_limits[1]]
     numf = len(lfiles)  # number of files loaded
     if0 = gpitch.find_ideal_f0(lfiles)  # ideal frequency for each pitch
-    
+
     x2, y2, fs2 = [], [], []
     for i in range(numf):
         a, b, c = gpitch.readaudio(datadir + lfiles[i], frames=32000, aug=False)
         x2.append(a.copy())
         y2.append(b.copy())
         fs2.append(c)
-        
-    # plt.figure(figsize=(16, 12))  # visualize loaded data 
+
+    # plt.figure(figsize=(16, 12))  # visualize loaded data
     # for i in range(numf):
     #     plt.subplot(4, 3, i+1)
     #     plt.plot(x2[i], y2[i])
     #     plt.suptitle('Training data')
-        
-        
+
     lkernel, iparam = gpitch.init_kernel_training(y=y2, list_files=lfiles)
-    
+
+    # Compare FFT kernels and initialization data
+    #_______________________________________________________________________________________________
     array0 = np.asarray(0.).reshape(-1,1)
     x_p = np.linspace(-1, 1, 32000).reshape(-1, 1)
 
     k_p = []
     for i in range(numf):
         k_p.append(lkernel[1][i].compute_K(x_p, array0))
-        
-        
+
     F2 = np.linspace(0., 8000., 16000).reshape(-1, 1)
     gpitch.pltrain.plot_fft(F2, y2, k_p, numf, iparam)
 
-
+    # import 12 audio files for training (same data but only 0.5 seconds)
+    #_______________________________________________________________________________________________
     n = 8000
     x, y, fs = [], [], []
     for i in range(numf):
@@ -304,11 +305,13 @@ def train_notebook(gpu='0', list_limits=[0,-1], maxiter=[100, 2000]):
         y.append(b.copy())
         fs.append(c)
 
-    # plt.figure(figsize=(16, 12))  # visualize loaded data 
+    # plt.figure(figsize=(16, 12))  # visualize loaded data
     # for i in range(numf):
     #     plt.subplot(4, 3, i+1)
     #     plt.plot(x[i], y[i])
 
+    # initialize models
+    #_______________________________________________________________________________________________
     m = []
     nivps_a, nivps_c = 200, 200  # num inducing variables per second for act and comp
     nlinfun = gpitch.logistic
@@ -319,26 +322,23 @@ def train_notebook(gpu='0', list_limits=[0,-1], maxiter=[100, 2000]):
         m[i].za.fixed = True
         m[i].zc.fixed = True
 
-    maxiter1 = maxiter[0]
-    maxiter2 = maxiter[1]
+    # optimization
+    #_______________________________________________________________________________________________
     for i in range(numf):
         st = time.time()
-
         #m[i].kern_act[0].variance.fixed = True
-        m[i].optimize(disp=1, maxiter=maxiter1)
-
-        m[i].za.fixed = False 
-        m[i].optimize(disp=1, maxiter=maxiter2)
-
+        m[i].optimize(disp=1, maxiter=maxiter[0])
+        m[i].za.fixed = False
+        m[i].optimize(disp=1, maxiter=maxiter[1])
         print("model {}, time optimizing {} sec".format(i+1, time.time() - st))
         tf.reset_default_graph()
 
-
+    # prediction
+    #_______________________________________________________________________________________________
     m_a, v_a = [], []  # list mean, var activation
     m_c, v_c = [], []  # list mean, var component
     m_s = []  # mean source
-    
-    
+
     for i in range(numf):
         st = time.time()
         mean_act, var_act = m[i].predict_act(x[i])
@@ -350,8 +350,8 @@ def train_notebook(gpu='0', list_limits=[0,-1], maxiter=[100, 2000]):
         v_a.append(var_act[0])
         v_c.append(var_com[0])
         tf.reset_default_graph()
-    
-    
+
+
     gpitch.pltrain.plot_prediction(x=x, y=y, source=m_s, m_a=m_a, v_a=v_a, m_c=m_c, v_c=v_c, m=m, nlinfun=nlinfun)
 
     gpitch.pltrain.plot_parameters(m)
@@ -362,14 +362,14 @@ def train_notebook(gpu='0', list_limits=[0,-1], maxiter=[100, 2000]):
 
     gpitch.pltrain.plot_fft(F2, y2, k_p2, numf, iparam)
 #     gpitch.pltrain.plot_fft(F2, y2, k_p, numf, iparam)
-    
-    
+
+
 #     F1 = np.linspace(0., 8000., n).reshape(-1, 1)
 #     gpitch.pltrain.plot_fft(F1, y, m_s, numf, iparam)
 
     # import pickle
     # for i in range(numf):
-    #     m[i].prediction_act = [m_a[i], v_a[i]] 
+    #     m[i].prediction_act = [m_a[i], v_a[i]]
     #     m[i].prediction_com = [m_c[i], v_c[i]]
     #     location = "/import/c4dm-04/alvarado/results/ss_amt/train/trained_25_modgp2_new_var_1" +  lfiles[i].strip('.wav')+".p"
     #     pickle.dump(m[i], open(location, "wb"))
