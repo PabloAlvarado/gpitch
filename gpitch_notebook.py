@@ -119,7 +119,7 @@ def get_lists_save_results():
     return [], [], [], [], [], [], [[], [], []], [[], [], []], [[], [], []], [[], [], []]
 
 
-def learning_on_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20], learning_rate=[0.0025, 0.0025], minibatch_size=None,
+def test_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20], learning_rate=[0.0025, 0.0025], minibatch_size=None,
                          frames=4000, start=0, opt_za=False, window_size=2001, disp=False, varfix=False, overlap=True):
     """
     param nivps: number of inducing variables per second, for activations and components
@@ -133,6 +133,7 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20],
     linst = ['011PFNOM', '131EGLPM', '311CLNOM', 'ALVARADO']  # list of instruments
     instrument = linst[inst]
     directory = '/import/c4dm-04/alvarado/results/ss_amt/train/'  # location saved models
+    directory = '/home/pa/Desktop/ss_amt/results/logistic/'
     pattern = 'trained_25_modgp2_new_var_1' + instrument  # which model version
 
     m, names_list = gpitch.loadm(directory=directory, pattern=pattern)  # load pitch models
@@ -140,6 +141,7 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20],
 
     # load data
     test_data_dir = '/import/c4dm-04/alvarado/datasets/ss_amt/test_data/'
+    test_data_dir = '/home/pa/Desktop/ss_amt/test_data/'
     lfiles = []
     lfiles += [i for i in os.listdir(test_data_dir) if instrument + '_mixture' in i]
 
@@ -153,8 +155,8 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20],
     else:
         x, y = gpitch.segment(xall2.copy(), yall2.copy(), window_size=window_size, aug=False)  # return list of segments
 
-    nlinfun = gpitch.logistic_tf  # use gaussian as non-linear transform for activations
-    mpd = gpitch.ssgp.init_model(x=x[0].copy(), y=y[0].copy(), m1=m[0], m2=m[1], m3=m[2], niv_a=nivps[0], niv_c=nivps[1],
+    nlinfun = gpitch.logistic_tf  # use logistic or gaussian as non-linear transform for activations
+    mpd = gpitch.pdgp.init_model(x=x[0].copy(), y=y[0].copy(), m1=m[0], m2=m[1], m3=m[2], niv_a=nivps[0], niv_c=nivps[1],
                                  minibatch_size=minibatch_size, nlinfun=nlinfun, quad=True, varfix=varfix)  # init pitch detec model
 
     mf_l, mg_l, vf_l, vg_l, x_l, y_l, q_mu_acts_l, q_mu_comps_l, q_sqrt_acts_l, q_sqrt_comps_l = get_lists_save_results()
@@ -256,13 +258,14 @@ def learning_on_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20],
     #return all_models_list, final_results
 
 
-def train_notebook(gpu='0', list_limits=[0,-1], maxiter=[100, 2000]):
+def train_notebook(gpu='0', list_limits=[0,-1], maxiter=[1, 2], nivps=[20, 20], frames=2000):
     sess = gpitch.init_settings(gpu)  # choose gpu to work
     plt.rcParams['figure.figsize'] = (16, 4)  # set plot size
 
     # import 12 audio files for intializing component parameters
     #_______________________________________________________________________________________________
     datadir = '/import/c4dm-04/alvarado/datasets/ss_amt/training_data/'
+    datadir = '/home/pa/Desktop/ss_amt/training_data/'
     lfiles = gpitch.lfiles_training
     lfiles = lfiles[list_limits[0]:list_limits[1]]
     numf = len(lfiles)  # number of files loaded
@@ -286,18 +289,21 @@ def train_notebook(gpu='0', list_limits=[0,-1], maxiter=[100, 2000]):
     # Compare FFT kernels and initialization data
     #_______________________________________________________________________________________________
     array0 = np.asarray(0.).reshape(-1,1)
-    x_p = np.linspace(-1, 1, 32000).reshape(-1, 1)
+    x_p = np.linspace(-4, 4, 8*16000).reshape(-1, 1)
 
     k_p = []
     for i in range(numf):
         k_p.append(lkernel[1][i].compute_K(x_p, array0))
 
-    F2 = np.linspace(0., 8000., 16000).reshape(-1, 1)
-    gpitch.pltrain.plot_fft(F2, y2, k_p, numf, iparam)
+    Fdata = np.linspace(0., 8000., 16000).reshape(-1, 1)
+    Fkernel = np.linspace(0., 8000., 4*16000).reshape(-1, 1)
+
+    gpitch.pltrain.plot_fft(Fdata, Fkernel, y2, k_p, numf, iparam)
+
 
     # import 12 audio files for training (same data but only 0.5 seconds)
     #_______________________________________________________________________________________________
-    n = 8000
+    n = frames
     x, y, fs = [], [], []
     for i in range(numf):
         a, b, c = gpitch.readaudio(datadir + lfiles[i], frames=n, aug=False)
@@ -313,7 +319,7 @@ def train_notebook(gpu='0', list_limits=[0,-1], maxiter=[100, 2000]):
     # initialize models
     #_______________________________________________________________________________________________
     m = []
-    nivps_a, nivps_c = 200, 200  # num inducing variables per second for act and comp
+    nivps_a, nivps_c = nivps[0], nivps[1]  # num inducing variables per second for act and comp
     nlinfun = gpitch.logistic
     for i in range(numf):
         z = gpitch.init_iv(x=x[i], num_sources=numf, nivps_a=nivps_a, nivps_c=nivps_c, fs=fs[i])
@@ -326,7 +332,7 @@ def train_notebook(gpu='0', list_limits=[0,-1], maxiter=[100, 2000]):
     #_______________________________________________________________________________________________
     for i in range(numf):
         st = time.time()
-        #m[i].kern_act[0].variance.fixed = True
+        m[i].kern_act[0].variance.fixed = True
         m[i].optimize(disp=1, maxiter=maxiter[0])
         m[i].za.fixed = False
         m[i].optimize(disp=1, maxiter=maxiter[1])
@@ -360,19 +366,19 @@ def train_notebook(gpu='0', list_limits=[0,-1], maxiter=[100, 2000]):
     for i in range(numf):
         k_p2.append(m[i].kern_com[0].compute_K(x_p, array0))
 
-    gpitch.pltrain.plot_fft(F2, y2, k_p2, numf, iparam)
-#     gpitch.pltrain.plot_fft(F2, y2, k_p, numf, iparam)
+    gpitch.pltrain.plot_fft(Fdata, Fkernel, y2, k_p2, numf, iparam)
 
 
-#     F1 = np.linspace(0., 8000., n).reshape(-1, 1)
-#     gpitch.pltrain.plot_fft(F1, y, m_s, numf, iparam)
+    for i in range(numf):
+        m[i].prediction_act = [m_a[i], v_a[i]]
+        m[i].prediction_com = [m_c[i], v_c[i]]
+        location = "/home/pa/Desktop/ss_amt/results/logistic/" +  lfiles[i].strip('.wav')+".p"
+        # location = "/import/c4dm-04/alvarado/results/ss_amt/train/trained_25_modgp2_new_var_1" +  lfiles[i].strip('.wav')+".p"
+        pickle.dump(m[i], open(location, "wb"))
 
-    # import pickle
-    # for i in range(numf):
-    #     m[i].prediction_act = [m_a[i], v_a[i]]
-    #     m[i].prediction_com = [m_c[i], v_c[i]]
-    #     location = "/import/c4dm-04/alvarado/results/ss_amt/train/trained_25_modgp2_new_var_1" +  lfiles[i].strip('.wav')+".p"
-    #     pickle.dump(m[i], open(location, "wb"))
+    return m
+
+
 
 
 #
