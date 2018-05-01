@@ -16,7 +16,7 @@ def init_kernel_training(y, list_files, fs=16000, maxh=25):
     for i in range(num_pitches):
         iparam.append(init_cparam(y[i], fs=fs, maxh=maxh, ideal_f0=if0[i])) # init component kern params
 
-        kern_act.append(Matern12(1, lengthscales=0.1, variance=1.))
+        kern_act.append(Matern12(1, lengthscales=1., variance=3.5))
         kern_com.append(Matern32sm(1, numc=len(iparam[i][1]), lengthscales=1., variances=iparam[i][1],
                                    frequencies=iparam[i][0]))
     kern = [kern_act, kern_com]
