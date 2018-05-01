@@ -77,7 +77,7 @@ class Matern32sm(gpflow.kernels.Kern):
             variances = 0.125*np.ones((num_partials, 1))
             frequencies = 1.*(1. + np.arange(num_partials))
 
-        self.lengthscales = Param(lengthscales, transforms.Logistic(0., 10.))
+        self.lengthscales = Param(lengthscales, transforms.Logistic(0., 2.))
 
         for i in range(self.num_partials):
             var_l.append(Param(variances[i], transforms.Logistic(0., 0.25)))

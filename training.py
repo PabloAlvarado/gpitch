@@ -5,7 +5,7 @@ import time
 import pickle
 
 
-def train_notebook(gpu='0', list_limits=None, maxiter=[200, 600], nivps=[200, 200], frames=4000):
+def train_notebook(gpu='0', list_limits=None, maxiter=[200, 2000], nivps=[200, 200], frames=8000):
     
     sess = gpitch.init_settings(gpu)  # choose gpu to work
 
