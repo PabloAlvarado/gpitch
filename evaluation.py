@@ -119,7 +119,7 @@ def get_lists_save_results():
     return [], [], [], [], [], [], [[], [], []], [[], [], []], [[], [], []], [[], [], []]
 
 
-def test_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20], learning_rate=[0.0025, 0.0025], minibatch_size=None,
+def evaluation_notebook(gpu='0', inst=0, nivps=[10, 10], maxiter=[50, 20], learning_rate=[0.0025, 0.0025], minibatch_size=None,
                          frames=4000, start=0, opt_za=False, window_size=2001, disp=False, varfix=False, overlap=True):
     """
     param nivps: number of inducing variables per second, for activations and components
@@ -133,7 +133,7 @@ def test_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20], learni
     linst = ['011PFNOM', '131EGLPM', '311CLNOM', 'ALVARADO']  # list of instruments
     instrument = linst[inst]
     directory = '/import/c4dm-04/alvarado/results/ss_amt/train/'  # location saved models
-    directory = '/home/pa/Desktop/ss_amt/results/logistic/'
+    #directory = '/home/pa/Desktop/ss_amt/results/logistic/'
     pattern = 'trained_25_modgp2_new_var_1' + instrument  # which model version
 
     m, names_list = gpitch.loadm(directory=directory, pattern=pattern)  # load pitch models
@@ -141,7 +141,7 @@ def test_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20], learni
 
     # load data
     test_data_dir = '/import/c4dm-04/alvarado/datasets/ss_amt/test_data/'
-    test_data_dir = '/home/pa/Desktop/ss_amt/test_data/'
+    #test_data_dir = '/home/pa/Desktop/ss_amt/test_data/'
     lfiles = []
     lfiles += [i for i in os.listdir(test_data_dir) if instrument + '_mixture' in i]
 
@@ -256,129 +256,4 @@ def test_notebook(gpu='0', inst=0, nivps=[1000, 1000], maxiter=[500, 20], learni
     #final_results = [x, y, s]
 
     #return all_models_list, final_results
-
-
-def train_notebook(gpu='0', list_limits=[0,-1], maxiter=[1, 2], nivps=[20, 20], frames=2000):
-    sess = gpitch.init_settings(gpu)  # choose gpu to work
-    plt.rcParams['figure.figsize'] = (16, 4)  # set plot size
-
-    # import 12 audio files for intializing component parameters
-    #_______________________________________________________________________________________________
-    datadir = '/import/c4dm-04/alvarado/datasets/ss_amt/training_data/'
-    datadir = '/home/pa/Desktop/ss_amt/training_data/'
-    lfiles = gpitch.lfiles_training
-    lfiles = lfiles[list_limits[0]:list_limits[1]]
-    numf = len(lfiles)  # number of files loaded
-    if0 = gpitch.find_ideal_f0(lfiles)  # ideal frequency for each pitch
-
-    x2, y2, fs2 = [], [], []
-    for i in range(numf):
-        a, b, c = gpitch.readaudio(datadir + lfiles[i], frames=32000, aug=False)
-        x2.append(a.copy())
-        y2.append(b.copy())
-        fs2.append(c)
-
-    # plt.figure(figsize=(16, 12))  # visualize loaded data
-    # for i in range(numf):
-    #     plt.subplot(4, 3, i+1)
-    #     plt.plot(x2[i], y2[i])
-    #     plt.suptitle('Training data')
-
-    lkernel, iparam = gpitch.init_kernel_training(y=y2, list_files=lfiles)
-
-    # Compare FFT kernels and initialization data
-    #_______________________________________________________________________________________________
-    array0 = np.asarray(0.).reshape(-1,1)
-    x_p = np.linspace(-4, 4, 8*16000).reshape(-1, 1)
-
-    k_p = []
-    for i in range(numf):
-        k_p.append(lkernel[1][i].compute_K(x_p, array0))
-
-    Fdata = np.linspace(0., 8000., 16000).reshape(-1, 1)
-    Fkernel = np.linspace(0., 8000., 4*16000).reshape(-1, 1)
-
-    gpitch.pltrain.plot_fft(Fdata, Fkernel, y2, k_p, numf, iparam)
-
-
-    # import 12 audio files for training (same data but only 0.5 seconds)
-    #_______________________________________________________________________________________________
-    n = frames
-    x, y, fs = [], [], []
-    for i in range(numf):
-        a, b, c = gpitch.readaudio(datadir + lfiles[i], frames=n, aug=False)
-        x.append(a.copy())
-        y.append(b.copy())
-        fs.append(c)
-
-    # plt.figure(figsize=(16, 12))  # visualize loaded data
-    # for i in range(numf):
-    #     plt.subplot(4, 3, i+1)
-    #     plt.plot(x[i], y[i])
-
-    # initialize models
-    #_______________________________________________________________________________________________
-    m = []
-    nivps_a, nivps_c = nivps[0], nivps[1]  # num inducing variables per second for act and comp
-    nlinfun = gpitch.logistic
-    for i in range(numf):
-        z = gpitch.init_iv(x=x[i], num_sources=numf, nivps_a=nivps_a, nivps_c=nivps_c, fs=fs[i])
-        kern = [ [lkernel[0][i]], [lkernel[1][i]] ]
-        m.append(gpitch.pdgp.Pdgp(x=x[i], y=y[i], z=z, kern=kern))
-        m[i].za.fixed = True
-        m[i].zc.fixed = True
-
-    # optimization
-    #_______________________________________________________________________________________________
-    for i in range(numf):
-        st = time.time()
-        m[i].kern_act[0].variance.fixed = True
-        m[i].optimize(disp=1, maxiter=maxiter[0])
-        m[i].za.fixed = False
-        m[i].optimize(disp=1, maxiter=maxiter[1])
-        print("model {}, time optimizing {} sec".format(i+1, time.time() - st))
-        tf.reset_default_graph()
-
-    # prediction
-    #_______________________________________________________________________________________________
-    m_a, v_a = [], []  # list mean, var activation
-    m_c, v_c = [], []  # list mean, var component
-    m_s = []  # mean source
-
-    for i in range(numf):
-        st = time.time()
-        mean_act, var_act = m[i].predict_act(x[i])
-        mean_com, var_com = m[i].predict_com(x[i])
-        print("model {}, time predicting {}".format(str(i + 1), time.time() - st) )
-        m_s.append(gpitch.logistic(mean_act[0])*mean_com[0])
-        m_a.append(mean_act[0])
-        m_c.append(mean_com[0])
-        v_a.append(var_act[0])
-        v_c.append(var_com[0])
-        tf.reset_default_graph()
-
-
-    gpitch.pltrain.plot_prediction(x=x, y=y, source=m_s, m_a=m_a, v_a=v_a, m_c=m_c, v_c=v_c, m=m, nlinfun=nlinfun)
-
-    gpitch.pltrain.plot_parameters(m)
-
-    k_p2 = []
-    for i in range(numf):
-        k_p2.append(m[i].kern_com[0].compute_K(x_p, array0))
-
-    gpitch.pltrain.plot_fft(Fdata, Fkernel, y2, k_p2, numf, iparam)
-
-
-    for i in range(numf):
-        m[i].prediction_act = [m_a[i], v_a[i]]
-        m[i].prediction_com = [m_c[i], v_c[i]]
-        location = "/home/pa/Desktop/ss_amt/results/logistic/" +  lfiles[i].strip('.wav')+".p"
-        # location = "/import/c4dm-04/alvarado/results/ss_amt/train/trained_25_modgp2_new_var_1" +  lfiles[i].strip('.wav')+".p"
-        pickle.dump(m[i], open(location, "wb"))
-
-    return m
-
-
-
-
 #

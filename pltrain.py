@@ -34,7 +34,7 @@ def plot_fft(F1, F2, y, y_k, numf, iparam):
     plt.figure(figsize=(16, 16))  # visualize loaded data
     for i in range(numf):
         Y1 = np.abs(fft(y[i].reshape(-1, ) ) )[0:16000]
-        Y2 = np.abs(fft(y_k[i].reshape(-1, ) ) )[0:4*16000]
+        Y2 = np.abs(fft(y_k[i].reshape(-1, ) ) )[0:5*16000]
         Y1 /= np.max(Y1)
         Y2 /= np.max(Y2)
 

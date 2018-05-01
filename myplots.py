@@ -1,9 +1,10 @@
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
-sys.path.append('../../')
+# sys.path.append('../../')
 from gpitch import logistic, gaussfun
-from scipy.fftpack import fft, ifft, ifftshift
+from scipy.fftpack import fft, ifft, ifftshift]
+from gpitch import pltrain
 
 
 def plot_results(mean_f, var_f, mean_g, var_g, x_plot, y, z, xlim):
