@@ -256,4 +256,11 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[10, 10], maxiter=[50, 20], learn
     #final_results = [x, y, s]
 
     #return all_models_list, final_results
+    
+    # import soundfile
+    # import numpy as np
+    # pitch = ['E', 'C', 'G']
+    # for i in range(3):
+    #     name = "011PFNOM_" + pitch[i] + "_part.wav"
+    #     soundfile.write(name, rl[2][i]/np.max(np.abs(rl[2][i])), 16000)
 #

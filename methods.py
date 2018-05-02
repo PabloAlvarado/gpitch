@@ -57,7 +57,7 @@ def readaudio(fname, frames=-1, start=0, aug=False):
     if aug:
         augnum = 1000  # number of zeros to add
         y = np.append(np.zeros((augnum, 1)), y).reshape(-1, 1)
-        y = np.append(y, np.zeros((augnum, 1))).reshape(-1, 1)
+        #y = np.append(y, np.zeros((augnum, 1))).reshape(-1, 1)
     frames = y.size
     x = np.linspace(0, (frames-1.)/fs, frames).reshape(-1, 1)  # time vector
     return x, y, fs
