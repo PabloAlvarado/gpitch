@@ -118,7 +118,7 @@ def plot_sources_all(x, y, esource, source=None, maxncol=4):
 #________________________________________________________________________________________________________________________
 
 def plot_training_all(x, y, source, m_a, v_a, m_c, v_c, m, nlinfun):
-    plt.figure(figsize=(16, 4))
+    plt.figure()
 
     plt.subplot(1,4,1), plt.title('data')
     plt.plot(x, y), plt.ylim([-1.1, 1.1])
