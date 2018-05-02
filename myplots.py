@@ -73,7 +73,7 @@ def plot_predict_all(x, mean_act, var_act, mean_com, var_com, m, nlinfun=logisti
 
 
 
-def plot_sources_all(x, y, esource, source=None, maxncol=4):
+def plot_sources_all(x, y, esource, source=None, maxncol=4, fignumber=100):
     if esource == None:
         num_sources = 0
     else:
@@ -97,11 +97,12 @@ def plot_sources_all(x, y, esource, source=None, maxncol=4):
         all_prediction += esource[i]
 
 
-    plt.figure(figsize=(16, 4*nrow))
+    plt.figure(fignumber, figsize=(16, 4*nrow))
     plt.subplot(nrow, ncol, (1, ncol))
     plt.plot(x, y, 'xk')
     plt.plot(x, all_prediction, lw=2)
-    plt.xlim(x[0], x[-1])
+    plt.ylim(-1.1, 1.1)
+    #plt.xlim(x[0], x[-1])
     plt.legend(["Data"], loc=1)
 
 
@@ -110,8 +111,9 @@ def plot_sources_all(x, y, esource, source=None, maxncol=4):
         if source is not None:
             plt.plot(x, source[i], 'xk')
         plt.plot(x, esource[i], lw=2)
-        plt.legend(["Real source " + str(i + 1), "Estimated source " + str(i + 1)], loc=1)
-        plt.xlim(x[0], x[-1])
+        plt.ylim(-1.1, 1.1)
+        #plt.legend(["Real source " + str(i + 1), "Estimated source " + str(i + 1)], loc=1)
+        #plt.xlim(x[0], x[-1])
 
 
 ## TRAINING PLOTS

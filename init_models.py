@@ -1,7 +1,26 @@
 from gpflow.kernels import Matern32, Matern12
 from gpitch.kernels import Matern32sm
 from gpitch.methods import find_ideal_f0, init_cparam
+import numpy as np
 
+
+def init_iv(x, num_sources, nivps_a, nivps_c, fs=16000):
+    """
+    Initialize inducing variables
+    :param x: time vector
+    :param fs: sample frequency
+    :param nivps_a: number inducing variables per second for activation
+    :param nivps_c: number inducing variables per second for component
+    """
+    dec_a = fs/nivps_a
+    dec_c = fs/nivps_c
+    za = []
+    zc = []
+    for i in range(num_sources):
+        za.append(np.vstack([x[::dec_a].copy(), x[-1].copy()]))  # location ind v act
+        zc.append(np.vstack([x[::dec_c].copy(), x[-1].copy()]))  # location ind v comp
+    z = [za, zc]
+    return z
 
 def init_kernel_training(y, list_files, fs=16000, maxh=25):
     num_pitches = len(list_files)
@@ -20,15 +39,136 @@ def init_kernel_training(y, list_files, fs=16000, maxh=25):
     kern = [kern_act, kern_com]
     return kern, iparam # list of all required kernels and its initial parameters
 
-
 def init_kernel_with_trained_models(m):
     kern_act = []
     kern_com = []
-    for i in range(len(m)):
-        nump = m[i].kern_com[0].num_partials.value
+    num_sources = len(m)
+    for i in range(num_sources):
+        num_p = m[i].kern_com[0].num_partials
         kern_act.append(Matern12(1))
-        kern_com.append(Matern32sm(1, num_partials=nump.copy()))
+        kern_com.append(Matern32sm(1, num_partials=num_p))
+                
+        kern_act[i].fixed = True
+        kern_com[i].fixed = True
+        
+        kern_act[i].lengthscales = m[i].kern_act[0].lengthscales.value.copy()
+        kern_act[i].variance = m[i].kern_act[0].variance.value.copy()
+        
+        kern_com[i].lengthscales = m[i].kern_com[0].lengthscales.value.copy()
+        for j in range(num_p):
+            kern_com[i].frequency[j] = m[i].kern_com[0].frequency[j].value.copy()
+            kern_com[i].variance[j] = m[i].kern_com[0].variance[j].value.copy()
     return [kern_act, kern_com]
+
+def reset_model(m, x, y, nivps):
+    num_sources = len(m.za)
+    m.x = x.copy()
+    m.y = y.copy()
+    m.likelihood.variance = 1.    
+    new_z = init_iv(x, num_sources, nivps[0], nivps[1])
+    for i in range(num_sources):
+        m.za[i] = new_z[0][i].copy()
+        m.zc[i] = new_z[1][i].copy()
+        
+        m.q_mu_act[i] = np.zeros((new_z[0][i].shape[0], 1))
+        m.q_mu_com[i] = np.zeros((new_z[1][i].shape[0], 1))
+        
+        m.q_sqrt_act[i] = np.array([np.eye(new_z[0][i].shape[0]) for _ in range(1)]).swapaxes(0, 2)
+        m.q_sqrt_com[i] = np.array([np.eye(new_z[1][i].shape[0]) for _ in range(1)]).swapaxes(0, 2)
+       
+        
+    
+
+
+# def re_init_params(m, x, y, nivps):
+
+#     # reset inducing variables
+#     dec_a = 16000/nivps[0]
+#     dec_c = 16000/nivps[1]
+#     za1 = np.vstack([x[::dec_a].copy(), x[-1].copy()])  # location inducing variables
+#     zc1 = np.vstack([x[::dec_c].copy(), x[-1].copy()])  # location inducing variables
+#     za2 = 0.33*(za1[1] - za1[0]) + np.vstack([x[::dec_a].copy(), x[-1].copy()])  # location inducing variables
+#     zc2 = 0.33*(zc1[1] - zc1[0]) + np.vstack([x[::dec_c].copy(), x[-1].copy()])  # location inducing variables
+#     za3 = 0.66*(za1[1] - za1[0]) + np.vstack([x[::dec_a].copy(), x[-1].copy()])  # location inducing variables
+#     zc3 = 0.66*(zc1[1] - zc1[0]) + np.vstack([x[::dec_c].copy(), x[-1].copy()])  # location inducing variables
+
+#     m.Za1 = za1.copy()
+#     m.Za2 = za2.copy()
+#     m.Za3 = za3.copy()
+#     m.Zc1 = zc1.copy()
+#     m.Zc2 = zc2.copy()
+#     m.Zc3 = zc3.copy()
+
+#     # reset input data
+#     m.X = x.copy()
+#     m.Y = y.copy()
+
+#     # reset variational parameters
+#     m.q_mu1 = np.zeros((zc1.shape[0], 1))  # f1
+#     m.q_mu2 = np.zeros((za1.shape[0], 1))  # g1
+#     m.q_mu3 = np.zeros((zc2.shape[0], 1))  # f2
+#     m.q_mu4 = np.zeros((za2.shape[0], 1))  # g2
+#     m.q_mu5 = np.zeros((zc3.shape[0], 1))  # f3
+#     m.q_mu6 = np.zeros((za3.shape[0], 1))  # g3
+
+#     q_sqrt_a1 = np.array([np.eye(za1.shape[0]) for _ in range(1)]).swapaxes(0, 2)
+#     q_sqrt_c1 = np.array([np.eye(zc1.shape[0]) for _ in range(1)]).swapaxes(0, 2)
+#     q_sqrt_a2 = np.array([np.eye(za2.shape[0]) for _ in range(1)]).swapaxes(0, 2)
+#     q_sqrt_c2 = np.array([np.eye(zc2.shape[0]) for _ in range(1)]).swapaxes(0, 2)
+#     q_sqrt_a3 = np.array([np.eye(za3.shape[0]) for _ in range(1)]).swapaxes(0, 2)
+#     q_sqrt_c3 = np.array([np.eye(zc3.shape[0]) for _ in range(1)]).swapaxes(0, 2)
+
+#     m.q_sqrt1 = q_sqrt_c1.copy()
+#     m.q_sqrt2 = q_sqrt_a1.copy()
+#     m.q_sqrt3 = q_sqrt_c2.copy()
+#     m.q_sqrt4 = q_sqrt_a2.copy()
+#     m.q_sqrt5 = q_sqrt_c3.copy()
+#     m.q_sqrt6 = q_sqrt_a3.copy()
+
+#     # reset hyper-parameters
+#     m.kern_g1.variance = 4.
+#     m.kern_g2.variance = 4.
+#     m.kern_g3.variance = 4.
+
+#     m.kern_g1.lengthscales = 0.5
+#     m.kern_g2.lengthscales = 0.5
+#     m.kern_g3.lengthscales = 0.5
+
+#     m.kern_f1.lengthscales = 1.0
+#     m.kern_f2.lengthscales = 1.0
+#     m.kern_f3.lengthscales = 1.0
+
+#     m.likelihood.variance = 1.
+
+
+# def get_lists_save_results():
+#     return [], [], [], [], [], [], [[], [], []], [[], [], []], [[], [], []], [[], [], []]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # def get_act_params(indict):
 #     """Get parameters of activation kernel"""

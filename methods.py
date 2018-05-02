@@ -13,24 +13,6 @@ import pickle
 import time
 
 
-def init_iv(x, num_sources, nivps_a, nivps_c, fs=16000):
-    """
-    Initialize inducing variables
-    :param x: time vector
-    :param fs: sample frequency
-    :param nivps_a: number inducing variables per second for activation
-    :param nivps_c: number inducing variables per second for component
-    """
-    dec_a = fs/nivps_a
-    dec_c = fs/nivps_c
-    za = []
-    zc = []
-    for i in range(num_sources):
-        za.append(np.vstack([x[::dec_a].copy(), x[-1].copy()]))  # location ind v act
-        zc.append(np.vstack([x[::dec_c].copy(), x[-1].copy()]))  # location ind v comp
-    z = [za, zc]
-    return z
-
 def loadm(directory, pattern=''):
     '''load an already gpitch trained model'''
     filenames = []
