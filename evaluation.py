@@ -47,6 +47,8 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[20, 20], maxiter=[1, 1], learnin
     else:
         x, y = gpitch.segment(xall2.copy(), yall2.copy(), window_size=window_size, aug=False)  # return list of segments    
     results_list = len(x)*[None]
+    var_params_list = [[], [], [], []]
+    z_location_list = len(x)*[None]
     
     ## optimize by windows
     for i in range(len(y)):
@@ -94,28 +96,19 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[20, 20], maxiter=[1, 1], learnin
         
         ## plot results
         mplt.plot_sources_all(x[i], y[i], results_list[i][4])
+        
+        ## save partial results
+        var_params_list[0].append(mpd.q_mu_act)
+        var_params_list[1].append(mpd.q_sqrt_act)
+        var_params_list[2].append(mpd.q_mu_com)
+        var_params_list[3].append(mpd.q_sqrt_com)
+        z_location_list[i] = list(z)
+        
+        ## reset tensorfloe graph
         tf.reset_default_graph()
     
-    return mpd, results_list
-
-
-#         q_mu_acts_l[0].append(mpd.q_mu2.value.copy())
-#         q_mu_acts_l[1].append(mpd.q_mu4.value.copy())
-#         q_mu_acts_l[2].append(mpd.q_mu6.value.copy())
-
-#         q_mu_comps_l[0].append(mpd.q_mu1.value.copy())
-#         q_mu_comps_l[1].append(mpd.q_mu3.value.copy())
-#         q_mu_comps_l[2].append(mpd.q_mu5.value.copy())
-
-#         q_sqrt_acts_l[0].append(mpd.q_sqrt2.value.copy())
-#         q_sqrt_acts_l[1].append(mpd.q_sqrt4.value.copy())
-#         q_sqrt_acts_l[2].append(mpd.q_sqrt6.value.copy())
-
-#         q_sqrt_comps_l[0].append(mpd.q_sqrt1.value.copy())
-#         q_sqrt_comps_l[1].append(mpd.q_sqrt3.value.copy())
-#         q_sqrt_comps_l[2].append(mpd.q_sqrt5.value.copy())
-
-#         
+    results = [results_list, var_params_list, z_location_list]
+    return mpd, results
 
 #         if disp:
 
