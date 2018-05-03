@@ -143,19 +143,19 @@ def plot_sources(x, y, s):
     plt.ylim(-1, 1)
 
 
-def plot_patches(x, y, rm, s1_l, s2_l, s3_l):
+def plot_patches(x, y, rm, s_l):
     num_patches = len(rm[0][0])
     for i in range(num_patches):
         plt.figure(1000, figsize=(16, 4))
-        plt.plot(x[i], i + s1_l[i], 'C0')
+        plt.plot(x[i], i + s_l[0][i], 'C0')
         plt.plot(x[i], i + y[i], 'C1')
 
 
         plt.figure(2000, figsize=(16, 4))
-        plt.plot(x[i], i + s2_l[i], 'C0')
+        plt.plot(x[i], i + s_l[1][i], 'C0')
         plt.plot(x[i], i + y[i], 'C1')
 
 
         plt.figure(3000, figsize=(16, 4))
-        plt.plot(x[i], i + s3_l[i], 'C0')
+        plt.plot(x[i], i + s_l[2][i], 'C0')
         plt.plot(x[i], i + y[i], 'C1')

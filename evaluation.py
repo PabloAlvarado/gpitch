@@ -9,8 +9,8 @@ from gpitch import window_overlap
 import gpitch.myplots as mplt
 
 
-def evaluation_notebook(gpu='0', inst=0, nivps=[20, 20], maxiter=[1, 1], learning_rate=[0.0025, 0.0025], 
-                        minibatch_size=None, frames=2*16000, start=0, opt_za=True, window_size=8001, overlap=True):
+def evaluation_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[1000, 1000], learning_rate=[0.0025, 0.0025], 
+                        minibatch_size=None, frames=2*16000, start=0, opt_za=True, window_size=8001, overlap=True, save=True):
     """
     param nivps: number of inducing variables per second, for activations and components
     """
@@ -44,7 +44,7 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[20, 20], maxiter=[1, 1], learnin
     var_params_list = [[], [], [], []]
     z_location_list = len(x)*[None]
     
-    ## optimize by windows
+    ## analyze whole signal by windows
     for i in range(len(y)):
         
         if i == 0: 
@@ -101,22 +101,22 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[20, 20], maxiter=[1, 1], learnin
         ## reset tensorflow graph
         tf.reset_default_graph()
     
-    results = [results_list, var_params_list, z_location_list]
     
     ## merge and overlap prediction results
     rl_merged = window_overlap.merge_all(results_list)  # results merged
-    s1_l, s2_l, s3_l = window_overlap.append_sources(rl_merged)  # get patches of sources
-    window_overlap.plot_patches(x, y, rl_merged, s1_l, s2_l, s3_l)
-    x_final, y_final, s_final = window_overlap.get_results_arrays(x=x, y=y, sl=[s1_l, s2_l, s3_l], ws=window_size)
-    window_overlap.plot_sources(x_final, y_final, s_final)
+    x_final, y_final, s_final = window_overlap.get_results_arrays(x=x, y=y, sl=rl_merged[4], ws=window_size)
     final_results = [x_final, y_final, s_final]
+    window_overlap.plot_sources(x_final, y_final, s_final)
 
     ##save wav files estimated sources
-    location_save = "/import/c4dm-04/alvarado/results/ss_amt/evaluation/logistic/"
-    for i in range(3):
-        name = names_list[i].strip('_trained.p') + "_part.wav"
-        soundfile.write(location_save + name, final_results[2][i]/np.max(np.abs(final_results[2][i])), 16000)
-        
+    if save:
+        location_save = "/import/c4dm-04/alvarado/results/ss_amt/evaluation/logistic/"
+        for i in range(3):
+            name = names_list[i].strip('_trained.p') + "_part.wav"
+            soundfile.write(location_save + name, final_results[2][i]/np.max(np.abs(final_results[2][i])), 16000)
+    
+    ## group results
+    results = [results_list, var_params_list, z_location_list]
     return mpd, results, final_results
 
     
@@ -140,6 +140,8 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[20, 20], maxiter=[1, 1], learnin
     
     
     
+    
+
     
     
     
