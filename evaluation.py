@@ -1,22 +1,16 @@
 import tensorflow as tf
 import numpy as np
-import gpflow
 import gpitch
 import os
 import time
-import pickle
+import soundfile
 import matplotlib.pyplot as plt
-import pandas as pd
-from scipy.fftpack import fft
-from IPython.display import display
 from gpitch import window_overlap
 import gpitch.myplots as mplt
-from gpitch.methods import logistic_tf
 
 
 def evaluation_notebook(gpu='0', inst=0, nivps=[20, 20], maxiter=[1, 1], learning_rate=[0.0025, 0.0025], 
-                        minibatch_size=None, frames=14*16000, start=0, opt_za=True, window_size=8001, 
-                        disp=False, overlap=True):
+                        minibatch_size=None, frames=2*16000, start=0, opt_za=True, window_size=8001, overlap=True):
     """
     param nivps: number of inducing variables per second, for activations and components
     """
@@ -55,7 +49,7 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[20, 20], maxiter=[1, 1], learnin
         
         if i == 0: 
             ## initialize model (do this only once)
-            z = gpitch.init_iv(x=x[i], num_sources=3, nivps_a=nivps[0], nivps_c=nivps[1], fs=fs)  # define location inducing variables
+            z = gpitch.init_iv(x=x[i], num_sources=3, nivps_a=nivps[0], nivps_c=nivps[1], fs=fs)  # location inducing var
             kern = gpitch.init_kernel_with_trained_models(m)
             mpd = gpitch.pdgp.Pdgp(x[i].copy(), y[i].copy(), z, kern, minibatch_size=minibatch_size, nlinfun=nlinfun)
             mpd.za.fixed = True
@@ -104,44 +98,52 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[20, 20], maxiter=[1, 1], learnin
         var_params_list[3].append(mpd.q_sqrt_com)
         z_location_list[i] = list(z)
         
-        ## reset tensorfloe graph
+        ## reset tensorflow graph
         tf.reset_default_graph()
     
     results = [results_list, var_params_list, z_location_list]
-    return mpd, results
-
-#         if disp:
-
-#             print("Likelihood")
-#             display(mpd.likelihood)
-
-#             print("Activation kernels")
-#             display(mpd.kern_g1)
-#             display(mpd.kern_g2)
-#             display(mpd.kern_g3)
-
-#             print("Component kernels")
-#             data_com_kern = pd.DataFrame({'Lengthscales':[mpd.kern_f1.lengthscales.value[0].copy(),
-#                                                           mpd.kern_f2.lengthscales.value[0].copy(),
-#                                                           mpd.kern_f3.lengthscales.value[0].copy()]})
-#             display(data_com_kern)
-
-#     results_l = [mf_l, mg_l, vf_l, vg_l, x_l, y_l, q_mu_acts_l, q_mu_comps_l, q_sqrt_acts_l, q_sqrt_comps_l]
-
-
-#     #rm = window_overlap.merge_all(results_l)  # results merged
-#     #s1_l, s2_l, s3_l = window_overlap.append_sources(rm)  # get patches of sources
-#     #window_overlap.plot_patches(rm, s1_l, s2_l, s3_l)
-#     #x, y, s = window_overlap.get_results_arrays(sl=[s1_l, s2_l, s3_l], rm=rm, ws=window_size)
-#     #window_overlap.plot_sources(x, y, s)
-#     #final_results = [x, y, s]
-
-#     #return all_models_list, final_results
     
-#     # import soundfile
-#     # import numpy as np
-#     # pitch = ['E', 'C', 'G']
-#     # for i in range(3):
-#     #     name = "011PFNOM_" + pitch[i] + "_part.wav"
-#     #     soundfile.write(name, rl[2][i]/np.max(np.abs(rl[2][i])), 16000)
-# #
+    ## merge and overlap prediction results
+    rl_merged = window_overlap.merge_all(results_list)  # results merged
+    s1_l, s2_l, s3_l = window_overlap.append_sources(rl_merged)  # get patches of sources
+    window_overlap.plot_patches(x, y, rl_merged, s1_l, s2_l, s3_l)
+    x_final, y_final, s_final = window_overlap.get_results_arrays(x=x, y=y, sl=[s1_l, s2_l, s3_l], ws=window_size)
+    window_overlap.plot_sources(x_final, y_final, s_final)
+    final_results = [x_final, y_final, s_final]
+
+    ##save wav files estimated sources
+    location_save = "/import/c4dm-04/alvarado/results/ss_amt/evaluation/logistic/"
+    for i in range(3):
+        name = names_list[i].strip('_trained.p') + "_part.wav"
+        soundfile.write(location_save + name, final_results[2][i]/np.max(np.abs(final_results[2][i])), 16000)
+        
+    return mpd, results, final_results
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+#

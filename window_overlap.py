@@ -77,20 +77,20 @@ def merged_x(x, ws):
 
 
 def merge_all(inlist):
-    outlist = [[[], [], []],
-               [[], [], []],
-               [[], [], []],
-               [[], [], []],
-               [],
-               []]
-    for j in range(4):
-        for i in range(len(inlist[4])):
-            outlist[j][0].append(inlist[j][i][0])
-            outlist[j][1].append(inlist[j][i][1])
-            outlist[j][2].append(inlist[j][i][2])
-    outlist[4] = inlist[4]
-    outlist[5] = inlist[5]
-
+    outlist = [ [[], [], []],
+                [[], [], []],
+                [[], [], []],
+                [[], [], []],
+                [[], [], []] ]
+    nrow = len(outlist)
+    ncol = len(inlist)
+    
+    for j in range(nrow):
+        for i in range(ncol):        
+            outlist[j][0].append(inlist[i][j][0])
+            outlist[j][1].append(inlist[i][j][1])
+            outlist[j][2].append(inlist[i][j][2])
+    
     return outlist
 
 
@@ -98,20 +98,20 @@ def append_sources(rmerged):
     s1_l = []
     s2_l = []
     s3_l = []
-    for i in range(len(rmerged[4])):
-        s1_l.append( logistic(rmerged[1][0][i].copy()) * rmerged[0][0][i].copy() )
-        s2_l.append( logistic(rmerged[1][1][i].copy()) * rmerged[0][1][i].copy() )
-        s3_l.append( logistic(rmerged[1][2][i].copy()) * rmerged[0][2][i].copy() )
+    for i in range(len(rmerged[0][0])):
+        s1_l.append( logistic(rmerged[0][0][i].copy()) * rmerged[2][0][i].copy() )
+        s2_l.append( logistic(rmerged[0][1][i].copy()) * rmerged[2][1][i].copy() )
+        s3_l.append( logistic(rmerged[0][2][i].copy()) * rmerged[2][2][i].copy() )
     return s1_l, s2_l, s3_l
 
 
-def get_results_arrays(sl, rm, ws):
+def get_results_arrays(x, y, sl, ws):
     s1 = merged_y(sl[0], ws)
     s2 = merged_y(sl[1], ws)
     s3 = merged_y(sl[2], ws)
 
-    x = merged_x(rm[4], ws)
-    y = merged_y(rm[5], ws)
+    x = merged_x(x, ws)
+    y = merged_y(y, ws)
 
     s1_trim = s1[0:-1].reshape(-1, 1)
     s2_trim = s2[0:-1].reshape(-1, 1)
@@ -143,18 +143,19 @@ def plot_sources(x, y, s):
     plt.ylim(-1, 1)
 
 
-def plot_patches(rm, s1_l, s2_l, s3_l):
-    for i in range(len(rm[4])):
-        plt.figure(1, figsize=(16, 4))
-        plt.plot(rm[4][i], i + s1_l[i], 'C0')
-        plt.plot(rm[4][i], i + rm[5][i], 'C1')
+def plot_patches(x, y, rm, s1_l, s2_l, s3_l):
+    num_patches = len(rm[0][0])
+    for i in range(num_patches):
+        plt.figure(1000, figsize=(16, 4))
+        plt.plot(x[i], i + s1_l[i], 'C0')
+        plt.plot(x[i], i + y[i], 'C1')
 
 
-        plt.figure(2, figsize=(16, 4))
-        plt.plot(rm[4][i], i + s2_l[i], 'C0')
-        plt.plot(rm[4][i], i + rm[5][i], 'C1')
+        plt.figure(2000, figsize=(16, 4))
+        plt.plot(x[i], i + s2_l[i], 'C0')
+        plt.plot(x[i], i + y[i], 'C1')
 
 
-        plt.figure(3, figsize=(16, 4))
-        plt.plot(rm[4][i], i + s3_l[i], 'C0')
-        plt.plot(rm[4][i], i + rm[5][i], 'C1')
+        plt.figure(3000, figsize=(16, 4))
+        plt.plot(x[i], i + s3_l[i], 'C0')
+        plt.plot(x[i], i + y[i], 'C1')
