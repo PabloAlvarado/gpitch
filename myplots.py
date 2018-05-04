@@ -5,24 +5,26 @@ from gpitch import logistic, gaussfun
 from scipy.fftpack import fft, ifft, ifftshift
 
 
-def plot_predict(x, mean, var, z, nlinfun=logistic, latent=False):
+def plot_predict(x, mean, var, z, nlinfun=logistic, latent=False, plot_z=True, plot_latent=True):
     """Basic plot unit for ploting predictions in general"""
     if latent:
         plt.plot(x, nlinfun(mean), 'C0', lw=2)
         plt.fill_between(x[:,0], nlinfun(mean[:,0] - 2*np.sqrt(var[:,0])),
                                  nlinfun(mean[:,0] + 2*np.sqrt(var[:,0])), color='C0', alpha=0.2)
 
-        plt.twinx()
+        if plot_latent:
+            plt.twinx()
 
-        plt.plot(x, mean, 'C2', lw=2, alpha=0.5)
-        plt.fill_between(x[:,0], mean[:,0] - 2*np.sqrt(var[:,0]),
-                                 mean[:,0] + 2*np.sqrt(var[:,0]), color='C2', alpha=0.1)
+            plt.plot(x, mean, 'C2', lw=2, alpha=0.5)
+            plt.fill_between(x[:,0], mean[:,0] - 2*np.sqrt(var[:,0]),
+                                     mean[:,0] + 2*np.sqrt(var[:,0]), color='C2', alpha=0.1)
     else:
         plt.plot(x, mean, 'C0', lw=2)
         plt.fill_between(x[:,0], mean[:,0] - 2*np.sqrt(var[:,0]),
                                  mean[:,0] + 2*np.sqrt(var[:,0]), color='C0', alpha=0.2)
 
-    plt.plot(z, 0.*z, '|k', mew=1)
+    if plot_z:
+        plt.plot(z, 0.*z, '|k', mew=1)
     
 ## PLOTS EVALUATION
 #____________________________________________________________________________________________________________
@@ -190,3 +192,27 @@ def plot_parameters(m):
     for i in range(len(m)):
         plt.plot(i, m[i].likelihood.variance.value, 'C1.')
     plt.xlim(-1, 12)#, plt.ylim([-0.001, 0.005])
+
+    
+# EXTRA PLOTS
+#_________________________________________________________________________________________
+
+def plot_pdgp(x, y, m, list_predictions, nlinfun=logistic, title='results'):
+    m_a, v_a, m_c, v_c, source = list_predictions
+ 
+    ncol, nrow = 1, 6
+    for i in range(3):
+        plt.subplot(nrow, ncol, i+1), plt.title('activation '+ str(i+1))
+        plot_predict(x, m_a[i], v_a[i], m.za[i].value, nlinfun=nlinfun, latent=True, plot_latent=False)
+
+    for i in range(3):
+        plt.subplot(nrow, ncol, i+4), plt.title('component '+ str(i+1))
+        plot_predict(x, m_c[i], v_c[i], m.zc[i].value, nlinfun=nlinfun, latent=False)
+        
+#     for i in range(3):
+#         plt.subplot(nrow, ncol, i+7), plt.title('source '+ str(i+1))
+#         plt.plot(x, source[i])
+
+#     plt.subplot(nrow, ncol, 10), plt.title('data and prediction')
+#     plt.plot(x, y, 'C0')
+#     plt.plot(x, source[0] + source[1] + source[2], 'C1')

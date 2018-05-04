@@ -5,17 +5,17 @@ import os
 import time
 import soundfile
 import matplotlib.pyplot as plt
-from gpitch import window_overlap
+from gpitch import window_overlap, logistic
 import gpitch.myplots as mplt
 
 
-def evaluation_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[1000, 1000], learning_rate=[0.0025, 0.0025], 
-                        minibatch_size=None, frames=2*16000, start=0, opt_za=True, window_size=8001, overlap=True, save=True):
+def evaluation_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[5000, 5000], learning_rate=[0.0025, 0.0025], 
+                        minibatch_size=None, frames=14*16000, start=0, opt_za=False, window_size=8001, overlap=True, save=True):
     """
     param nivps: number of inducing variables per second, for activations and components
     """
     
-    ## intialization
+    ## settings
     if frames < window_size:
         window_size = frames
     sess = gpitch.init_settings(gpu)  # select gpu to use
@@ -56,7 +56,7 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[1000, 1000],
             mpd.zc.fixed = True
         else:
              ## reset model to analyze a new window
-            gpitch.reset_model(m=mpd, x=x[i].copy(), y=y[i].copy(), nivps=nivps) 
+            gpitch.reset_model(m=mpd, x=x[i].copy(), y=y[i].copy(), nivps=nivps, m_trained=m) 
 
         ## plot training data (windowed)    
         plt.figure(5), plt.title("Test data  " + lfiles[0])
@@ -88,9 +88,10 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[1000, 1000],
         ## prediction
         results_list[i] = mpd.predict_act_n_com(x[i].copy())
         
-        ## plot results
-        mplt.plot_sources_all(x[i], y[i], results_list[i][4])
-        
+        ## plot partial results
+        plt.figure(123456789, figsize=(16, 4*6))
+        mplt.plot_pdgp(x=x[i], y=y[i], m=mpd, list_predictions=results_list[i])
+         
         ## save partial results
         var_params_list[0].append(mpd.q_mu_act)
         var_params_list[1].append(mpd.q_sqrt_act)
@@ -100,7 +101,6 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[1000, 1000],
         
         ## reset tensorflow graph
         tf.reset_default_graph()
-    
     
     ## merge and overlap prediction results
     rl_merged = window_overlap.merge_all(results_list)  # results merged
