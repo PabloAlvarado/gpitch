@@ -39,7 +39,7 @@ def init_kernel_training(y, list_files, fs=16000, maxh=25):
     kern = [kern_act, kern_com]
     return kern, iparam # list of all required kernels and its initial parameters
 
-def init_kernel_with_trained_models(m):
+def init_kernel_with_trained_models(m, option_two=True):
     kern_act = []
     kern_com = []
     num_sources = len(m)
@@ -51,11 +51,16 @@ def init_kernel_with_trained_models(m):
         kern_act[i].fixed = True
         kern_com[i].fixed = True
         
-        kern_act[i].lengthscales = m[i].kern_act[0].lengthscales.value.copy()
-        kern_act[i].variance = m[i].kern_act[0].variance.value.copy()
-        kern_act[i].fixed = False
+        if option_two:
+            kern_act[i].lengthscales = 0.5
+            kern_act[i].variance = 4.0
+            kern_com[i].lengthscales = 1.0
+        else:
+            kern_act[i].lengthscales = m[i].kern_act[0].lengthscales.value.copy()
+            kern_act[i].variance = m[i].kern_act[0].variance.value.copy()
+            kern_com[i].lengthscales = m[i].kern_com[0].lengthscales.value.copy()
         
-        kern_com[i].lengthscales = m[i].kern_com[0].lengthscales.value.copy()
+        kern_act[i].fixed = False
         kern_com[i].lengthscales.fixed = False
         
         for j in range(num_p):
@@ -63,7 +68,7 @@ def init_kernel_with_trained_models(m):
             kern_com[i].variance[j] = m[i].kern_com[0].variance[j].value.copy()
     return [kern_act, kern_com]
 
-def reset_model(m, x, y, nivps, m_trained):
+def reset_model(m, x, y, nivps, m_trained, option_two=True):
     num_sources = len(m.za)
     m.x = x.copy()
     m.y = y.copy()
@@ -80,10 +85,14 @@ def reset_model(m, x, y, nivps, m_trained):
         m.q_sqrt_com[i] = np.array([np.eye(new_z[1][i].shape[0]) for _ in range(1)]).swapaxes(0, 2)
         
         
-        m.kern_act[i].lengthscales = m_trained[i].kern_act[0].lengthscales.value.copy()
-        m.kern_act[i].variance = m_trained[i].kern_act[0].variance.value.copy()
-        
-        m.kern_com[i].lengthscales = m_trained[i].kern_com[0].lengthscales.value.copy()
+        if option_two:
+            m.kern_act[i].lengthscales = 0.5
+            m.kern_act[i].variance = 4.0
+            m.kern_com[i].lengthscales = 1.0
+        else:    
+            m.kern_act[i].lengthscales = m_trained[i].kern_act[0].lengthscales.value.copy()
+            m.kern_act[i].variance = m_trained[i].kern_act[0].variance.value.copy()
+            m.kern_com[i].lengthscales = m_trained[i].kern_com[0].lengthscales.value.copy()
         
         num_p = m.kern_com[i].num_partials
         for j in range(num_p):

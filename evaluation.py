@@ -9,11 +9,15 @@ from gpitch import window_overlap, logistic
 import gpitch.myplots as mplt
 
 
-def evaluation_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[5000, 5000], learning_rate=[0.0025, 0.0025], 
-                        minibatch_size=None, frames=14*16000, start=0, opt_za=False, window_size=8001, overlap=True, save=True):
+def evaluation_notebook(gpu='0', inst=0, nivps=[20, 20], maxiter=[500, 500], learning_rate=[0.005, 0.001], 
+                        minibatch_size=50, frames=4000, start=0, opt_za=False, window_size=4000, overlap=False, save=False):
     """
     param nivps: number of inducing variables per second, for activations and components
     """
+    if save:
+        print("Results are going to be saved")
+    else:
+        print("Results are NOT going to be saved")
     
     ## settings
     if frames < window_size:
@@ -34,12 +38,13 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[5000, 5000],
     lfiles = []
     lfiles += [i for i in os.listdir(test_data_dir) if instrument + '_mixture' in i]
     xall, yall, fs = gpitch.readaudio(test_data_dir + lfiles[0], aug=False, start=start, frames=frames)
-    yall2 = np.vstack((  yall.copy(), 0.  )) 
-    xall2 = np.vstack((  xall.copy(), xall[-1].copy() + xall[1].copy()  ))
+   
     if overlap:
+        yall2 = np.vstack((  yall.copy(), 0.  )) 
+        xall2 = np.vstack((  xall.copy(), xall[-1].copy() + xall[1].copy()  ))
         x, y = window_overlap.windowed(xall2.copy(), yall2.copy(), ws=window_size)  # return list of segments
     else:
-        x, y = gpitch.segment(xall2.copy(), yall2.copy(), window_size=window_size, aug=False)  # return list of segments    
+        x, y = [xall.copy()], [yall.copy()]  
     results_list = len(x)*[None]
     var_params_list = [[], [], [], []]
     z_location_list = len(x)*[None]
@@ -103,10 +108,16 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[200, 200], maxiter=[5000, 5000],
         tf.reset_default_graph()
     
     ## merge and overlap prediction results
-    rl_merged = window_overlap.merge_all(results_list)  # results merged
-    x_final, y_final, s_final = window_overlap.get_results_arrays(x=x, y=y, sl=rl_merged[4], ws=window_size)
-    final_results = [x_final, y_final, s_final]
-    window_overlap.plot_sources(x_final, y_final, s_final)
+    if overlap:
+        rl_merged = window_overlap.merge_all(results_list)  # results merged
+        x_final, y_final, s_final = window_overlap.get_results_arrays(x=x, y=y, sl=rl_merged[4], ws=window_size)
+        final_results = [x_final, y_final, s_final]
+        window_overlap.plot_sources(x_final, y_final, s_final)
+    else:
+        x_final = x[0].copy()
+        y_final = y[0].copy()
+        s_final = results_list[0][4]
+        window_overlap.plot_sources(x_final, y_final, s_final)
 
     ##save wav files estimated sources
     if save:
