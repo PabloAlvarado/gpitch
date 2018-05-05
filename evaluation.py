@@ -111,14 +111,14 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[20, 20], maxiter=[500, 500], lea
     if overlap:
         rl_merged = window_overlap.merge_all(results_list)  # results merged
         x_final, y_final, s_final = window_overlap.get_results_arrays(x=x, y=y, sl=rl_merged[4], ws=window_size)
-        final_results = [x_final, y_final, s_final]
         window_overlap.plot_sources(x_final, y_final, s_final)
     else:
         x_final = x[0].copy()
         y_final = y[0].copy()
         s_final = results_list[0][4]
         window_overlap.plot_sources(x_final, y_final, s_final)
-
+ 
+    final_results = [x_final, y_final, s_final]
     ##save wav files estimated sources
     if save:
         location_save = "/import/c4dm-04/alvarado/results/ss_amt/evaluation/logistic/"
