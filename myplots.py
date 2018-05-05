@@ -25,7 +25,7 @@ def plot_predict(x, mean, var, z, nlinfun=logistic, latent=False, plot_z=True, p
 
     if plot_z:
         plt.plot(z, 0.*z, '|k', mew=1)
-    
+
 ## PLOTS EVALUATION
 #____________________________________________________________________________________________________________
 def plot_data(x, y, source=None, maxncol=4):
@@ -122,7 +122,7 @@ def plot_sources_all(x, y, esource, source=None, maxncol=4, fignumber=100):
 #________________________________________________________________________________________________________________________
 
 def plot_training_all(x, y, source, m_a, v_a, m_c, v_c, m, nlinfun):
-    plt.figure()
+    plt.figure(figsize=(16,3))
 
     plt.subplot(1,4,1), plt.title('data')
     plt.plot(x, y), plt.ylim([-1.1, 1.1])
@@ -135,19 +135,19 @@ def plot_training_all(x, y, source, m_a, v_a, m_c, v_c, m, nlinfun):
 
     plt.subplot(1,4,4), plt.title('component')
     plot_predict(x, m_c, v_c, m.zc[0].value, nlinfun=logistic)
-                     
+
 def plot_trained_models(m, instr_name):
     for i in range(len(m)):
         x = m[i].x.value.copy()
         y = m[i].y.value.copy()
-        
+
         mean_g, var_g = m[i].prediction_act
         mean_f, var_f = m[i].prediction_com
-        
+
         source = logistic(mean_g)*mean_f
-        
+
         plot_training_all(x, y, source, mean_g, var_g, mean_f, var_f, m[i], logistic)
-    
+
     plt.suptitle(instr_name)
 
 def plot_fft(F1, F2, y, y_k, numf, iparam):
@@ -193,13 +193,13 @@ def plot_parameters(m):
         plt.plot(i, m[i].likelihood.variance.value, 'C1.')
     plt.xlim(-1, 12)#, plt.ylim([-0.001, 0.005])
 
-    
+
 # EXTRA PLOTS
 #_________________________________________________________________________________________
 
 def plot_pdgp(x, y, m, list_predictions, nlinfun=logistic, title='results'):
     m_a, v_a, m_c, v_c, source = list_predictions
- 
+
     ncol, nrow = 1, 6
     for i in range(3):
         plt.subplot(nrow, ncol, i+1), plt.title('activation '+ str(i+1))
@@ -208,7 +208,7 @@ def plot_pdgp(x, y, m, list_predictions, nlinfun=logistic, title='results'):
     for i in range(3):
         plt.subplot(nrow, ncol, i+4), plt.title('component '+ str(i+1))
         plot_predict(x, m_c[i], v_c[i], m.zc[i].value, nlinfun=nlinfun, latent=False)
-        
+
 #     for i in range(3):
 #         plt.subplot(nrow, ncol, i+7), plt.title('source '+ str(i+1))
 #         plt.plot(x, source[i])
