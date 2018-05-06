@@ -11,6 +11,11 @@ import gpitch.myplots as mplt
 
 plt.rcParams['figure.figsize'] = (16, 3)  # set plot size
 
+di = 3*[None]
+di[0] = "/import/c4dm-04/alvarado/results/ss_amt/train/logistic/"  # location saved models
+di[1] = "/import/c4dm-04/alvarado/datasets/ss_amt/test_data/" # location test data
+di[2] = "/import/c4dm-04/alvarado/results/ss_amt/evaluation/logistic/"  #location save results
+
 def predict_windowed(x, pred_fun, ws=16000):
     n = x.size
     #results_w = []
@@ -39,34 +44,59 @@ def predict_windowed(x, pred_fun, ws=16000):
     return m_a, v_a, m_c, v_c, s_l
 
 
-def evaluation_notebook(gpu='0', inst=0, nivps=[20, 20], maxiter=[100, 100],
-                        learning_rate=[0.001, 0.001], minibatch_size=50, frames=14*16000,
-                        start=0, opt_za=True, window_size=14*16000, overlap=False,
-                        save=False, directory=None):
+def evaluation_notebook(gpu='0', 
+                        inst=0, 
+                        nivps=[20, 20], 
+                        maxiter=[500, 500],
+                        frames=16000,
+                        window_size=16000,
+                        minibatch_size=-1,
+                        learning_rate=[0.002, 0.002], 
+                        opt_za=True,
+                        overlap=False,
+                        start=0,
+                        save=False,  
+                        filename=None,
+                        directory=di):
     """
     param nivps: number of inducing variables per second, for activations and components
     """
+    
+    ## settings
     if save:
         print("Results are going to be saved")
     else:
         print("Results are NOT going to be saved")
-
-    ## settings
+        
+    if minibatch_size == -1:
+        minibatch_size = int(np.sqrt(window_size))
+            
+    
+    window_size_predic = 16000
+    
     if frames < window_size:
         window_size = frames
+    
+    if frames < window_size_predic:
+        window_size_predic = frames
+        
+    if minibatch_size == None:
+        window_size_predic = window_size
+        
+        
+
+    
     sess = gpitch.init_settings(gpu)  # select gpu to use
     nlinfun = gpitch.logistic_tf  # use logistic or gaussian
 
     ## load pitch models
-    #directory = '/import/c4dm-04/alvarado/results/ss_amt/train/logistic/'  # location saved models
     linst = ['011PFNOM', '131EGLPM', '311CLNOM', 'ALVARADO']  # list of instruments
     instrument = linst[inst]
     pattern = instrument  # which model version
     m, names_list = gpitch.loadm(directory=directory[0], pattern=pattern)
     mplt.plot_trained_models(m, instrument)
 
-    ## load training data
-    #test_data_dir = '/import/c4dm-04/alvarado/datasets/ss_amt/test_data/'
+    ## load test data
     test_data_dir = directory[1]
     lfiles = []
     lfiles += [i for i in os.listdir(test_data_dir) if instrument + '_mixture' in i]
@@ -125,7 +155,7 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[20, 20], maxiter=[100, 100],
         ## prediction
         if 1:
             st = time.time()
-            results_list[i] = predict_windowed(x=x[i].copy(), pred_fun=mpd.predict_act_n_com, ws=16000)
+            results_list[i] = predict_windowed(x=x[i].copy(), pred_fun=mpd.predict_act_n_com, ws=window_size_predic)
             print("Time predicting {} secs".format(time.time() - st))
         else:
             st = time.time()
@@ -150,31 +180,55 @@ def evaluation_notebook(gpu='0', inst=0, nivps=[20, 20], maxiter=[100, 100],
     if overlap:
         rl_merged = window_overlap.merge_all(results_list)  # results merged
         x_final, y_final, s_final = window_overlap.get_results_arrays(x=x, y=y, sl=rl_merged[4], ws=window_size)
-        window_overlap.plot_sources(x_final, y_final, s_final)
     else:
-        x_final = x[0].copy()
-        y_final = y[0].copy()
-        s_final = results_list[0][4]
-        window_overlap.plot_sources(x_final, y_final, s_final)
+        x_final, y_final, s_final = x[0].copy(), y[0].copy(), results_list[0][4]
+    
+    ## plot sources
+    window_overlap.plot_sources(x_final, y_final, s_final)
 
     final_results = [x_final, y_final, s_final]
-    ##save wav files estimated sources
+    ## save wav files estimated sources
     if save:
-        #location_save = "/import/c4dm-04/alvarado/results/ss_amt/evaluation/logistic/"
         location_save = directory[2]
         for i in range(3):
-            name = names_list[i].strip('_trained.p') + "_part.wav"
+            name = names_list[i].strip('_trained.p') + "_part" + filename + ".wav"
             soundfile.write(location_save + name, final_results[2][i]/np.max(np.abs(final_results[2][i])), 16000)
 
     ## group results
     results = [results_list, var_params_list, z_location_list]
-    return mpd, results, final_results
+    # return mpd, results, final_results
+    return final_results
 
 
 
+def logistic_20ivps_full_window(gpu, inst):
+    return evaluation_notebook(gpu=gpu, 
+                               inst=inst, 
+                               nivps=[20, 100], 
+                               maxiter=[10, 10],
+                               frames=14*16000,
+                               window_size=14*16000,
+                               minibatch_size=-1,
+                               opt_za=True,
+                               overlap=False,
+                               save=True,  
+                               filename="_logistic_20ivps_full_window",
+                               directory=di)
 
 
-
+def logistic_200ivps_windowed(gpu, inst):
+    return evaluation_notebook(gpu=gpu, 
+                               inst=inst, 
+                               nivps=[20, 20], 
+                               maxiter=[100, 100],
+                               frames=14*16000,
+                               window_size=8001,
+                               minibatch_size=None,
+                               opt_za=True,
+                               overlap=True,
+                               save=True,  
+                               filename="_logistic_200ivps_windowed",
+                               directory=di)
 
 
 
