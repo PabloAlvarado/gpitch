@@ -201,10 +201,10 @@ def evaluation_notebook(gpu='0',
 
 
 
-def logistic_20ivps_full_window(gpu, inst):
+def logistic_50ivps_full_window(gpu, inst):
     return evaluation_notebook(gpu=gpu, 
                                inst=inst, 
-                               nivps=[20, 100], 
+                               nivps=[50, 50], 
                                maxiter=[10, 10],
                                frames=14*16000,
                                window_size=14*16000,
@@ -212,7 +212,7 @@ def logistic_20ivps_full_window(gpu, inst):
                                opt_za=True,
                                overlap=False,
                                save=True,  
-                               filename="_logistic_20ivps_full_window",
+                               filename="_logistic_50ivps_full_window",
                                directory=di)
 
 
