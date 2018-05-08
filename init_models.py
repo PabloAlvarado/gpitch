@@ -39,7 +39,7 @@ def init_kernel_training(y, list_files, fs=16000, maxh=25):
     kern = [kern_act, kern_com]
     return kern, iparam # list of all required kernels and its initial parameters
 
-def init_kernel_with_trained_models(m, option_two=True):
+def init_kernel_with_trained_models(m, option_two=False):
     kern_act = []
     kern_com = []
     num_sources = len(m)
@@ -50,6 +50,7 @@ def init_kernel_with_trained_models(m, option_two=True):
                 
         kern_act[i].fixed = True
         kern_com[i].fixed = True
+        kern_com[i].vars_n_freqs_fixed(fix_var=False, fix_freq=False)
         
         if option_two:
             kern_act[i].lengthscales = 0.5
@@ -68,7 +69,7 @@ def init_kernel_with_trained_models(m, option_two=True):
             kern_com[i].variance[j] = m[i].kern_com[0].variance[j].value.copy()
     return [kern_act, kern_com]
 
-def reset_model(m, x, y, nivps, m_trained, option_two=True):
+def reset_model(m, x, y, nivps, m_trained, option_two=False):
     num_sources = len(m.za)
     m.x = x.copy()
     m.y = y.copy()

@@ -16,7 +16,7 @@ di[0] = "/import/c4dm-04/alvarado/results/ss_amt/train/logistic/"  # location sa
 di[1] = "/import/c4dm-04/alvarado/datasets/ss_amt/test_data/" # location test data
 di[2] = "/import/c4dm-04/alvarado/results/ss_amt/evaluation/logistic/"  #location save results
 
-def predict_windowed(x, pred_fun, ws=16000):
+def predict_windowed(x, pred_fun, ws=8000):
     n = x.size
     #results_w = []
     m_a = [[], [], []]
@@ -44,48 +44,48 @@ def predict_windowed(x, pred_fun, ws=16000):
     return m_a, v_a, m_c, v_c, s_l
 
 
-def evaluation_notebook(gpu='0', 
-                        inst=0, 
-                        nivps=[20, 20], 
+def evaluation_notebook(gpu='0',
+                        inst=0,
+                        nivps=[20, 20],
                         maxiter=[500, 500],
                         frames=16000,
                         window_size=16000,
                         minibatch_size=-1,
-                        learning_rate=[0.002, 0.002], 
+                        learning_rate=[0.0025, 0.0025],
                         opt_za=True,
-                        overlap=False,
+                        windowed=False,
                         start=0,
-                        save=False,  
+                        save=False,
                         filename=None,
                         directory=di):
     """
     param nivps: number of inducing variables per second, for activations and components
     """
-    
+
     ## settings
     if save:
         print("Results are going to be saved")
     else:
         print("Results are NOT going to be saved")
-        
+
     if minibatch_size == -1:
         minibatch_size = int(np.sqrt(window_size))
-            
-    
-    window_size_predic = 16000
-    
+
+
+    window_size_predic = 4000
+
     if frames < window_size:
         window_size = frames
-    
+
     if frames < window_size_predic:
         window_size_predic = frames
-        
-    if minibatch_size == None:
-        window_size_predic = window_size
-        
-        
 
-    
+    #if minibatch_size == None:
+    #    window_size_predic = window_size
+
+
+
+
     sess = gpitch.init_settings(gpu)  # select gpu to use
     nlinfun = gpitch.logistic_tf  # use logistic or gaussian
 
@@ -102,14 +102,15 @@ def evaluation_notebook(gpu='0',
     lfiles += [i for i in os.listdir(test_data_dir) if instrument + '_mixture' in i]
     xall, yall, fs = gpitch.readaudio(test_data_dir + lfiles[0], aug=False, start=start, frames=frames)
 
-    if overlap:
-        yall2 = np.vstack((  yall.copy(), 0.  ))
-        xall2 = np.vstack((  xall.copy(), xall[-1].copy() + xall[1].copy()  ))
-        x, y = window_overlap.windowed(xall2.copy(), yall2.copy(), ws=window_size)  # return list of segments
+    if windowed:
+        #yall2 = np.vstack((  yall.copy(), 0.  ))
+        #xall2 = np.vstack((  xall.copy(), xall[-1].copy() + xall[1].copy()  ))
+        #x, y = window_overlap.windowed(xall2.copy(), yall2.copy(), ws=window_size)  # return list of segments
+        x, y = window_overlap.segment(xall, yall, window_size=window_size, aug=False)
     else:
         x, y = [xall.copy()], [yall.copy()]
     results_list = len(x)*[None]
-    var_params_list = [[], [], [], []]
+    var_params_list = [[], [], [], [], []]
     z_location_list = len(x)*[None]
 
     ## analyze whole signal by windows
@@ -120,7 +121,7 @@ def evaluation_notebook(gpu='0',
             z = gpitch.init_iv(x=x[i], num_sources=3, nivps_a=nivps[0], nivps_c=nivps[1], fs=fs)  # location inducing var
             kern = gpitch.init_kernel_with_trained_models(m, option_two=False)
             mpd = gpitch.pdgp.Pdgp(x[i].copy(), y[i].copy(), z, kern, minibatch_size=minibatch_size, nlinfun=nlinfun)
-            mpd.za.fixed = True
+            mpd.za.fixed = False
             mpd.zc.fixed = True
         else:
              ## reset model to analyze a new window
@@ -171,18 +172,20 @@ def evaluation_notebook(gpu='0',
         var_params_list[1].append(mpd.q_sqrt_act)
         var_params_list[2].append(mpd.q_mu_com)
         var_params_list[3].append(mpd.q_sqrt_com)
+        var_params_list[4].append(mpd.likelihood.variance)
         z_location_list[i] = list(z)
 
         ## reset tensorflow graph
         tf.reset_default_graph()
 
     ## merge and overlap prediction results
-    if overlap:
+    if windowed:
         rl_merged = window_overlap.merge_all(results_list)  # results merged
-        x_final, y_final, s_final = window_overlap.get_results_arrays(x=x, y=y, sl=rl_merged[4], ws=window_size)
+        x_final, y_final, r_final = window_overlap.get_results_arrays_noov(x=x, y=y, results=rl_merged, window_size=window_size)
+        s_final = list(r_final[-1])
     else:
         x_final, y_final, s_final = x[0].copy(), y[0].copy(), results_list[0][4]
-    
+
     ## plot sources
     window_overlap.plot_sources(x_final, y_final, s_final)
 
@@ -195,58 +198,40 @@ def evaluation_notebook(gpu='0',
             soundfile.write(location_save + name, final_results[2][i]/np.max(np.abs(final_results[2][i])), 16000)
 
     ## group results
-    results = [results_list, var_params_list, z_location_list]
+    all_results = [results_list, var_params_list, z_location_list]
     # return mpd, results, final_results
-    return final_results
+    return mpd, final_results, all_results
 
 
 
-def logistic_50ivps_full_window(gpu, inst):
-    return evaluation_notebook(gpu=gpu, 
-                               inst=inst, 
-                               nivps=[50, 50], 
-                               maxiter=[10, 10],
+def logistic_20ivps_full_window(gpu, inst):
+    return evaluation_notebook(gpu=gpu,
+                               inst=inst,
+                               nivps=[50, 50],
+                               maxiter=[50000, 0],
                                frames=14*16000,
                                window_size=14*16000,
                                minibatch_size=-1,
-                               opt_za=True,
-                               overlap=False,
-                               save=True,  
-                               filename="_logistic_50ivps_full_window",
+                               opt_za=False,
+                               windowed=False,
+                               save=True,
+                               filename="_logistic_20ivps_full_window",
                                directory=di)
 
 
 def logistic_200ivps_windowed(gpu, inst):
-    return evaluation_notebook(gpu=gpu, 
-                               inst=inst, 
-                               nivps=[20, 20], 
-                               maxiter=[100, 100],
+    return evaluation_notebook(gpu=gpu,
+                               inst=inst,
+                               nivps=[200, 200],
+                               maxiter=[20000, 0],
                                frames=14*16000,
-                               window_size=8001,
-                               minibatch_size=None,
-                               opt_za=True,
-                               overlap=True,
-                               save=True,  
+                               window_size=32000,
+                               minibatch_size=-1,
+                               opt_za=False,
+                               windowed=True,
+                               save=True,
                                filename="_logistic_200ivps_windowed",
                                directory=di)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

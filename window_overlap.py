@@ -124,6 +124,21 @@ def get_results_arrays(x, y, sl, ws):
     return x_trim, y_trim, s
 
 
+def get_results_arrays_noov(x, y, results, window_size):
+    
+    lr_out = []
+    for i in range(5):
+        l_aux = [None, None, None]
+        for j in range(3):
+            l_aux[j] = np.asarray(results[i][j]).reshape(-1,1)  
+    lr_out.append(list(l_aux))
+
+    x_ar = np.asarray(x).reshape(-1,1)
+    y_ar = np.asarray(y).reshape(-1,1)
+
+    return x_ar, y_ar, lr_out
+
+
 def plot_sources(x, y, s):
     plt.figure(figsize=(16, 9))
 
@@ -159,3 +174,49 @@ def plot_patches(x, y, rm, s_l):
         plt.figure(3000, figsize=(16, 4))
         plt.plot(x[i], i + s_l[2][i], 'C0')
         plt.plot(x[i], i + y[i], 'C1')
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+#
+# ____________________________________________________________________________
+
+
+def segment(x, y, window_size=32000, aug=True):
+    """segments the input data into arrays of size nw. Returns a list with segments
+        the augmentation corresponds to 50 miliseconds (800 samples) assuming 16kHz of sampling rate
+    """
+    xs = []  # time vector segmented
+    ys = []  # data segmented
+    for i in range(y.size/window_size):
+        yaux = y[i*window_size : (i+1)*window_size].copy()
+        xaux = x[i*window_size : (i+1)*window_size].copy()
+        if aug:
+            xa, ya = augmentate(xaux, yaux)
+        else:
+            xa, ya = xaux.copy(), yaux.copy()
+        ys.append(ya)
+        xs.append(xa)
+    return xs, ys
+
+def augmentate(x, y, augment_size=1600):
+    addzeros = np.zeros((augment_size, 1)) # patch of zeros to add at the begining and end
+    yaug1 = np.append(addzeros, y.copy()).reshape(-1, 1)
+    yaug = np.append(yaug1, addzeros).reshape(-1, 1)
+
+    alpha = augment_size/16000.
+    xaug = np.linspace(x[0] - alpha, x[-1] + alpha, x.size + 2*augment_size).reshape(-1, 1)  # time vector
+    return xaug, yaug
