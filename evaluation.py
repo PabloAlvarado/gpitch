@@ -4,6 +4,7 @@ import gpitch
 import os
 import time
 import soundfile
+import pickle
 import matplotlib.pyplot as plt
 from gpitch import window_overlap, logistic
 import gpitch.myplots as mplt
@@ -131,27 +132,27 @@ def evaluation_notebook(gpu='0',
         plt.figure(5, figsize=(16,3)), plt.title("Test data  " + lfiles[0])
         plt.plot(mpd.x.value, mpd.y.value)
 
-        # ## optimization
-        # st = time.time()
-        # if minibatch_size is None:
-        #     print ("VI optimization")
-        #     mpd.optimize(disp=True, maxiter=maxiter[0])
-        # else:
-        #     print ("SVI optimization")
-        #     mpd.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate[0], epsilon=0.1), maxiter=maxiter[0])
-        #
-        # ## optimization location inducing variables
-        # if opt_za:
-        #     mpd.za.fixed = False
-        #     st = time.time()
-        #     if minibatch_size is None:
-        #         print ("VI optimizing location inducing variables")
-        #         mpd.optimize(disp=True, maxiter=maxiter[1])
-        #     else:
-        #         print ("SVI optimizing location inducing variables")
-        #         mpd.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate[1], epsilon=0.1), maxiter=maxiter[1])
-        #     mpd.za.fixed = True
-        # print("Time optimizing {} secs".format(time.time() - st))
+        ## optimization
+        st = time.time()
+        if minibatch_size is None:
+            print ("VI optimization")
+            mpd.optimize(disp=True, maxiter=maxiter[0])
+        else:
+            print ("SVI optimization")
+            mpd.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate[0], epsilon=0.1), maxiter=maxiter[0])
+
+        ## optimization location inducing variables
+        if opt_za:
+            mpd.za.fixed = False
+            st = time.time()
+            if minibatch_size is None:
+                print ("VI optimizing location inducing variables")
+                mpd.optimize(disp=True, maxiter=maxiter[1])
+            else:
+                print ("SVI optimizing location inducing variables")
+                mpd.optimize(method=tf.train.AdamOptimizer(learning_rate=learning_rate[1], epsilon=0.1), maxiter=maxiter[1])
+            mpd.za.fixed = True
+        print("Time optimizing {} secs".format(time.time() - st))
 
         ## prediction
         if 1:
@@ -175,10 +176,15 @@ def evaluation_notebook(gpu='0',
         var_params_list[4].append(mpd.likelihood.variance)
         z_location_list[i] = list(z)
 
-        ## reset tensorflow graph
+        mpd.save_prediction = results_list[i]
         if windowed:
-            pickle.dump(m, open("/import/c4dm-04/alvarado/results/ss_amt/evaluation/logistic/" + instrument +
-                                "_window_" + str(i+1) + ".p", "wb"))
+            pickle.dump(mpd, open("/import/c4dm-04/alvarado/results/ss_amt/evaluation/logistic/models/" + instrument +
+                                  "_window_" + str(i+1) + ".p", "wb"))
+        else:
+            pickle.dump(mpd, open("/import/c4dm-04/alvarado/results/ss_amt/evaluation/logistic/models/" + instrument +
+                                  "_full_window.p", "wb"))
+
+        ## reset tensorflow graph
         tf.reset_default_graph()
 
     ## merge and overlap prediction results
@@ -190,6 +196,7 @@ def evaluation_notebook(gpu='0',
         x_final, y_final, s_final = x[0].copy(), y[0].copy(), results_list[0][4]
 
     ## plot sources
+    plt.figure(figsize=(16, 9))
     window_overlap.plot_sources(x_final, y_final, s_final)
 
     final_results = [x_final, y_final, s_final]
@@ -203,10 +210,6 @@ def evaluation_notebook(gpu='0',
     ## group results
     all_results = [results_list, var_params_list, z_location_list]
     # return mpd, results, final_results
-
-    if windowed is not True:
-        pickle.dump(m, open("/import/c4dm-04/alvarado/results/ss_amt/evaluation/logistic/" + instrument +
-                            "_full_window.p", "wb"))
 
     return mpd, final_results, all_results
 

@@ -84,13 +84,13 @@ def merge_all(inlist):
                 [[], [], []] ]
     nrow = len(outlist)
     ncol = len(inlist)
-    
+
     for j in range(nrow):
-        for i in range(ncol):        
+        for i in range(ncol):
             outlist[j][0].append(inlist[i][j][0])
             outlist[j][1].append(inlist[i][j][1])
             outlist[j][2].append(inlist[i][j][2])
-    
+
     return outlist
 
 
@@ -125,12 +125,12 @@ def get_results_arrays(x, y, sl, ws):
 
 
 def get_results_arrays_noov(x, y, results, window_size):
-    
+
     lr_out = []
     for i in range(5):
         l_aux = [None, None, None]
         for j in range(3):
-            l_aux[j] = np.asarray(results[i][j]).reshape(-1,1)  
+            l_aux[j] = np.asarray(results[i][j]).reshape(-1,1)
     lr_out.append(list(l_aux))
 
     x_ar = np.asarray(x).reshape(-1,1)
@@ -140,21 +140,19 @@ def get_results_arrays_noov(x, y, results, window_size):
 
 
 def plot_sources(x, y, s):
-    plt.figure(figsize=(16, 9))
-
     plt.subplot(3,1,1)
-    plt.plot(x, y)
-    plt.plot(x, s[0])
+    plt.plot(x, y, 'C0')
+    plt.plot(x, s[0], 'C1')
     plt.ylim(-1, 1)
 
     plt.subplot(3,1,2)
-    plt.plot(x, y)
-    plt.plot(x, s[1])
+    plt.plot(x, y, 'C0')
+    plt.plot(x, s[1], 'C1')
     plt.ylim(-1, 1)
 
     plt.subplot(3,1,3)
-    plt.plot(x, y)
-    plt.plot(x, s[2])
+    plt.plot(x, y, 'C0')
+    plt.plot(x, s[2], 'C1')
     plt.ylim(-1, 1)
 
 
@@ -174,23 +172,23 @@ def plot_patches(x, y, rm, s_l):
         plt.figure(3000, figsize=(16, 4))
         plt.plot(x[i], i + s_l[2][i], 'C0')
         plt.plot(x[i], i + y[i], 'C1')
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #
 # ____________________________________________________________________________
 
