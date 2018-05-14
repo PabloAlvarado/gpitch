@@ -120,13 +120,131 @@ class Matern32sm(gpflow.kernels.Kern):
 
 
 
+class Matern32sml(gpflow.kernels.Kern):
+    """
+    Matern spectral mixture kernel with single lengthscale.
+    """
+    def __init__(self, input_dim, num_partials, lengthscales=None, variances=None, frequencies=None):
+        gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
+        len_l = []
+        var_l = []
+        freq_l = []
+        self.ARD = False
+        self.num_partials = num_partials
+
+        if lengthscales.all() == None:
+            lengthscales = 1.*np.ones((num_partials, 1))
+            variances = 0.125*np.ones((num_partials, 1))
+            frequencies = 1.*(1. + np.arange(num_partials))
+
+        for i in range(self.num_partials):
+            len_l.append(Param(lengthscales[i], transforms.Logistic(0., 2.)))
+            var_l.append(Param(variances[i], transforms.Logistic(0., 1.)))
+            freq_l.append(Param(frequencies[i], transforms.positive))
+        
+        self.lengthscales = ParamList(len_l)
+        self.variance = ParamList(var_l)
+        self.frequency = ParamList(freq_l)
+
+    def K(self, X, X2=None, presliced=False):
+        if not presliced:
+            X, X2 = self._slice(X, X2)
+        if X2 is None:
+            X2 = X
+
+        # Introduce dummy dimension so we can use broadcasting
+        f = tf.expand_dims(X, 1)  # now N x 1 x D
+        f2 = tf.expand_dims(X2, 0)  # now 1 x M x D
+        r = tf.sqrt(tf.square(f - f2 +  1e-12))
+
+        r1 = np.sqrt(3.)*tf.reduce_sum(r / self.lengthscales[0], 2)
+        r2 = tf.reduce_sum(2.*np.pi * self.frequency[0] * r , 2)
+        k = self.variance[0] * (1. + r1) * tf.exp(-r1) * tf.cos(r2)
+
+        for i in range(1, self.num_partials):
+            r1 = np.sqrt(3.)*tf.reduce_sum(r / self.lengthscales[i], 2)
+            r2 = tf.reduce_sum(2.*np.pi*self.frequency[i]*r , 2)
+            k += self.variance[i] * (1. + r1) * tf.exp(-r1) * tf.cos(r2)
+        return k
+
+    def Kdiag(self, X):
+        var = tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance[0]))
+        for i in range(1, self.num_partials):
+            var += tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze( self.variance[i] ) )
+        return var
+
+    def vars_n_freqs_fixed(self, fix_len = False, fix_var=False, fix_freq=False):
+        for i in range(self.num_partials):
+            self.variance[i].fixed = fix_var
+            self.frequency[i].fixed = fix_freq
+            self.lengthscales[i].fixed = fix_len
 
 
 
 
+class Mercer(gpflow.kernels.Kern):
+    """
+    The Mercer kernel for audio.
+    """
 
+    def __init__(self, input_dim, energy, frequency, num_features, variance=1.0):
+        """
+        - input_dim is the dimension of the input to the kernel
+        - variance is the (initial) value for the variance parameter(s)
+          if ARD=True, there is one variance per input
+        - active_dims is a list of length input_dim which controls
+          which columns of X are used.
+        """
+        gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
+        self.num_features = num_features
+        self.energy = energy
+        self.frequency = frequency
+        self.variance = Param(variance, transforms.positive)
 
+    def phi_features(self, X):
+        n = tf.shape(X)[0]
+        m = self.num_features
+        phi_list = 2*m*[None]
+        for i in range(m):    
+            phi_list[i] = tf.sqrt(self.energy[i])*tf.cos(2*np.pi*self.frequency[i]*X)
+            phi_list[i + m] = tf.sqrt(self.energy[i])*tf.sin(2*np.pi*self.frequency[i]*X)
+        phi = tf.stack(phi_list)
+        return tf.reshape(phi, (2*m, n))
 
+    def K(self, X, X2=None, presliced=False):
+        if not presliced:
+            X, X2 = self._slice(X, X2)
+        if X2 is None:
+            phi = self.phi_features(X)
+            return tf.matmul(phi * self.variance, phi, transpose_a=True)
+        else:
+            phi = self.phi_features(X)
+            phi2 = self.phi_features(X2)
+            return tf.matmul(phi * self.variance, phi2, transpose_a=True)
 
+    def Kdiag(self, X, presliced=False):
+        return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance))
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 #
