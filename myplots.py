@@ -160,9 +160,9 @@ def plot_fft(F1, F2, y, y_k, numf, iparam):
 
         plt.subplot(4, 3, i+1)
         plt.plot(F1, Y1 , 'C0' )
-        plt.plot(F2 + 40., Y2, 'C1' )
+        plt.plot(F2, Y2, 'C1' )
         plt.twinx()
-        plt.plot(20. + iparam[i][0], iparam[i][1] / np.max(iparam[i][1]), '|C4', mew=2)
+        plt.plot(iparam[i][0], iparam[i][1] / np.max(iparam[i][1]), '|C4', mew=2)
         plt.xlim(0, 4000)
 
 def plot_parameters(m):

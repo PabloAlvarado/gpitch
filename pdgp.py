@@ -14,6 +14,37 @@ float_type = settings.dtypes.float_type
 jitter = settings.numerics.jitter_level
 
 
+def predict_windowed(model, xnew, ws=1600):
+    n = xnew.size
+    m_a_l = [[] for _ in range(model.num_sources)]
+    v_a_l = [[] for _ in range(model.num_sources)]
+    m_c_l = [[] for _ in range(model.num_sources)]
+    v_c_l = [[] for _ in range(model.num_sources)]
+    m_s_l = [[] for _ in range(model.num_sources)]
+
+    for i in range(n/ws):
+        x = xnew[i*ws : (i+1)*ws].copy()
+        m_a, v_a = model.predict_act(x)
+        m_c, v_c = model.predict_com(x)
+
+        for j in range(model.num_sources):
+            m_a_l[j].append(m_a[j].copy())
+            v_a_l[j].append(v_a[j].copy())
+            m_c_l[j].append(m_c[j].copy())
+            v_c_l[j].append(v_c[j].copy())
+            m_s_l[j].append(gpitch.logistic(m_a[j]) * m_c[j])
+
+    for j in range(model.num_sources):
+        m_a_l[j] = np.asarray(m_a_l[j]).reshape(-1, 1)
+        v_a_l[j] = np.asarray(v_a_l[j]).reshape(-1, 1)
+        m_c_l[j] = np.asarray(m_c_l[j]).reshape(-1, 1)
+        v_c_l[j] = np.asarray(v_c_l[j]).reshape(-1, 1)
+        m_s_l[j] = gpitch.logistic(m_a_l[j]) * m_c_l[j]
+
+    return m_a_l, v_a_l, m_c_l, v_c_l, m_s_l
+
+
+
 class Pdgp(gpflow.model.Model):
     def __init__(self, x, y, z, kern, whiten=True, minibatch_size=None, nlinfun=logistic_tf):
         """
@@ -175,3 +206,24 @@ class Pdgp(gpflow.model.Model):
 
             mean_source[i] = self.nlinfun(mean_a[i])*mean_c[i]
         return mean_a, var_a, mean_c, var_c, mean_source
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#

@@ -6,7 +6,7 @@ import pickle
 import gpitch.myplots as mplt
 
 
-def train_notebook(gpu='0', list_limits=None, maxiter=[1000, 10000], nivps=[200, 200], frames=8000, saver=True):
+def train_notebook(gpu='0', list_limits=None, maxiter=[1000, 10000], nivps=[200, 200], frames=8000, save=True):
     
     sess = gpitch.init_settings(gpu)  # choose gpu to work
 
@@ -92,7 +92,7 @@ def train_notebook(gpu='0', list_limits=None, maxiter=[1000, 10000], nivps=[200,
     # gpitch.pltrain.plot_fft(Fdata, Fkernel, y2, k_p2, numf, iparam)
     
     ## save models
-    if saver:
+    if save:
         for i in range(numf):
             m[i].prediction_act = [m_a[i], v_a[i]]
             m[i].prediction_com = [m_c[i], v_c[i]]

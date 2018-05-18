@@ -50,7 +50,7 @@ def init_kernel_with_trained_models(m, option_two=False):
                 
         kern_act[i].fixed = True
         kern_com[i].fixed = True
-        kern_com[i].vars_n_freqs_fixed(fix_var=False, fix_freq=False)
+        kern_com[i].vars_n_freqs_fixed(fix_var=True, fix_freq=False)
         
         if option_two:
             kern_act[i].lengthscales = 0.5
