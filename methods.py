@@ -145,7 +145,7 @@ def init_settings(visible_device, interactive=False):
     '''Initialize usage of GPU and plotting
        visible_device : which GPU to use'''
 
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'  # deactivate tf warnings (default 0)
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # deactivate tf warnings (default 0)
     os.environ["CUDA_VISIBLE_DEVICES"] = visible_device  # configuration use only one GPU
     config = tf.ConfigProto()  # configuration to not to use all the memory
     config.gpu_options.allow_growth = True
@@ -242,21 +242,29 @@ def freq2midi(freq):
     return int(69. + 12. * np.log2(freq / 440.))
 
 
-lfiles_training = [ '011PFNOM_M60_train.wav',
+lfiles_training = [ ['011PFNOM_M60_train.wav',
                     '011PFNOM_M64_train.wav',
-                    '011PFNOM_M67_train.wav',
-                    '131EGLPM_M60_train.wav',
+                    '011PFNOM_M67_train.wav'],
+                    ['131EGLPM_M60_train.wav',
                     '131EGLPM_M64_train.wav',
-                    '131EGLPM_M67_train.wav',
-                    '311CLNOM_M60_train.wav',
+                    '131EGLPM_M67_train.wav'],
+                    ['311CLNOM_M60_train.wav',
                     '311CLNOM_M64_train.wav',
-                    '311CLNOM_M67_train.wav',
-                    'ALVARADO_M60_train.wav',
+                    '311CLNOM_M67_train.wav'],
+                    ['ALVARADO_M60_train.wav',
                     'ALVARADO_M64_train.wav',
-                    'ALVARADO_M67_train.wav']
+                    'ALVARADO_M67_train.wav']]
 
-
-
+def get_features(f, s, f_centers, nfps):
+    var_l = []
+    freq_l = []
+    for i in range(f.size):
+        idx =  np.argmin(np.abs(f - f_centers[i]))
+        freq_list.append(f[idx -nfps//2: idx + nfps//2])
+        var_list.append(s[idx -nfps//2: idx + nfps//2])
+    frequency = np.asarray(freq_l).reshape(-1, 1)
+    energy = np.asarray(var_l).reshape(-1, 1)
+    return frequency, energy
 
 
 

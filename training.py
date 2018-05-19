@@ -7,7 +7,7 @@ import gpitch.myplots as mplt
 
 
 def train_notebook(gpu='0', list_limits=None, maxiter=[1000, 10000], nivps=[200, 200], frames=8000, save=True):
-    
+
     sess = gpitch.init_settings(gpu)  # choose gpu to work
 
     ## import 12 audio files for intializing component parameters
@@ -23,7 +23,7 @@ def train_notebook(gpu='0', list_limits=None, maxiter=[1000, 10000], nivps=[200,
         y2.append(b.copy())
         fs2.append(c)
     lkernel, iparam = gpitch.init_models.init_kernel_training(y=y2, list_files=lfiles)
-    
+
     ## Compare FFT kernels and initialization data
     array0 = np.asarray(0.).reshape(-1,1)
     x_p = np.linspace(-5, 5, 10*16000).reshape(-1, 1)
@@ -42,7 +42,7 @@ def train_notebook(gpu='0', list_limits=None, maxiter=[1000, 10000], nivps=[200,
         x.append(a.copy())
         y.append(b.copy())
         fs.append(c)
-        
+
     ## initialize models
     m = []
     nivps_a, nivps_c = nivps[0], nivps[1]  # num inducing variables per second for act and comp
@@ -53,7 +53,7 @@ def train_notebook(gpu='0', list_limits=None, maxiter=[1000, 10000], nivps=[200,
         m.append(gpitch.pdgp.Pdgp(x=x[i], y=y[i], z=z, kern=kern))
         m[i].za.fixed = True
         m[i].zc.fixed = True
-        
+
     ## optimization
     for i in range(numf):
         st = time.time()
@@ -64,7 +64,7 @@ def train_notebook(gpu='0', list_limits=None, maxiter=[1000, 10000], nivps=[200,
         m[i].optimize(disp=1, maxiter=maxiter[1])
         print("model {}, time optimizing {} sec".format(i+1, time.time() - st))
         tf.reset_default_graph()
-        
+
     ## prediction
     m_a, v_a = [], []  # list mean, var activation
     m_c, v_c = [], []  # list mean, var component
@@ -80,7 +80,7 @@ def train_notebook(gpu='0', list_limits=None, maxiter=[1000, 10000], nivps=[200,
         v_a.append(var_act[0])
         v_c.append(var_com[0])
         tf.reset_default_graph()
-            
+
     ## plots
     for i in range(len(m_s)):
         mplt.plot_training_all(x=x[i], y=y[i], source=m_s[i], m_a=m_a[i], v_a=v_a[i], m_c=m_c[i], v_c=v_c[i], m=m[i],
@@ -90,7 +90,7 @@ def train_notebook(gpu='0', list_limits=None, maxiter=[1000, 10000], nivps=[200,
     # for i in range(numf):
     #     k_p2.append(m[i].kern_com[0].compute_K(x_p, array0))
     # gpitch.pltrain.plot_fft(Fdata, Fkernel, y2, k_p2, numf, iparam)
-    
+
     ## save models
     if save:
         for i in range(numf):

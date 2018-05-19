@@ -141,7 +141,7 @@ class Matern32sml(gpflow.kernels.Kern):
             len_l.append(Param(lengthscales[i], transforms.Logistic(0., 2.)))
             var_l.append(Param(variances[i], transforms.Logistic(0., 1.)))
             freq_l.append(Param(frequencies[i], transforms.positive))
-        
+
         self.lengthscales = ParamList(len_l)
         self.variance = ParamList(var_l)
         self.frequency = ParamList(freq_l)
@@ -197,26 +197,26 @@ class MercerCosMix(gpflow.kernels.Kern):
         """
         gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
         self.num_features = len(frequency)
-        self.variance = Param(variance, transforms.positive)
-        
+        self.variance = Param(variance, transforms.Logistic(0., 0.25))
+
         if features_as_params:
             energy_list = []
             frequency_list = []
             for i in range(energy.size):
                 energy_list.append( Param(energy[i], transforms.positive) )
                 frequency_list.append( Param(frequency[i], transforms.positive) )
-                
+
             self.energy = ParamList(energy_list)
             self.frequency = ParamList(frequency_list)
         else:
             self.energy = energy
             self.frequency = frequency
-            
+
     def phi_features(self, X):
         n = tf.shape(X)[0]
         m = self.num_features
         phi_list = 2*m*[None]
-        for i in range(m):    
+        for i in range(m):
             phi_list[i] = tf.sqrt(self.energy[i])*tf.cos(2*np.pi*self.frequency[i]*X)
             phi_list[i + m] = tf.sqrt(self.energy[i])*tf.sin(2*np.pi*self.frequency[i]*X)
         phi = tf.stack(phi_list)
@@ -238,8 +238,8 @@ class MercerCosMix(gpflow.kernels.Kern):
     def Kdiag(self, X, presliced=False):
         return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance))
 
-    
-    
+
+
 class Logistic_hat(gpflow.kernels.Stationary):
     """
     The Logistic hat kernel
@@ -252,9 +252,9 @@ class Logistic_hat(gpflow.kernels.Stationary):
         f1 = (1./ (1. + tf.exp( 100*(-1.-r) )) )
         f2 = (1./ (1. + tf.exp( 100*( 1.-r) )) )
         return self.variance * (f1 - f2)
-    
-    
-    
+
+
+
 class Spectrum(gpflow.kernels.Kern):
     """
     Matern spectral mixture kernel with single lengthscale.
@@ -264,7 +264,7 @@ class Spectrum(gpflow.kernels.Kern):
 
         self.ARD = False
         self.num_partials = len(frequency)
-        
+
         self.energy = energy
         self.variance = Param(variance, transforms.positive)
         self.frequency = frequency
@@ -279,20 +279,20 @@ class Spectrum(gpflow.kernels.Kern):
         f = tf.expand_dims(X, 1)  # now N x 1 x D
         f2 = tf.expand_dims(X2, 0)  # now 1 x M x D
         r = tf.sqrt(tf.square(f - f2 +  1e-12))
-          
+
         k_list = self.num_partials*[None]
         for i in range(self.num_partials):
             r2 = tf.reduce_sum(2.*np.pi*self.frequency[i]*r , 2)
             k_list[i] = self.energy[i] * tf.cos(r2)
-        k = tf.reduce_sum(k_list, 0)  
-        
+        k = tf.reduce_sum(k_list, 0)
+
         return self.variance*k
 
     def Kdiag(self, X, presliced=False):
         return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance))
 
-    
-    
+
+
 class Spectrum2(gpflow.kernels.Kern):
     """
     Matern spectral mixture kernel with single lengthscale.
@@ -302,13 +302,13 @@ class Spectrum2(gpflow.kernels.Kern):
 
         self.ARD = False
         self.num_partials = len(frequency)
-        
+
         self.energy = energy
         self.variance = Param(variance, transforms.positive)
         self.frequency = frequency
-              
+
     def square_dist_2(self, X, X2):
-        X = X 
+        X = X
         Xs = tf.reduce_sum(tf.square(X), 1)
         if X2 is None:
             return -2 * tf.matmul(X, X, transpose_b=True) + \
@@ -322,7 +322,7 @@ class Spectrum2(gpflow.kernels.Kern):
     def euclid_dist_2(self, X, X2, freq):
         r2 = self.square_dist_2(X, X2)
         return 2.*np.pi*freq*tf.sqrt(r2 + 1e-12)
-        
+
     def K(self, X, X2=None, presliced=False):
         if not presliced:
             X, X2 = self._slice(X, X2)
@@ -333,25 +333,25 @@ class Spectrum2(gpflow.kernels.Kern):
         for i in range(self.num_partials):
             r = self.euclid_dist_2(X, X2, self.frequency[i])
             k_list[i] = self.energy[i] * tf.cos(r)
-        k = tf.reduce_sum(k_list, 0)  
-            
+        k = tf.reduce_sum(k_list, 0)
+
         return self.variance*k
 
     def Kdiag(self, X, presliced=False):
-        return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance))   
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+        return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #
