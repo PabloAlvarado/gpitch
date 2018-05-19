@@ -255,16 +255,6 @@ lfiles_training = [ ['011PFNOM_M60_train.wav',
                     'ALVARADO_M64_train.wav',
                     'ALVARADO_M67_train.wav']]
 
-def get_features(f, s, f_centers, nfps):
-    var_l = []
-    freq_l = []
-    for i in range(f.size):
-        idx =  np.argmin(np.abs(f - f_centers[i]))
-        freq_list.append(f[idx -nfps//2: idx + nfps//2])
-        var_list.append(s[idx -nfps//2: idx + nfps//2])
-    frequency = np.asarray(freq_l).reshape(-1, 1)
-    energy = np.asarray(var_l).reshape(-1, 1)
-    return frequency, energy
 
 
 
