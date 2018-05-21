@@ -193,21 +193,23 @@ def plot_patches(x, y, rm, s_l):
 # ____________________________________________________________________________
 
 
-def segment(x, y, window_size=32000, aug=True):
-    """segments the input data into arrays of size nw. Returns a list with segments
-        the augmentation corresponds to 50 miliseconds (800 samples) assuming 16kHz of sampling rate
+def segmented(x, y, window_size=32000, aug=False):
     """
+    segmentates the input data into arrays of size nw. Returns a list with segments.
+    The augmentation corresponds to 50 miliseconds (800 samples) assuming 16kHz of sampling rate.
+    """
+    num_windows = y.size/window_size
     xs = []  # time vector segmented
     ys = []  # data segmented
-    for i in range(y.size/window_size):
+    for i in range(num_windows):
         yaux = y[i*window_size : (i+1)*window_size].copy()
         xaux = x[i*window_size : (i+1)*window_size].copy()
         if aug:
-            xa, ya = augmentate(xaux, yaux)
+            xaug, yaug = augmentate(xaux, yaux)
         else:
-            xa, ya = xaux.copy(), yaux.copy()
-        ys.append(ya)
-        xs.append(xa)
+            xaug, yaug = xaux.copy(), yaux.copy()
+        ys.append(yaug)
+        xs.append(xaug)
     return xs, ys
 
 def augmentate(x, y, augment_size=1600):
