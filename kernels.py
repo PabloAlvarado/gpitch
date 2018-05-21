@@ -187,7 +187,7 @@ class MercerCosMix(gpflow.kernels.Kern):
     The Mercer Cosine Mixture kernel for audio.
     """
 
-    def __init__(self, input_dim, energy, frequency, variance=1.0, features_as_params=False):
+    def __init__(self, input_dim, energy, frequency, variance=1.0, features_as_params=True):
         """
         - input_dim is the dimension of the input to the kernel
         - variance is the (initial) value for the variance parameter(s)
