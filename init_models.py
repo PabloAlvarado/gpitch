@@ -4,7 +4,7 @@ from gpitch.methods import find_ideal_f0, init_cparam
 import numpy as np
 import gpflow
 
-def init_iv(x, num_sources, nivps_a, nivps_c, fs=16000):
+def init_iv(x, num_sources, nivps_a, nivps_c, fs):
     """
     Initialize inducing variables
     :param x: time vector
@@ -22,7 +22,7 @@ def init_iv(x, num_sources, nivps_a, nivps_c, fs=16000):
     z = [za, zc]
     return z
 
-def init_kernel_training(y, list_files, fs=16000, maxh=25):
+def init_kernel_training(y, list_files, fs, maxh=25):
     num_pitches = len(list_files)
     if0 = find_ideal_f0(list_files)  # ideal frequency for each pitch
     iparam = []  # initilize component kernel parameters for each pitch model
@@ -101,20 +101,32 @@ def reset_model(m, x, y, nivps, m_trained, option_two=False):
             m.kern_com[i].variance[j] = m_trained[i].kern_com[0].variance[j].value.copy()
        
     
-def get_features(f, s, f_centers, nfpc):
+def get_features(f, s, f_centers, nfpc, use_centers, totalnumf):
     """Get kernel features (parameters) from FFT of training data"""
-    var_l = []
-    freq_l = []
-    for i in range(f_centers.size):
-        idx =  np.argmin(np.abs(f - f_centers[i]))
-        if nfpc == 1:
-            freq_l.append(f[idx: idx + 1])
-            var_l.append(s[idx: idx + 1])
-        else:
-            freq_l.append(f[idx -nfpc//2: idx + nfpc//2])
-            var_l.append(s[idx -nfpc//2: idx + nfpc//2])
-    frequency = np.asarray(freq_l).reshape(-1, 1)
-    energy = np.asarray(var_l).reshape(-1, 1)
+    if use_centers:
+        var_l = []
+        freq_l = []
+        for i in range(f_centers.size):
+            idx =  np.argmin(np.abs(f - f_centers[i]))
+            if nfpc == 1:
+                freq_l.append(f[idx: idx + 1])
+                var_l.append(s[idx: idx + 1])
+            else:
+                freq_l.append(f[idx -nfpc//2: idx + nfpc//2])
+                var_l.append(s[idx -nfpc//2: idx + nfpc//2])
+        frequency = np.asarray(freq_l).reshape(-1, 1)
+        energy = np.asarray(var_l).reshape(-1, 1)
+        energy /= sum(energy)
+    else:
+        num_features = totalnumf
+        idx = np.flip(np.argsort(np.log(s)), axis=0)
+        Ssorted = s[idx].copy()
+        Fsorted = f[idx].copy()
+        
+        energy = Ssorted[0:num_features].copy()
+        energy /= np.sum(energy)
+        frequency = Fsorted[0:num_features].copy()
+        
     return frequency, energy
 
 
@@ -129,7 +141,7 @@ def init_kern(num_pitches, energy, frequency):
         k_com_a[i].variance.fixed = True
         k_com_a[i].lengthscales.transform = gpflow.transforms.Logistic(0., 0.5)
         k_com_b.append( MercerCosMix(input_dim=1, energy=energy[i].copy(),
-                                                    frequency=frequency[i].copy(), variance=0.25))
+                                                    frequency=frequency[i].copy(), variance=0.25, features_as_params=False))
         k_com_b[i].fixed = True
         k_com.append( k_com_a[i]*k_com_b[i] )
     kern = [k_act, k_com]

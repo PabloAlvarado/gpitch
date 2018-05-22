@@ -11,7 +11,7 @@ def flex_hann(n, m):
     return f
 
 def frame(x, y, window_size, overlap):
-    x_b, y_b = balance_data_size(y, window_size, overlap, fs=16000)
+    x_b, y_b = balance_data_size(y, window_size, overlap, fs)
     xout = []
     yout = []
     n = x_b.size
@@ -64,7 +64,7 @@ def merged_n_trim(x, y, window_size, overlap, num_samples):
     y_final = y_aux[0:num_samples].reshape(-1,1)
     return x_final, y_final
 
-def balance_data_size(y, window_size, overlap, fs=16000):
+def balance_data_size(y, window_size, overlap, fs):
     n = y.size
     n_samples = []
     for i in range(1, 1000):

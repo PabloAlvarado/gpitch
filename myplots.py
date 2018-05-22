@@ -24,7 +24,7 @@ def plot_predict(x, mean, var, z, nlinfun=logistic, latent=False, plot_z=True, p
                                  mean[:,0] + 2*np.sqrt(var[:,0]), color='C0', alpha=0.2)
 
     if plot_z:
-        plt.plot(z, 0.*z, '|k', mew=1)
+        plt.plot(z, -0.01 + 0.*z, '|k', mew=1)
 
 ## PLOTS EVALUATION
 #____________________________________________________________________________________________________________

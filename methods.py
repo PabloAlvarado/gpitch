@@ -33,6 +33,8 @@ def find_ideal_f0(string):
 
 def readaudio(fname, frames=-1, start=0, aug=False):
     y, fs = soundfile.read(fname, frames=frames, start=start)  # load data and sample freq
+    if y.shape[1] == 2:
+        y = np.mean(y, 1) 
     y = y.reshape(-1, 1)
     y /= np.max(np.abs(y))
     y += -y.mean()  # move data to have zero mean and bounded between (-1, 1)
@@ -156,9 +158,8 @@ def init_settings(visible_device, interactive=False):
     return sess
 
 def load_filenames(directory, pattern, bounds):
-    auxl = fnmatch.filter(os.listdir(directory), pattern)
-    filel = [fnmatch.filter(auxl, '*_M' + str(pitch) + '_*')[0]
-             for pitch in range(bounds[0], bounds[1]) ]
+    auxl = fnmatch.filter(os.listdir(directory),  '*' + pattern + '*')
+    filel = [ fnmatch.filter(auxl, '*_M' + str(pitch) + '_*')[0] for pitch in range(bounds[0], bounds[1]) ]
     filel =  np.asarray(filel).reshape(-1,)
     return filel
 
