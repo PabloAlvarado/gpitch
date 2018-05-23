@@ -26,7 +26,7 @@ def find_ideal_f0(string):
     """"""
     ideal_f0 = []
     for j in range(len(string)):
-        for i in range(21, 89):
+        for i in range(21, 109):
             if string[j].find('M' + str(i)) is not -1:
                 ideal_f0.append(midi2freq(i))
     return ideal_f0
@@ -119,6 +119,9 @@ def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
         if F_star[index] < 0.75*ideal_f0:
             F_star2 = np.delete(F_star, [index])
             S_star2 = np.delete(S_star, [index])
+        else:
+            F_star2 = F_star.copy()
+            S_star2 = S_star.copy()
 
     aux1 = np.flip(np.sort(S_star2), 0)
     aux2 = np.flip(np.argsort(S_star2), 0)
