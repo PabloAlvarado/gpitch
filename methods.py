@@ -146,14 +146,15 @@ def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
 
     return [freq_final, var_final, F, S, thres]
 
-def init_settings(visible_device, interactive=False):
+def init_settings(visible_device, interactive=False, allow_growth=True):
     '''Initialize usage of GPU and plotting
        visible_device : which GPU to use'''
 
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # deactivate tf warnings (default 0)
     os.environ["CUDA_VISIBLE_DEVICES"] = visible_device  # configuration use only one GPU
-    config = tf.ConfigProto()  # configuration to not to use all the memory
-    config.gpu_options.allow_growth = True
+    config = tf.ConfigProto()
+    if allow_growth: 
+        config.gpu_options.allow_growth = True  # configuration to not to use all the memory
     if interactive == True:
         sess = tf.InteractiveSession(config=config)
     else:
