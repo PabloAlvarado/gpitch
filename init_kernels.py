@@ -1,6 +1,7 @@
 from gpflow.kernels import Matern32
 from gpitch.kernels import MercerCosMix
 import gpflow
+import pickle
 
 
 def init_kern_act(num_pitches):
@@ -20,7 +21,7 @@ def init_kern_com(num_pitches, lengthscale, energy, frequency):
 
     for i in range(num_pitches):
         kern_exp.append(Matern32(1, lengthscales=lengthscale[i], variance=1.0) )
-        #kern_exp[i].variance.fixed = True
+        #kern_exp[i].variance.fixed = True  # fix hyperparams in case it is necessary
         #kern_exp[i].lengthscales.fixed = True
         kern_exp[i].lengthscales.transform = gpflow.transforms.Logistic(0., 1.)
 
@@ -38,3 +39,21 @@ def init_kern(num_pitches, lengthscale, energy, frequency):
     kern_com = init_kern_com(num_pitches, lengthscale, energy, frequency)
     kern = [kern_act, kern_com]
     return kern
+
+
+def load_params(num_sources, fname):
+    """ load kernel hyperparams for initialization"""
+    path_p = '/import/c4dm-04/alvarado/results/sampling_covariance/'
+    pitches = ["60", "64", "67"]
+    hparam = []
+    lengthscale = []
+    variance = []
+    frequency = []
+
+    for i in range(num_sources):
+        hparam.append(pickle.load(open(path_p + fname + "_M" + pitches[i] + "_hyperparams.p", "rb")))
+        lengthscale.append(hparam[i][1].copy())
+        variance.append(hparam[i][2].copy() / sum(hparam[i][2].copy()))
+        frequency.append(hparam[i][3].copy())
+
+    return lengthscale, variance, frequency
