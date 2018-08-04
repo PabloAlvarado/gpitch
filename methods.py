@@ -31,19 +31,21 @@ def find_ideal_f0(string):
                 ideal_f0.append(midi2freq(i))
     return ideal_f0
 
-def readaudio(fname, frames=-1, start=0, aug=False):
+def readaudio(fname, frames=-1, start=0, aug=False, scaled=False):
     y, fs = soundfile.read(fname, frames=frames, start=start)  # load data and sample freq
-    if y.shape[1] == 2:
+    if len(y.shape) == 1:
+        y = y.reshape(-1, 1)
+    if y.shape[1] == 2:  # convert to mono
         y = np.mean(y, 1) 
     y = y.reshape(-1, 1)
-    y /= np.max(np.abs(y))
-    y += -y.mean()  # move data to have zero mean and bounded between (-1, 1)
+    if scaled:
+        y /= np.max(np.abs(y))
     if aug:
         augnum = 1000  # number of zeros to add
         y = np.append(np.zeros((augnum, 1)), y).reshape(-1, 1)
         #y = np.append(y, np.zeros((augnum, 1))).reshape(-1, 1)
     frames = y.size
-    x = np.linspace(0, (frames-1.)/fs, frames).reshape(-1, 1)  # time vector
+    x = np.linspace(0., (frames-1.)/fs, frames).reshape(-1, 1)  # time vector
     return x, y, fs
 
 
@@ -83,7 +85,7 @@ def merge_all(inlist):
 
     return outlist
 
-def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
+def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10, thres=0.1, min_dis=0.8):
     '''
     :param y: data
     :param fs: sample frequency
@@ -101,11 +103,12 @@ def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10):
 
     win =  signal.hann(win_size)
     Ss = signal.convolve(S, win, mode='same') / sum(win)
+
     Sslog = np.log(S)
     Sslog = Sslog + np.abs(np.min(Sslog))
     Sslog /= np.max(Sslog)
-    thres = 0.10*np.max(Sslog)
-    min_dist = 0.8*np.argmin(np.abs(F - ideal_f0))
+    thres = thres*np.max(Sslog)
+    min_dist = min_dis*np.argmin(np.abs(F - ideal_f0))
     idx = peakutils.indexes(Sslog, thres=thres, min_dist=min_dist)
 
     F_star, S_star = F[idx], S[idx]
@@ -153,9 +156,9 @@ def init_settings(visible_device, interactive=False, allow_growth=True):
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # deactivate tf warnings (default 0)
     os.environ["CUDA_VISIBLE_DEVICES"] = visible_device  # configuration use only one GPU
     config = tf.ConfigProto()
-    if allow_growth: 
-        config.gpu_options.allow_growth = True  # configuration to not to use all the memory
-    if interactive == True:
+    config.gpu_options.allow_growth = allow_growth # configuration to not to use all the memory
+
+    if interactive:
         sess = tf.InteractiveSession(config=config)
     else:
         sess = tf.Session(config=config)

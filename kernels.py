@@ -10,6 +10,77 @@ float_type = settings.dtypes.float_type
 int_type = settings.dtypes.int_type
 np_float_type = np.float32 if float_type is tf.float32 else np.float64
 
+
+class Sig(gpflow.kernels.Kern):
+    """
+    The sigmoidal kernel with unitary variance.
+    """
+
+    def __init__(self, input_dim, a=1.0, b=1.0, active_dims=None):
+        """
+        """
+        gpflow.kernels.Kern.__init__(self, input_dim, active_dims)
+
+        self.a = Param(a)
+        self.b = Param(b)
+
+    def K(self, X, X2=None, presliced=False):
+        if not presliced:
+            X, X2 = self._slice(X, X2)
+        if X2 is None:
+            Xhat = 1. / (1. + tf.exp(-(X * self.a + self.b)))
+            return tf.matmul(Xhat, Xhat, transpose_b=True)
+        else:
+            Xhat = 1. / (1. + tf.exp(-(X * self.a + self.b)))
+            Xhat2 = 1. / (1. + tf.exp(-(X2 * self.a + self.b)))
+            return tf.matmul(Xhat, Xhat2, transpose_b=True)
+
+    def Kdiag(self, X, presliced=False):
+        if not presliced:
+            X, _ = self._slice(X, None)
+        Xhat = 1. / (1. + tf.exp(-(X * self.a + self.b)))
+        return tf.reduce_sum(tf.square(Xhat), 1)
+
+
+
+class Cosine(gpflow.kernels.Kern):
+    """
+    The Cosine kernel with frequency hyperparameter, instead of lengthscale
+    """
+
+    def __init__(self, input_dim, variance=1., frequency=1.):
+        gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
+        self.variance = Param(variance, transforms.positive)
+        self.frequency = Param(frequency, transforms.positive)
+
+    def square_dist(self, X, X2):
+        X = 2. * np.pi * self.frequency * X
+        Xs = tf.reduce_sum(tf.square(X), 1)
+        if X2 is None:
+            return -2 * tf.matmul(X, X, transpose_b=True) + \
+                   tf.reshape(Xs, (-1, 1)) + tf.reshape(Xs, (1, -1))
+        else:
+            X2 = 2. * np.pi * self.frequency * X2
+            X2s = tf.reduce_sum(tf.square(X2), 1)
+            return -2 * tf.matmul(X, X2, transpose_b=True) + \
+                   tf.reshape(Xs, (-1, 1)) + tf.reshape(X2s, (1, -1))
+
+    def euclid_dist(self, X, X2):
+        r2 = self.square_dist(X, X2)
+        return tf.sqrt(r2 + 1e-12)
+
+    def K(self, X, X2=None, presliced=False):
+        if not presliced:
+            X, X2 = self._slice(X, X2)
+        r = self.euclid_dist(X, X2)
+        return self.variance * tf.cos(r)
+
+    def Kdiag(self, X, presliced=False):
+        return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance))
+
+
+
+
 class Matern32sm_old(gpflow.kernels.Kern):
     """
     Matern spectral mixture kernel with single lengthscale.
@@ -187,7 +258,8 @@ class MercerCosMix(gpflow.kernels.Kern):
     The Mercer Cosine Mixture kernel for audio.
     """
 
-    def __init__(self, input_dim, energy, frequency, variance=1.0, features_as_params=True):
+    def __init__(self, input_dim, energy=np.asarray([1.]), frequency=np.asarray([2*np.pi]),
+                 variance=1.0, features_as_params=False):
         """
         - input_dim is the dimension of the input to the kernel
         - variance is the (initial) value for the variance parameter(s)
@@ -342,9 +414,26 @@ class Spectrum2(gpflow.kernels.Kern):
 
 
 
+class NonParam(gpflow.kernels.Kern):
+    """Non-parametric kernel"""
 
+    def __init__(self, input_dim, numsamples, variance=1.0):
+        gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
+        self.ARD = False
+        self.numsamples = numsamples
 
+        self.variance = gpflow.param.Param(variance, transform=gpflow.transforms.positive)
 
+        self.L = gpflow.param.Param(np.eye(self.numsamples),
+                                    transform=gpflow.transforms.LowerTriangular(N=self.numsamples))
+
+    def K(self, X, X2=None, presliced=False):
+        if not presliced:
+            X, X2 = self._slice(X, X2)
+        return tf.squeeze(tf.matmul(self.L * self.variance, self.L, transpose_b=True))
+
+    def Kdiag(self, X, presliced=False):
+        return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance))
 
 
 
