@@ -2,15 +2,17 @@ import numpy as np
 import pickle
 
 
-def compute_sousep(x, y, m, num_sources, use_sampled_cov=False):
+def compute_sousep(x, y, m, num_sources, fname, use_sampled_cov=False):
     """compute source separation."""
 
     if use_sampled_cov:
-        matrix_path = '/import/c4dm-04/alvarado/results/sampling_covariance/'
+        # matrix_path = '/import/c4dm-04/alvarado/results/sampling_covariance/'
+        matrix_path = '/home/pa/Desktop/sampling_covariance/'
+        pitches = ["60", "64", "67"]
         cov = []
-        var1 = m.kern.prod_1.matern32.variance.value[0]
-        var2 = m.kern.prod_2.matern32.variance.value[0]
-        var3 = m.kern.prod_3.matern32.variance.value[0]
+        var1 = m.kern.prod_1.matern12.variance.value[0]
+        var2 = m.kern.prod_2.matern12.variance.value[0]
+        var3 = m.kern.prod_3.matern12.variance.value[0]
         var = [var1, var2, var3]
 
         for i in range(num_sources):
