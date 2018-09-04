@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 
 
-def compute_sousep(x, y, m, num_sources, fname, use_sampled_cov=False):
+def compute_sousep(x, y, m, num_sources, fname=None, use_sampled_cov=False):
     """compute source separation."""
 
     if use_sampled_cov:

@@ -10,7 +10,7 @@ def flex_hann(n, m):
     f[-m:] = wp[-m:].reshape(-1,1)
     return f
 
-def frame(x, y, window_size, overlap):
+def frame(x, y, window_size, overlap, fs):
     x_b, y_b = balance_data_size(y, window_size, overlap, fs)
     xout = []
     yout = []

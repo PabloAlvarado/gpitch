@@ -7,6 +7,8 @@ from gpflow._settings import settings
 
 
 float_type = settings.dtypes.float_type
+jitter = settings.numerics.jitter_level
+
 int_type = settings.dtypes.int_type
 np_float_type = np.float32 if float_type is tf.float32 else np.float64
 
@@ -41,6 +43,34 @@ class Sig(gpflow.kernels.Kern):
         Xhat = 1. / (1. + tf.exp(-(X * self.a + self.b)))
         return tf.reduce_sum(tf.square(Xhat), 1)
 
+
+class Hann(gpflow.kernels.Kern):
+    """
+    The Hanning kernel with unitary variance.
+    """
+
+    def __init__(self, input_dim, N=1025, active_dims=None):
+        """
+        """
+        self.N = N
+        gpflow.kernels.Kern.__init__(self, input_dim, active_dims)
+
+    def K(self, X, X2=None, presliced=False):
+        if not presliced:
+            X, X2 = self._slice(X, X2)
+        if X2 is None:
+            Xhat = 0.5 * (1. - tf.cos(2.*np.pi*X*16000/(self.N - 1.)) )
+            return tf.matmul(Xhat, Xhat, transpose_b=True)
+        else:
+            Xhat = 0.5 * (1. - tf.cos(2. * np.pi * X * 16000 / (self.N - 1.)))
+            Xhat2 = 0.5 * (1. - tf.cos(2. * np.pi * X2 * 16000 / (self.N - 1.)))
+            return tf.matmul(Xhat, Xhat2, transpose_b=True)
+
+    def Kdiag(self, X, presliced=False):
+        if not presliced:
+            X, _ = self._slice(X, None)
+        Xhat = 0.5 * (1. - tf.cos(2.*np.pi*X*16000/(self.N - 1.)) )
+        return tf.reduce_sum(tf.square(Xhat), 1)
 
 
 class Cosine(gpflow.kernels.Kern):
@@ -77,8 +107,6 @@ class Cosine(gpflow.kernels.Kern):
 
     def Kdiag(self, X, presliced=False):
         return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance))
-
-
 
 
 class Matern32sm_old(gpflow.kernels.Kern):
@@ -129,7 +157,6 @@ class Matern32sm_old(gpflow.kernels.Kern):
         for i in range(2, self.numc + 1):
             var += tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(getattr(self, 'variance_' + str(i))))
         return var
-
 
 
 class Matern32sm(gpflow.kernels.Kern):
@@ -187,8 +214,6 @@ class Matern32sm(gpflow.kernels.Kern):
         for i in range(self.num_partials):
             self.variance[i].fixed = fix_var
             self.frequency[i].fixed = fix_freq
-
-
 
 
 class Matern32sml(gpflow.kernels.Kern):
@@ -251,8 +276,6 @@ class Matern32sml(gpflow.kernels.Kern):
             self.lengthscales[i].fixed = fix_len
 
 
-
-
 class MercerCosMix(gpflow.kernels.Kern):
     """
     The Mercer Cosine Mixture kernel for audio.
@@ -311,7 +334,6 @@ class MercerCosMix(gpflow.kernels.Kern):
         return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance))
 
 
-
 class Logistic_hat(gpflow.kernels.Stationary):
     """
     The Logistic hat kernel
@@ -324,7 +346,6 @@ class Logistic_hat(gpflow.kernels.Stationary):
         f1 = (1./ (1. + tf.exp( 100*(-1.-r) )) )
         f2 = (1./ (1. + tf.exp( 100*( 1.-r) )) )
         return self.variance * (f1 - f2)
-
 
 
 class Spectrum(gpflow.kernels.Kern):
@@ -362,7 +383,6 @@ class Spectrum(gpflow.kernels.Kern):
 
     def Kdiag(self, X, presliced=False):
         return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance))
-
 
 
 class Spectrum2(gpflow.kernels.Kern):
@@ -413,7 +433,6 @@ class Spectrum2(gpflow.kernels.Kern):
         return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance))
 
 
-
 class NonParam(gpflow.kernels.Kern):
     """Non-parametric kernel"""
 
@@ -436,6 +455,63 @@ class NonParam(gpflow.kernels.Kern):
         return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance))
 
 
+class MeanGP(gpflow.kernels.Stationary):
+    def __init__(self, input_dim, xkern, fkern, variance=1.0, plen=1.0, pvar=1.0):
+
+        gpflow.kernels.Stationary.__init__(self, input_dim=input_dim, active_dims=None, ARD=False)
+        eyem = tf.eye(xkern.size, dtype=float_type)
+        self.variance = Param(variance, transforms.positive)
+        self.plen = plen
+        self.pvar = pvar
+        self.fkern = fkern
+        self.xkern = xkern
+        self.kern = gpflow.kernels.RBF(input_dim=input_dim, variance=self.pvar, lengthscales=self.plen)
+        self.cov = tf.matmul(eyem, self.kern.compute_K_symm(xkern))
+        self.icov = tf.matrix_inverse(self.cov + jitter*eyem)
+
+    def K(self, X, X2=None, presliced=False):
+        if not presliced:
+            X, X2 = self._slice(X, X2)
+        r = self.euclid_dist(X, X2)
+        K_fu = self.kern.compute_K(tf.reshape(r, (-1, 1)), self.xkern)
+        return K_fu
+
+
+class KernelGPR(gpflow.kernels.Kern):
+    """
+    The GP kernel
+    """
+    def __init__(self, input_dim, gpm, variance=1.0):
+        gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
+        self.variance = Param(variance, transforms.positive)
+        self.m = gpm
+        self.m.fixed = True
+
+    def square_dist(self, X, X2):
+        Xs = tf.reduce_sum(tf.square(X), 1)
+        if X2 is None:
+            return -2 * tf.matmul(X, X, transpose_b=True) + \
+                   tf.reshape(Xs, (-1, 1)) + tf.reshape(Xs, (1, -1))
+        else:
+            X2s = tf.reduce_sum(tf.square(X2), 1)
+            return -2 * tf.matmul(X, X2, transpose_b=True) + \
+                   tf.reshape(Xs, (-1, 1)) + tf.reshape(X2s, (1, -1))
+
+    def euclid_dist(self, X, X2):
+        r2 = self.square_dist(X, X2)
+        return tf.sqrt(r2 + 1e-12)
+
+    def K(self, X, X2=None, presliced=False):
+
+        if not presliced:
+            X, X2 = self._slice(X, X2)
+
+        r = self.euclid_dist(X, X2)
+        cov = self.m.build_predict(tf.reshape(r, (-1, 1)))[0]
+        return self.variance * tf.reshape(cov, (tf.shape(r)[0], tf.shape(r)[1]))
+
+    def Kdiag(self, X, presliced=False):
+        return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.m.kern.variance * self.variance))
 
 
 
@@ -443,4 +519,24 @@ class NonParam(gpflow.kernels.Kern):
 
 
 
-#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""end"""

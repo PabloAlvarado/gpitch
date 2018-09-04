@@ -165,7 +165,7 @@ def init_settings(visible_device, interactive=False, allow_growth=True):
     return sess
 
 def load_filenames(directory, pattern, bounds):
-    auxl = fnmatch.filter(os.listdir(directory),  '*' + pattern + '*')
+    auxl = fnmatch.filter(os.listdir(directory),  '*' + pattern + '*.wav')
     filel = [ fnmatch.filter(auxl, '*_M' + str(pitch) + '_*')[0] for pitch in range(bounds[0], bounds[1]) ]
     filel =  np.asarray(filel).reshape(-1,)
     return filel

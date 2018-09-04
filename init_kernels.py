@@ -14,16 +14,14 @@ def init_kern_act(num_pitches):
     return kern_act
 
 
-def init_kern_com(num_pitches, lengthscale, energy, frequency):
+def init_kern_com(num_pitches, lengthscale, energy, frequency, len_fixed=True):
     """Initialize kernels for activations and components"""
 
     kern_com, kern_exp, kern_per = [], [], []
 
     for i in range(num_pitches):
         kern_exp.append(Matern12(1, lengthscales=lengthscale[i].copy(), variance=1.0) )
-        #kern_exp[i].variance.fixed = True  # fix hyperparams in case it is necessary
-        #kern_exp[i].lengthscales.fixed = True
-        kern_exp[i].lengthscales.transform = gpflow.transforms.Logistic(0., 1.)
+        kern_exp[i].lengthscales.fixed = len_fixed
 
         kern_per.append(MercerCosMix(1, energy=energy[i].copy(), frequency=frequency[i].copy(), variance=1.0,))
         kern_per[i].fixed = True
@@ -43,8 +41,8 @@ def init_kern(num_pitches, lengthscale, energy, frequency):
 
 def load_params(num_sources, fname):
     """ load kernel hyperparams for initialization"""
-    # path_p = '/import/c4dm-04/alvarado/results/sampling_covariance/'
-    path_p = '/home/pa/Desktop/sampling_covariance/'
+    path_p = '/import/c4dm-04/alvarado/results/sampling_covariance/'
+    # path_p = '/home/pa/Desktop/sampling_covariance/'
     pitches = ["60", "64", "67"]
     hparam = []
     lengthscale = []
