@@ -147,20 +147,32 @@ def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10, thres=0.1, min_
 
     return [freq_final, var_final, F, S, thres]
 
-def init_settings(visible_device, interactive=False, allow_growth=True):
-    '''Initialize usage of GPU and plotting
-       visible_device : which GPU to use'''
+def init_settings(visible_device='0', interactive=False, allow_growth=True, run_on_server=True):
+    '''
+    Initialize usage of GPU and plotting visible_device : which GPU to use
+    '''
 
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # deactivate tf warnings (default 0)
-    os.environ["CUDA_VISIBLE_DEVICES"] = visible_device  # configuration use only one GPU
+    # deactivate tf warnings (default 0)
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+    # configuration use only one GPU
+    os.environ["CUDA_VISIBLE_DEVICES"] = visible_device
+
+    # configuration to not to use all the memory
     config = tf.ConfigProto()
-    config.gpu_options.allow_growth = allow_growth # configuration to not to use all the memory
+    config.gpu_options.allow_growth = allow_growth
 
     if interactive:
         sess = tf.InteractiveSession(config=config)
     else:
         sess = tf.Session(config=config)
-    return sess
+
+    # run on server or run on local machine
+    if run_on_server:
+        path = "/import/c4dm-01/MAPS_original/AkPnBcht/ISOL/NO/"
+    else:
+        path = "/run/user/1000/gvfs/sftp:host=frank.eecs.qmul.ac.uk,user=paad3/import/c4dm-01/MAPS_original/AkPnBcht/ISOL/NO/"
+    return sess, path
 
 
 def load_filenames(directory, pattern, bounds, ext=".wav"):
