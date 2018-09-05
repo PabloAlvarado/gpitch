@@ -49,8 +49,6 @@ def readaudio(fname, frames=-1, start=0, aug=False, scaled=False):
     return x, y, fs
 
 
-
-
 def trim_n_merge(x, trim_size=1600, aug=True):
     xl = []
     for i in range(len(x)):
@@ -164,11 +162,13 @@ def init_settings(visible_device, interactive=False, allow_growth=True):
         sess = tf.Session(config=config)
     return sess
 
-def load_filenames(directory, pattern, bounds):
-    auxl = fnmatch.filter(os.listdir(directory),  '*' + pattern + '*.wav')
-    filel = [ fnmatch.filter(auxl, '*_M' + str(pitch) + '_*')[0] for pitch in range(bounds[0], bounds[1]) ]
-    filel =  np.asarray(filel).reshape(-1,)
+
+def load_filenames(directory, pattern, bounds, ext=".wav"):
+    auxl = fnmatch.filter(os.listdir(directory),  '*' + pattern + '*' + ext)
+    filel = [fnmatch.filter(auxl, '*_M' + str(pitch) + '_*')[0] for pitch in range(bounds[0], bounds[1])]
+    filel = np.asarray(filel).reshape(-1,)
     return filel
+
 
 def norm(x):
     """divide by absolute max"""
