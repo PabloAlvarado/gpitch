@@ -169,9 +169,9 @@ def init_settings(visible_device='0', interactive=False, allow_growth=True, run_
 
     # run on server or run on local machine
     if run_on_server:
-        path = "/import/c4dm-01/MAPS_original/AkPnBcht/ISOL/NO/"
+        path = "/import/"
     else:
-        path = "/run/user/1000/gvfs/sftp:host=frank.eecs.qmul.ac.uk,user=paad3/import/c4dm-01/MAPS_original/AkPnBcht/ISOL/NO/"
+        path = "/run/user/1000/gvfs/sftp:host=frank.eecs.qmul.ac.uk,user=paad3/import/"
     return sess, path
 
 
