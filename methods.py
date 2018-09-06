@@ -175,9 +175,9 @@ def init_settings(visible_device='0', interactive=False, allow_growth=True, run_
     return sess, path
 
 
-def load_filenames(directory, pattern, bounds, ext=".wav"):
+def load_filenames(directory, pattern, pitches, ext=".wav"):
     auxl = fnmatch.filter(os.listdir(directory),  '*' + pattern + '*' + ext)
-    filel = [fnmatch.filter(auxl, '*_M' + str(pitch) + '_*')[0] for pitch in range(bounds[0], bounds[1])]
+    filel = [fnmatch.filter(auxl, '*_M' + str(pitch) + '_*')[0] for pitch in pitches]
     filel = np.asarray(filel).reshape(-1,)
     return filel
 

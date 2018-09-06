@@ -2,8 +2,14 @@
   <dictionary name="pa">
     <words>
       <w>fname</w>
+      <w>hyperparameters</w>
       <w>kernelfit</w>
+      <w>lfiles</w>
+      <w>npartials</w>
+      <w>readcov</w>
       <w>savem</w>
+      <w>writecov</w>
+      <w>xkern</w>
     </words>
   </dictionary>
 </component>
