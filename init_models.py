@@ -28,7 +28,7 @@ def init_iv(x, num_sources, nivps_a, nivps_c, fs):
 def init_liv(x, y, num_sources=1, win_size=3, thres=0.001):
     """
     Initialize location of inducing varibales by using locations of 
-    peaks and valleys of test data "y".
+    peaks and valleys of test data "y" or extrema.
     """
     # change shape
     x = x.reshape(-1,)

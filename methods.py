@@ -135,7 +135,7 @@ def init_cparam(y, fs, maxh, ideal_f0, scaled=True, win_size=10, thres=0.1, min_
         idxf = aux2
 
     if scaled:
-        sig_scale = 1./ (4.*np.sum(vvec)) #rescale (sigma)
+        sig_scale = 1./ np.sum(vvec) #rescale (sigma)
         vvec *= sig_scale
 
     freq_final = F_star2[idxf]
@@ -171,7 +171,7 @@ def init_settings(visible_device='0', interactive=False, allow_growth=True, run_
     if run_on_server:
         path = "/import/"
     else:
-        path = "/run/user/1000/gvfs/sftp:host=frank.eecs.qmul.ac.uk,user=paad3/import/"
+        path = ""
     return sess, path
 
 
