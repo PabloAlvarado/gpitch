@@ -171,7 +171,7 @@ def init_settings(visible_device='0', interactive=False, allow_growth=True, run_
     if run_on_server:
         path = "/import/"
     else:
-        path = ""
+        path = "/"
     return sess, path
 
 

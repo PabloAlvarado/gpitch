@@ -28,7 +28,7 @@ class AMT:
     Automatic music transcription class
     """
 
-    def __init__(self, test_filename, nsec, pitches, window_size=4410, run_on_server=False, gpu='0'):
+    def __init__(self, test_filename, nsec, pitches, window_size=4410, run_on_server=True, gpu='0'):
 
         self.train_data = [None]
         self.test_data = Audio()
@@ -38,13 +38,29 @@ class AMT:
         self.kern_pitches = [None]
         self.model = None
 
+        self.mean = []
+        self.var = []
+
+        self.var1 = []
+        self.var2 = []
+        self.var3 = []
+        self.var4 = []
+        self.var5 = []
+        self.var6 = []
+        self.var7 = []
+        self.var8 = []
+        self.var9 = []
+        self.var10 = []
+
         # init session
         self.sess, self.path = gpitch.init_settings(visible_device=gpu, run_on_server=run_on_server)
-
-        # data_path = "c4dm-01/MAPS_original/AkPnBcht/ISOL/NO/"
-        # save_path = "c4dm-04/alvarado/results/"
-        self.train_path = "/media/pa/TOSHIBA EXT/Datasets/MAPS/AkPnBcht/ISOL/NO/"
-        self.test_path = "/media/pa/TOSHIBA EXT/Datasets/MAPS/AkPnBcht/MUS/"
+    
+        if run_on_server:
+            self.train_path = "c4dm-01/MAPS_original/AkPnBcht/ISOL/NO/"
+            self.test_path = "c4dm-01/MAPS_original/AkPnBcht/MUS/"
+        else:
+            self.train_path = "media/pa/TOSHIBA EXT/Datasets/MAPS/AkPnBcht/ISOL/NO/"
+            self.test_path = "media/pa/TOSHIBA EXT/Datasets/MAPS/AkPnBcht/MUS/"
 
         self.load_train(pitches=pitches)
         self.load_test(filename=test_filename, start=20000, frames=nsec*44100, window_size=window_size)
@@ -83,7 +99,7 @@ class AMT:
 
         nrows = int(np.ceil(nfiles/4.))
 
-        if figsize == None:
+        if figsize is None:
             figsize = (16, 2*nrows)
 
         plt.figure(figsize=figsize)
@@ -155,7 +171,8 @@ class AMT:
             self.kern_pitches = gpitch.init_kernels.init_kern_com(num_pitches=len(self.train_data),
                                                                   lengthscale=self.params[0],
                                                                   energy=self.params[1],
-                                                                  frequency=self.params[2])
+                                                                  frequency=self.params[2],
+                                                                  len_fixed=False)
         else:
             # load already learned parameters
             pass
@@ -185,25 +202,77 @@ class AMT:
         self.model = gpflow.sgpr.SGPR(X=x_init, Y=y_init, kern=kern_model, Z=z_init)
 
     def reset_model(self, x, y, z):
-        self.model.X = x
-        self.model.Y = y
-        self.model.Z = z
+        self.model.X = x.copy()
+        self.model.Y = 10.*y.copy()
+        self.model.Z = z.copy()
+        self.model.likelihood.variance = 1.
+
+        self.model.kern.prod_1.matern12.variance = 0.00001
+        self.model.kern.prod_2.matern12.variance = 0.00001
+        self.model.kern.prod_3.matern12.variance = 0.00001
+        self.model.kern.prod_4.matern12.variance = 0.00001
+        self.model.kern.prod_5.matern12.variance = 0.00001
+        self.model.kern.prod_6.matern12.variance = 0.00001
+        self.model.kern.prod_7.matern12.variance = 0.00001
+        self.model.kern.prod_8.matern12.variance = 0.00001
+        self.model.kern.prod_9.matern12.variance = 0.00001
+        self.model.kern.prod_10.matern12.variance = 0.00001
+
+        self.model.kern.prod_1.matern12.lengthscales = self.params[0][0].copy()
+        self.model.kern.prod_2.matern12.lengthscales = self.params[0][1].copy()
+        self.model.kern.prod_3.matern12.lengthscales = self.params[0][2].copy()
+        self.model.kern.prod_4.matern12.lengthscales = self.params[0][3].copy()
+        self.model.kern.prod_5.matern12.lengthscales = self.params[0][4].copy()
+        self.model.kern.prod_6.matern12.lengthscales = self.params[0][5].copy()
+        self.model.kern.prod_7.matern12.lengthscales = self.params[0][6].copy()
+        self.model.kern.prod_8.matern12.lengthscales = self.params[0][7].copy()
+        self.model.kern.prod_9.matern12.lengthscales = self.params[0][8].copy()
+        self.model.kern.prod_10.matern12.lengthscales = self.params[0][9].copy()
 
     def optimize(self, maxiter, disp=1, nwin=None):
+
+        self.mean = []
+        self.var = []
 
         if nwin is None:
             nwin = len(self.test_data.Y)
 
         for i in range(nwin):
-            if i == 0:
-                self.model.optimize(disp=disp, maxiter=maxiter)
+            # reset model
 
-            else:
-                x_init = self.test_data.X[i].copy()
-                y_init = self.test_data.Y[i].copy()
-                z_init = self.inducing[0][i].copy()
-                self.reset_model(x=x_init, y=y_init, z=z_init)
-                self.model.optimize(disp=disp, maxiter=maxiter)
+            self.reset_model(x=self.test_data.X[i],
+                             y=self.test_data.Y[i],
+                             z=self.inducing[0][i])
 
-    def save(self):
-        pass
+            # optimize window
+            self.model.optimize(disp=disp, maxiter=maxiter)
+
+            # save learned params
+            self.var1.append(self.model.kern.prod_1.matern12.variance.value.copy())
+            self.var2.append(self.model.kern.prod_2.matern12.variance.value.copy())
+            self.var3.append(self.model.kern.prod_3.matern12.variance.value.copy())
+            self.var4.append(self.model.kern.prod_4.matern12.variance.value.copy())
+            self.var5.append(self.model.kern.prod_5.matern12.variance.value.copy())
+            self.var6.append(self.model.kern.prod_6.matern12.variance.value.copy())
+            self.var7.append(self.model.kern.prod_7.matern12.variance.value.copy())
+            self.var8.append(self.model.kern.prod_8.matern12.variance.value.copy())
+            self.var9.append(self.model.kern.prod_9.matern12.variance.value.copy())
+            self.var10.append(self.model.kern.prod_10.matern12.variance.value.copy())
+
+            # predict
+            mean, var = self.model.predict_f(self.test_data.X[i].copy())
+            self.mean.append(mean)
+            self.var.append(var)
+
+    # def predict(self, xnew=None):
+    #     if xnew is None:
+    #         mean = np.asarray(self.mean).reshape(-1, 1)
+    #         var = np.asarray(self.var).reshape(-1, 1)
+    #     else:
+    #         mean, var = self.model.predict_f(xnew)
+    #
+    #     return mean, var
+    #
+    #
+    # def save(self):
+    #     pass

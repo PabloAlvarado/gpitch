@@ -2,17 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="221d81c1-07aa-4421-b433-be9ed964921e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../code-paper/.idea/code-paper.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../code-paper/.idea/code-paper.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../code-paper/demo-maps-10-pitches.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/../code-paper/demo-maps-10-pitches.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/demo_MAPS_ISOL_NO_F_S0_M72_AkPnBcht_cov_matrix.h5" beforeDir="false" afterPath="$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/demo_MAPS_ISOL_NO_F_S0_M72_AkPnBcht_cov_matrix.h5" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/demo_MAPS_ISOL_NO_F_S0_M72_AkPnBcht_kern_params.p" beforeDir="false" afterPath="$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/demo_MAPS_ISOL_NO_F_S0_M72_AkPnBcht_kern_params.p" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/dictionaries/pa.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/pa.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gpitch.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gpitch.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/init_kernels.py" beforeDir="false" afterPath="$PROJECT_DIR$/init_kernels.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/init_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/init_models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kernelfit.py" beforeDir="false" afterPath="$PROJECT_DIR$/kernelfit.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/methods.py" beforeDir="false" afterPath="$PROJECT_DIR$/methods.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transcription.py" beforeDir="false" afterPath="$PROJECT_DIR$/transcription.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -56,93 +51,70 @@
         </counts>
       </usages-collector>
     </session>
+    <session id="714664401">
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.closed" value="1" />
+          <entry key="project.open.time.1" value="1" />
+          <entry key="project.open.time.6" value="1" />
+          <entry key="project.opened" value="2" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.edit">
+        <counts>
+          <entry key="py" value="865" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.edit">
+        <counts>
+          <entry key="Python" value="865" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="py" value="5" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="Python" value="5" />
+        </counts>
+      </usages-collector>
+    </session>
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+    <leaf>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mapsm.py">
+        <entry file="file://$PROJECT_DIR$/kernelfit.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1032">
-              <caret line="45" selection-start-line="45" selection-end-line="45" />
+            <state relative-caret-position="1128">
+              <caret line="47" column="29" selection-start-line="47" selection-start-column="29" selection-end-line="47" selection-end-column="29" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/__init__.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="264">
-              <caret line="11" column="26" selection-start-line="11" selection-start-column="26" selection-end-line="11" selection-end-column="26" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/transcription.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="168">
-              <caret line="38" selection-start-line="38" selection-end-line="38" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-                <marker date="1536495259189" expanded="true" signature="778:780" ph="..." />
-                <marker date="1536495259189" expanded="true" signature="2543:2548" ph="..." />
-                <marker date="1536495259189" expanded="true" signature="3549:3550" ph="..." />
-                <marker date="1536495259189" expanded="true" signature="3604:4403" ph="..." />
-                <marker date="1536495259189" expanded="true" signature="6714:6795" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/methods.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3000">
-              <caret line="137" column="36" selection-start-line="137" selection-start-column="36" selection-end-line="137" selection-end-column="36" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/init_models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="576">
-              <caret line="29" column="49" selection-start-line="29" selection-start-column="49" selection-end-line="29" selection-end-column="49" />
-              <folding>
-                <element signature="e#0#55#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/kernelfit.py">
+        <entry file="file://$PROJECT_DIR$/transcription.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="552">
-              <caret line="44" column="30" selection-start-line="44" selection-start-column="30" selection-end-line="44" selection-end-column="30" />
+            <state relative-caret-position="283">
+              <caret line="205" column="27" selection-start-line="205" selection-start-column="27" selection-end-line="205" selection-end-column="27" />
               <folding>
-                <element signature="e#0#13#0" expanded="true" />
+                <element signature="e#0#18#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/samplecov.py">
+        <entry file="file://$PROJECT_DIR$/init_kernels.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1128">
-              <caret line="48" column="43" selection-start-line="48" selection-start-column="43" selection-end-line="48" selection-end-column="43" />
+            <state relative-caret-position="336">
+              <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
               <folding>
-                <element signature="e#0#18#0" expanded="true" />
+                <element signature="e#0#45#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -174,7 +146,6 @@
         <option value="$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/kernelfit.py" />
         <option value="$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/mapsm.py" />
         <option value="$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/demo_learn_kernel.py" />
-        <option value="$PROJECT_DIR$/init_kernels.py" />
         <option value="$PROJECT_DIR$/init_models.py" />
         <option value="$PROJECT_DIR$/mapsm.py" />
         <option value="$PROJECT_DIR$/Audio.py" />
@@ -182,8 +153,9 @@
         <option value="$PROJECT_DIR$/samplecov.py" />
         <option value="$PROJECT_DIR$/methods.py" />
         <option value="$PROJECT_DIR$/__init__.py" />
-        <option value="$PROJECT_DIR$/transcription.py" />
+        <option value="$PROJECT_DIR$/init_kernels.py" />
         <option value="$PROJECT_DIR$/kernelfit.py" />
+        <option value="$PROJECT_DIR$/transcription.py" />
       </list>
     </option>
   </component>
@@ -201,7 +173,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -211,31 +182,17 @@
             </path>
             <path>
               <item name="gpitch" type="b2602c69:ProjectViewProjectNode" />
-              <item name="code-paper" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="gpitch" type="b2602c69:ProjectViewProjectNode" />
-              <item name="code-paper" type="462c0819:PsiDirectoryNode" />
-              <item name="maps" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="gpitch" type="b2602c69:ProjectViewProjectNode" />
-              <item name="code-paper" type="462c0819:PsiDirectoryNode" />
-              <item name="maps" type="462c0819:PsiDirectoryNode" />
-              <item name="sample-cov-matrices" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="gpitch" type="b2602c69:ProjectViewProjectNode" />
               <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/.." />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
@@ -300,8 +257,8 @@
     <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="1" visible="true" weight="0.10701107" />
-      <window_info id="Structure" order="2" weight="0.12335266" />
+      <window_info content_ui="combo" id="Project" order="1" weight="0.10701107" />
+      <window_info active="true" id="Structure" order="2" visible="true" weight="0.12335266" />
       <window_info anchor="bottom" id="Event Log" order="0" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="1" />
       <window_info anchor="bottom" id="Python Console" order="2" />
@@ -356,34 +313,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/kernelfit.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="23" column="43" selection-start-line="23" selection-start-column="43" selection-end-line="23" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/demo_learn_kernel.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="18" column="12" selection-start-line="18" selection-start-column="12" selection-end-line="18" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/mapsm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="672">
-          <caret line="28" column="10" selection-start-line="28" selection-start-column="10" selection-end-line="28" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/samplecov.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="897">
-          <caret line="47" column="31" selection-start-line="47" selection-start-column="31" selection-end-line="47" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/kernelfit.py" />
+    <entry file="file://$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/demo_learn_kernel.py" />
+    <entry file="file://$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/mapsm.py" />
+    <entry file="file://$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/samplecov.py" />
     <entry file="file://$PROJECT_DIR$/evaluation.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1944" />
@@ -395,13 +328,6 @@
     <entry file="file://$PROJECT_DIR$/kernels.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-11798" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/init_kernels.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="21" column="32" selection-start-line="21" selection-start-column="32" selection-end-line="21" selection-end-column="32" />
-        </state>
       </provider>
     </entry>
     <entry file="file://$USER_HOME$/anaconda2/lib/python2.7/site-packages/gpflow-0.5-py2.7.egg/gpflow/kernels.py">
@@ -423,9 +349,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1032">
           <caret line="45" selection-start-line="45" selection-end-line="45" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -433,29 +356,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="264">
           <caret line="11" column="26" selection-start-line="11" selection-start-column="26" selection-end-line="11" selection-end-column="26" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/methods.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3000">
-          <caret line="137" column="36" selection-start-line="137" selection-start-column="36" selection-end-line="137" selection-end-column="36" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/init_models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="576">
-          <caret line="29" column="49" selection-start-line="29" selection-start-column="49" selection-end-line="29" selection-end-column="49" />
-          <folding>
-            <element signature="e#0#55#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -463,33 +363,49 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1128">
           <caret line="48" column="43" selection-start-line="48" selection-start-column="43" selection-end-line="48" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/init_models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1176">
+          <caret line="29" column="49" selection-start-line="29" selection-start-column="49" selection-end-line="29" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/methods.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-899">
+          <caret line="137" column="36" selection-start-line="137" selection-start-column="36" selection-end-line="137" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/kernelfit.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1128">
+          <caret line="47" column="29" selection-start-line="47" selection-start-column="29" selection-end-line="47" selection-end-column="29" />
           <folding>
-            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/init_kernels.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="336">
+          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
+          <folding>
+            <element signature="e#0#45#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/transcription.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="38" selection-start-line="38" selection-end-line="38" />
+        <state relative-caret-position="283">
+          <caret line="205" column="27" selection-start-line="205" selection-start-column="27" selection-end-line="205" selection-end-column="27" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
-            <marker date="1536495259189" expanded="true" signature="778:780" ph="..." />
-            <marker date="1536495259189" expanded="true" signature="2543:2548" ph="..." />
-            <marker date="1536495259189" expanded="true" signature="3549:3550" ph="..." />
-            <marker date="1536495259189" expanded="true" signature="3604:4403" ph="..." />
-            <marker date="1536495259189" expanded="true" signature="6714:6795" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/kernelfit.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="552">
-          <caret line="44" column="30" selection-start-line="44" selection-start-column="30" selection-end-line="44" selection-end-column="30" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
           </folding>
         </state>
       </provider>

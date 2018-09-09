@@ -20,7 +20,7 @@ def init_kern_com(num_pitches, lengthscale, energy, frequency, len_fixed=True):
     kern_com, kern_exp, kern_per = [], [], []
 
     for i in range(num_pitches):
-        kern_exp.append(Matern32(1, lengthscales=lengthscale[i].copy(), variance=1.0) )
+        kern_exp.append(Matern12(1, lengthscales=lengthscale[i].copy(), variance=1.0) )
         kern_exp[i].lengthscales.fixed = len_fixed
 
         kern_per.append(MercerCosMix(1, energy=energy[i].copy(), frequency=frequency[i].copy(), variance=1.0,))

@@ -18,7 +18,10 @@ def approximate_kernel(p, x):
     nparams = p.size
     npartials = (nparams - 2) / 2
     bias = np.sqrt(p[0] * p[0])
+
     k_e = (1. + np.sqrt(3.) * np.abs(x) / np.sqrt(p[1] * p[1])) * np.exp(- np.sqrt(3.) * np.abs(x) / np.sqrt(p[1] * p[1]))
+    #k_e =  np.exp(- np.sqrt(3.) * np.abs(x) / np.sqrt(p[1] * p[1]))
+
     k_partials = [np.sqrt(p[i] * p[i]) * np.cos(2 * np.pi * np.sqrt(p[i + npartials] * p[i + npartials]) * np.abs(x))
                   for i in range(2, 2 + npartials)]
     k_fun = 0.*bias + k_e * sum(k_partials)
@@ -42,7 +45,7 @@ def fit(kern, audio, file_name, max_par, fs=44100):
     # initialize parameters
     if0 = gpitch.find_ideal_f0([file_name])[0]
     init_f, init_v = gpitch.init_cparam(y=audio, fs=fs, maxh=max_par, ideal_f0=if0, scaled=False)[0:2]
-    init_l = np.array([0., 0.01])
+    init_l = np.array([0., 1.])
 
     # optimization
     p0 = np.hstack((init_l, init_v, init_f))  # initialize params
