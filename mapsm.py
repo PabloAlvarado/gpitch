@@ -59,12 +59,12 @@ def write(fname, data):
 
 
 def read(fname):
-    return pickle.load(fname, open(fname + ".p", "rb"))
+    return pickle.load(fname, open(fname, "rb"))
 
 
-def writecov(fname, data):
+def writecov(path, fname, data):
     with h5py.File(fname + '.h5', 'w') as hf:
-        hf.create_dataset(fname, data=data)
+        hf.create_dataset(path + fname, data=data)
 
 
 def readcov(fname):

@@ -1,9 +1,13 @@
 <component name="ProjectDictionaryState">
   <dictionary name="pa">
     <words>
+      <w>auxl</w>
+      <w>auxname</w>
       <w>covsize</w>
       <w>disp</w>
       <w>figsize</w>
+      <w>filel</w>
+      <w>filenames</w>
       <w>fname</w>
       <w>hyperparameters</w>
       <w>kernelfit</w>
@@ -17,6 +21,8 @@
       <w>nrows</w>
       <w>nsec</w>
       <w>nwin</w>
+      <w>pianoroll</w>
+      <w>prdic</w>
       <w>pstar</w>
       <w>readcov</w>
       <w>savem</w>

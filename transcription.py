@@ -1,7 +1,9 @@
 import numpy as np
-import matplotlib.pyplot as plt
+import pickle
+import h5py
 import gpflow
 import gpitch
+import matplotlib.pyplot as plt
 
 
 class Audio:
@@ -28,8 +30,9 @@ class AMT:
     Automatic music transcription class
     """
 
-    def __init__(self, test_filename, nsec, pitches, window_size=4410, run_on_server=True, gpu='0'):
+    def __init__(self, pitches, nsec=1, test_filename=None, window_size=4410, run_on_server=True, gpu='0'):
 
+        self.pitches = pitches
         self.train_data = [None]
         self.test_data = Audio()
         self.params = [[], [], []]
@@ -37,6 +40,7 @@ class AMT:
         self.inducing = [None]
         self.kern_pitches = [None]
         self.model = None
+        self.sampled_cov = [None]
 
         self.mean = []
         self.var = []
@@ -54,7 +58,9 @@ class AMT:
 
         # init session
         self.sess, self.path = gpitch.init_settings(visible_device=gpu, run_on_server=run_on_server)
-    
+
+        self.kernel_path = 'c4dm-04/alvarado/results/sampling_covariance/maps/rectified/'
+
         if run_on_server:
             self.train_path = "c4dm-01/MAPS_original/AkPnBcht/ISOL/NO/"
             self.test_path = "c4dm-01/MAPS_original/AkPnBcht/MUS/"
@@ -63,7 +69,9 @@ class AMT:
             self.test_path = "media/pa/TOSHIBA EXT/Datasets/MAPS/AkPnBcht/MUS/"
 
         self.load_train(pitches=pitches)
-        self.load_test(filename=test_filename, start=20000, frames=nsec*44100, window_size=window_size)
+
+        if test_filename is not None:
+            self.load_test(filename=test_filename, start=0, frames=nsec*44100, window_size=window_size)
 
     def load_train(self, pitches, train_data_path=None):
 
@@ -119,7 +127,7 @@ class AMT:
         if axis_off:
             plt.axis("off")
 
-    def plot_kernels(self, figsize=None, axis=False):
+    def plot_kernel(self, figsize=None, axis=False):
         nfiles = len(self.train_data)
 
         if nfiles <= 2:
@@ -130,7 +138,7 @@ class AMT:
         nrows = int(np.ceil(nfiles / 2.))
         x0 = np.array(0.).reshape(-1, 1)
 
-        if figsize == None:
+        if figsize is None:
             figsize = (16, 2*nrows)
 
         plt.figure(figsize=figsize)
@@ -139,25 +147,43 @@ class AMT:
 
             plt.plot(self.kern_sampled[0][i], self.kern_sampled[1][i])
             plt.plot(self.kern_sampled[0][i], self.kern_pitches[i].compute_K(self.kern_sampled[0][i], x0))
+            # x1 = np.linspace(0, (441-1.)/44100, 441).reshape(-1, 1)
+            # plt.plot(self.kern_pitches[i].compute_K(x1, x0))
             plt.title(self.train_data[i].name[18:-13])
             plt.legend(['sampled kernel', 'approximate kernel'])
             if axis is not True:
                 plt.axis("off")
         plt.suptitle("sampled kernels")
 
-    def load_kernels(self):
-        pass
+    def load_kernel(self):
+        path = self.path + self.kernel_path
+        param_filename = gpitch.load_filenames(directory=path, pattern='params', pitches=self.pitches, ext='.p')
 
-    def init_kernels(self, covsize, num_sam, max_par=20, train=True):
+        self.params = [[], [], []]
+        self.kern_sampled = [[], []]
 
-        nfiles = len(self.train_data)
-        skern, xkern = nfiles * [None], nfiles * [None]
-        scov, samples = nfiles * [None], nfiles * [None]
+        for i in range(len(self.pitches)):
+            aux_param = pickle.load(open(path + param_filename[i], "rb"))
+            self.params[0].append(aux_param[0])
+            self.params[1].append(aux_param[1])
+            self.params[2].append(aux_param[2])
+
+            self.kern_sampled[0].append(aux_param[3])
+            self.kern_sampled[1].append(aux_param[4])
+
+    def init_kernel(self, covsize=2205, num_sam=10000, max_par=20, train=False, save=False):
+
         if train:
+            nfiles = len(self.train_data)
+            skern, xkern = nfiles * [None], nfiles * [None]
+            scov, samples = nfiles * [None], nfiles * [None]
+            self.sampled_cov = nfiles * [None]
+
             for i in range(nfiles):
 
                 # sample cov matrix
-                scov[i], skern[i], samples[i] = gpitch.samplecov.get_cov(self.train_data[i].y, num_sam=num_sam, size=covsize)
+                self.sampled_cov[i], skern[i], samples[i] = gpitch.samplecov.get_cov(self.train_data[i].y,
+                                                                                     num_sam=num_sam, size=covsize)
 
                 # approx kernel
                 [params, kern_in, kern_fi] = gpitch.kernelfit.fit(kern=skern[i], audio=self.train_data[i].y,
@@ -167,15 +193,20 @@ class AMT:
                 self.params[2].append(params[2])   # frequencies
 
                 xkern[i] = np.linspace(0., (covsize - 1.) / self.train_data[i].fs, covsize).reshape(-1, 1)
-            self.kern_sampled = [xkern, skern]
-            self.kern_pitches = gpitch.init_kernels.init_kern_com(num_pitches=len(self.train_data),
-                                                                  lengthscale=self.params[0],
-                                                                  energy=self.params[1],
-                                                                  frequency=self.params[2],
-                                                                  len_fixed=False)
+                self.kern_sampled = [xkern, skern]
+
+            if save:
+                self.save()
+
         else:
             # load already learned parameters
-            pass
+            self.load_kernel()
+
+        self.kern_pitches = gpitch.init_kernels.init_kern_com(num_pitches=len(self.train_data),
+                                                              lengthscale=self.params[0],
+                                                              energy=self.params[1],
+                                                              frequency=self.params[2],
+                                                              len_fixed=False)
 
     def init_inducing(self):
         nwin = len(self.test_data.X)
@@ -203,20 +234,21 @@ class AMT:
 
     def reset_model(self, x, y, z):
         self.model.X = x.copy()
-        self.model.Y = 10.*y.copy()
+        self.model.Y = 20.*y.copy()
         self.model.Z = z.copy()
         self.model.likelihood.variance = 1.
 
-        self.model.kern.prod_1.matern12.variance = 0.00001
-        self.model.kern.prod_2.matern12.variance = 0.00001
-        self.model.kern.prod_3.matern12.variance = 0.00001
-        self.model.kern.prod_4.matern12.variance = 0.00001
-        self.model.kern.prod_5.matern12.variance = 0.00001
-        self.model.kern.prod_6.matern12.variance = 0.00001
-        self.model.kern.prod_7.matern12.variance = 0.00001
-        self.model.kern.prod_8.matern12.variance = 0.00001
-        self.model.kern.prod_9.matern12.variance = 0.00001
-        self.model.kern.prod_10.matern12.variance = 0.00001
+        init_var = 0.00001
+        self.model.kern.prod_1.matern12.variance = init_var
+        self.model.kern.prod_2.matern12.variance = init_var
+        self.model.kern.prod_3.matern12.variance = init_var
+        self.model.kern.prod_4.matern12.variance = init_var
+        self.model.kern.prod_5.matern12.variance = init_var
+        self.model.kern.prod_6.matern12.variance = init_var
+        self.model.kern.prod_7.matern12.variance = init_var
+        self.model.kern.prod_8.matern12.variance = init_var
+        self.model.kern.prod_9.matern12.variance = init_var
+        self.model.kern.prod_10.matern12.variance = init_var
 
         self.model.kern.prod_1.matern12.lengthscales = self.params[0][0].copy()
         self.model.kern.prod_2.matern12.lengthscales = self.params[0][1].copy()
@@ -274,5 +306,19 @@ class AMT:
     #     return mean, var
     #
     #
-    # def save(self):
-    #     pass
+    def save(self):
+        # save results
+        for i in range(len(self.pitches)):
+            auxname = self.train_data[i].name.strip('.wav')
+            fname_cov = auxname + '_cov_matrix'
+            fname_param = self.path  + self.kernel_path + auxname + '_kern_params'
+
+            with h5py.File(self.path + self.kernel_path + fname_cov + '.h5', 'w') as hf:
+                hf.create_dataset(fname_cov, data=self.sampled_cov[i])
+
+            pickle.dump([self.params[0][i],
+                         self.params[1][i],
+                         self.params[2][i],
+                         self.kern_sampled[0][i],
+                         self.kern_sampled[1][i]],
+                        open(fname_param + ".p", "wb"))

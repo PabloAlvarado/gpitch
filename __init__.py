@@ -10,3 +10,4 @@ from . import transcription
 from . import samplecov
 from . import kernelfit
 from . import init_kernels
+from . import pianoroll

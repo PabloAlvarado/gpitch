@@ -175,9 +175,12 @@ def init_settings(visible_device='0', interactive=False, allow_growth=True, run_
     return sess, path
 
 
-def load_filenames(directory, pattern, pitches, ext=".wav"):
+def load_filenames(directory, pattern, pitches=None, ext=".wav"):
     auxl = fnmatch.filter(os.listdir(directory),  '*' + pattern + '*' + ext)
-    filel = [fnmatch.filter(auxl, '*_M' + str(pitch) + '_*')[0] for pitch in pitches]
+    if pitches is not None:
+        filel = [fnmatch.filter(auxl, '*_M' + str(pitch) + '_*')[0] for pitch in pitches]
+    else:
+        filel = auxl
     filel = np.asarray(filel).reshape(-1,)
     return filel
 
