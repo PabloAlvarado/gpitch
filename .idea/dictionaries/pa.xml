@@ -19,11 +19,14 @@
       <w>lfiles</w>
       <w>loadm</w>
       <w>multiplot</w>
+      <w>ncol</w>
       <w>ncols</w>
       <w>npartials</w>
       <w>nplots</w>
+      <w>nrow</w>
       <w>nrows</w>
       <w>nsec</w>
+      <w>nsources</w>
       <w>nwin</w>
       <w>pianoroll</w>
       <w>prdic</w>
@@ -32,6 +35,8 @@
       <w>savem</w>
       <w>scov</w>
       <w>skern</w>
+      <w>smean</w>
+      <w>svar</w>
       <w>writecov</w>
       <w>wsize</w>
       <w>xkern</w>

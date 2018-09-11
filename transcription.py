@@ -63,7 +63,11 @@ class AMT:
 
         self.mean = []
         self.var = []
+        self.smean = []
+        self.svar = []
 
+        self.matrix_var = []
+        self.matrix_len = []
         self.var1 = []
         self.var2 = []
         self.var3 = []
@@ -79,6 +83,11 @@ class AMT:
 
         if test_filename is not None:
             self.load_test(filename=test_filename, start=0, frames=nsec*44100, window_size=window_size)
+
+            nrow = len(self.pitches)
+            ncol = len(self.test_data.Y)
+            self.matrix_var = np.zeros((nrow, ncol))
+            self.matrix_len = np.zeros((nrow, ncol))
 
     def load_train(self, train_data_path=None):
 
@@ -222,7 +231,7 @@ class AMT:
                                             maxh=max_par,
                                             ideal_f0=f0)
 
-                self.params[0].append(np.array(0.05))  # lengthscale
+                self.params[0].append(np.array(1.))  # lengthscale
                 self.params[1].append(params[1])  # variances
                 self.params[2].append(params[0])  # frequencies
 
@@ -268,40 +277,49 @@ class AMT:
         self.model.Z = z.copy()
         self.model.likelihood.variance = 1.
 
-        init_var = 0.00001
-        self.model.kern.prod_1.matern12.variance = init_var
-        self.model.kern.prod_2.matern12.variance = init_var
-        self.model.kern.prod_3.matern12.variance = init_var
-        self.model.kern.prod_4.matern12.variance = init_var
-        self.model.kern.prod_5.matern12.variance = init_var
-        self.model.kern.prod_6.matern12.variance = init_var
-        self.model.kern.prod_7.matern12.variance = init_var
-        self.model.kern.prod_8.matern12.variance = init_var
-        self.model.kern.prod_9.matern12.variance = init_var
-        self.model.kern.prod_10.matern12.variance = init_var
+        lines_var = []
+        lines_len = []
+        for i in range(len(self.pitches)):
+            lines_var.append("self.model.kern.prod_" + str(1 + i) + ".matern12.variance = 0.00001")
+            lines_len.append("self.model.kern.prod_" + str(1 + i) + ".matern12.lengthscales = self.params[0][i].copy()")
+            exec (lines_var[i])
+            exec (lines_len[i])
 
-        self.model.kern.prod_1.matern12.lengthscales = self.params[0][0].copy()
-        self.model.kern.prod_2.matern12.lengthscales = self.params[0][1].copy()
-        self.model.kern.prod_3.matern12.lengthscales = self.params[0][2].copy()
-        self.model.kern.prod_4.matern12.lengthscales = self.params[0][3].copy()
-        self.model.kern.prod_5.matern12.lengthscales = self.params[0][4].copy()
-        self.model.kern.prod_6.matern12.lengthscales = self.params[0][5].copy()
-        self.model.kern.prod_7.matern12.lengthscales = self.params[0][6].copy()
-        self.model.kern.prod_8.matern12.lengthscales = self.params[0][7].copy()
-        self.model.kern.prod_9.matern12.lengthscales = self.params[0][8].copy()
-        self.model.kern.prod_10.matern12.lengthscales = self.params[0][9].copy()
+        # self.model.kern.prod_1.matern12.variance = init_var
+        # self.model.kern.prod_2.matern12.variance = init_var
+        # self.model.kern.prod_3.matern12.variance = init_var
+        # self.model.kern.prod_4.matern12.variance = init_var
+        # self.model.kern.prod_5.matern12.variance = init_var
+        # self.model.kern.prod_6.matern12.variance = init_var
+        # self.model.kern.prod_7.matern12.variance = init_var
+        # self.model.kern.prod_8.matern12.variance = init_var
+        # self.model.kern.prod_9.matern12.variance = init_var
+        # self.model.kern.prod_10.matern12.variance = init_var
+        #
+        # self.model.kern.prod_1.matern12.lengthscales = self.params[0][0].copy()
+        # self.model.kern.prod_2.matern12.lengthscales = self.params[0][1].copy()
+        # self.model.kern.prod_3.matern12.lengthscales = self.params[0][2].copy()
+        # self.model.kern.prod_4.matern12.lengthscales = self.params[0][3].copy()
+        # self.model.kern.prod_5.matern12.lengthscales = self.params[0][4].copy()
+        # self.model.kern.prod_6.matern12.lengthscales = self.params[0][5].copy()
+        # self.model.kern.prod_7.matern12.lengthscales = self.params[0][6].copy()
+        # self.model.kern.prod_8.matern12.lengthscales = self.params[0][7].copy()
+        # self.model.kern.prod_9.matern12.lengthscales = self.params[0][8].copy()
+        # self.model.kern.prod_10.matern12.lengthscales = self.params[0][9].copy()
 
     def optimize(self, maxiter, disp=1, nwin=None):
 
         self.mean = []
         self.var = []
+        self.smean = []
+        self.svar = []
 
         if nwin is None:
             nwin = len(self.test_data.Y)
 
         for i in range(nwin):
-            # reset model
 
+            # reset model
             self.reset_model(x=self.test_data.X[i],
                              y=self.test_data.Y[i],
                              z=self.inducing[0][i])
@@ -310,21 +328,32 @@ class AMT:
             self.model.optimize(disp=disp, maxiter=maxiter)
 
             # save learned params
-            self.var1.append(self.model.kern.prod_1.matern12.variance.value.copy())
-            self.var2.append(self.model.kern.prod_2.matern12.variance.value.copy())
-            self.var3.append(self.model.kern.prod_3.matern12.variance.value.copy())
-            self.var4.append(self.model.kern.prod_4.matern12.variance.value.copy())
-            self.var5.append(self.model.kern.prod_5.matern12.variance.value.copy())
-            self.var6.append(self.model.kern.prod_6.matern12.variance.value.copy())
-            self.var7.append(self.model.kern.prod_7.matern12.variance.value.copy())
-            self.var8.append(self.model.kern.prod_8.matern12.variance.value.copy())
-            self.var9.append(self.model.kern.prod_9.matern12.variance.value.copy())
-            self.var10.append(self.model.kern.prod_10.matern12.variance.value.copy())
+            lines_var = []
+            for j in range(len(self.pitches)):
+                lines_var.append("self.matrix_var[j, i] = self.model.kern.prod_" + str(j + 1) +
+                                 ".matern12.variance.value.copy()")
+                exec(lines_var[j])
 
-            # predict
+            # self.var1.append(self.model.kern.prod_1.matern12.variance.value.copy())
+            # self.var2.append(self.model.kern.prod_2.matern12.variance.value.copy())
+            # self.var3.append(self.model.kern.prod_3.matern12.variance.value.copy())
+            # self.var4.append(self.model.kern.prod_4.matern12.variance.value.copy())
+            # self.var5.append(self.model.kern.prod_5.matern12.variance.value.copy())
+            # self.var6.append(self.model.kern.prod_6.matern12.variance.value.copy())
+            # self.var7.append(self.model.kern.prod_7.matern12.variance.value.copy())
+            # self.var8.append(self.model.kern.prod_8.matern12.variance.value.copy())
+            # self.var9.append(self.model.kern.prod_9.matern12.variance.value.copy())
+            # self.var10.append(self.model.kern.prod_10.matern12.variance.value.copy())
+
+            # predict mixture function
             mean, var = self.model.predict_f(self.test_data.X[i].copy())
             self.mean.append(mean)
             self.var.append(var)
+
+            # predict sources
+            smean, svar = self.model.predict_s(self.test_data.X[i].copy())
+            self.smean.append(smean)
+            self.svar.append(svar)
 
     def save(self):
         # save results
@@ -343,13 +372,16 @@ class AMT:
                          self.kern_sampled[1][i]],
                         open(fname_param + ".p", "wb"))
 
-    # def predict(self, xnew=None):
-    #     if xnew is None:
-    #         mean = np.asarray(self.mean).reshape(-1, 1)
-    #         var = np.asarray(self.var).reshape(-1, 1)
-    #     else:
-    #         mean, var = self.model.predict_f(xnew)
-    #
-    #     return mean, var
-            #
-            #
+    def predict_f(self, xnew=None):
+        if xnew is None:
+            mean = np.asarray(self.mean).reshape(-1, 1)
+            var = np.asarray(self.var).reshape(-1, 1)
+        else:
+            mean, var = self.model.predict_f(xnew)
+
+        return mean, var
+
+    # def predict_s(self):
+    #     nwin = len(self.test_data.Y)
+    #     for i in range(nwin):
+    #         print i
