@@ -14,13 +14,14 @@ import time
 
 
 def loadm(directory, pattern=''):
-    '''load an already gpitch trained model'''
+    """load an already gpitch trained model"""
     filenames = []
     filenames += [i for i in os.listdir(directory) if pattern in i]
     m_list = []  # list of models loaded
     for i in range(len(filenames)):
         m_list.append(pickle.load(open(directory + filenames[i], "rb")))
     return m_list, filenames
+
 
 def find_ideal_f0(string):
     """"""
@@ -30,6 +31,7 @@ def find_ideal_f0(string):
             if string[j].find('M' + str(i)) is not -1:
                 ideal_f0.append(midi2freq(i))
     return ideal_f0
+
 
 def readaudio(fname, frames=-1, start=0, aug=False, scaled=False):
     y, fs = soundfile.read(fname, frames=frames, start=start)  # load data and sample freq

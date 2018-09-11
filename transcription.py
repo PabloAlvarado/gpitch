@@ -4,6 +4,7 @@ import h5py
 import gpflow
 import gpitch
 import matplotlib.pyplot as plt
+from scipy import fftpack
 
 
 class Audio:
@@ -32,6 +33,7 @@ class AMT:
 
     def __init__(self, pitches, nsec=1, test_filename=None, window_size=4410, run_on_server=True, gpu='0'):
 
+        self.piano_roll = 1
         self.pitches = pitches
         self.train_data = [None]
         self.test_data = Audio()
@@ -41,6 +43,7 @@ class AMT:
         self.kern_pitches = [None]
         self.model = None
         self.sampled_cov = [None]
+
 
         self.mean = []
         self.var = []
@@ -97,6 +100,8 @@ class AMT:
         path = self.path + self.test_path
         self.test_data = Audio(path=path, filename=filename, start=start, frames=frames, window_size=window_size)
 
+        self.piano_roll = 1.
+
     def plot_traindata(self, figsize=None, axis_off=True):
         nfiles = len(self.train_data)
 
@@ -119,7 +124,7 @@ class AMT:
                 plt.axis("off")
         plt.suptitle("train data")
 
-    def plot_testdata(self, figsize=(16, 2), axis_off=True):
+    def plot_testdata(self, figsize=(16, 2), axis_off=False):
         plt.figure(figsize=figsize)
         plt.plot(self.test_data.x, self.test_data.y)
         plt.legend([self.test_data.name])
@@ -171,11 +176,13 @@ class AMT:
             self.kern_sampled[0].append(aux_param[3])
             self.kern_sampled[1].append(aux_param[4])
 
-    def init_kernel(self, covsize=2205, num_sam=10000, max_par=20, train=False, save=False):
+    def init_kernel(self, covsize=441, num_sam=10000, max_par=20, train=False, save=False, load=False):
+
+        nfiles = len(self.train_data)
+        self.params = [[], [], []]
+        skern, xkern = nfiles * [np.zeros((1, 1))], nfiles * [None]
 
         if train:
-            nfiles = len(self.train_data)
-            skern, xkern = nfiles * [None], nfiles * [None]
             scov, samples = nfiles * [None], nfiles * [None]
             self.sampled_cov = nfiles * [None]
 
@@ -186,22 +193,41 @@ class AMT:
                                                                                      num_sam=num_sam, size=covsize)
 
                 # approx kernel
-                [params, kern_in, kern_fi] = gpitch.kernelfit.fit(kern=skern[i], audio=self.train_data[i].y,
-                                                                  file_name=self.train_data[i].name, max_par=max_par)
+                params = gpitch.kernelfit.fit(kern=skern[i], audio=self.train_data[i].y,
+                                              file_name=self.train_data[i].name, max_par=max_par)[0]
                 self.params[0].append(params[0])  # lengthscale
                 self.params[1].append(params[1])  # variances
                 self.params[2].append(params[2])   # frequencies
 
                 xkern[i] = np.linspace(0., (covsize - 1.) / self.train_data[i].fs, covsize).reshape(-1, 1)
-                self.kern_sampled = [xkern, skern]
+            self.kern_sampled = [xkern, skern]
 
             if save:
                 self.save()
 
-        else:
-            # load already learned parameters
-            self.load_kernel()
+        elif load:
+            self.load_kernel()  # load already learned parameters
 
+        else:
+            # init kernels with fft of data
+            for i in range(nfiles):
+                f0 = gpitch.find_ideal_f0([self.train_data[i].name])[0]
+
+                params = gpitch.init_cparam(y=self.train_data[i].y.copy(),
+                                            fs=self.train_data[i].fs,
+                                            maxh=max_par,
+                                            ideal_f0=f0)
+
+                self.params[0].append(np.array(0.05))  # lengthscale
+                self.params[1].append(params[1])  # variances
+                self.params[2].append(params[0])  # frequencies
+
+                skern[i] = fftpack.ifft(np.abs(fftpack.fft(self.train_data[i].y.copy().reshape(-1, ))))[0:covsize]
+                skern[i] /= np.max(skern[i])
+                xkern[i] = np.linspace(0., (covsize - 1.) / self.train_data[i].fs, covsize).reshape(-1, 1)
+            self.kern_sampled = [xkern, skern]
+
+        # init kernel specific pitch
         self.kern_pitches = gpitch.init_kernels.init_kern_com(num_pitches=len(self.train_data),
                                                               lengthscale=self.params[0],
                                                               energy=self.params[1],
@@ -296,22 +322,12 @@ class AMT:
             self.mean.append(mean)
             self.var.append(var)
 
-    # def predict(self, xnew=None):
-    #     if xnew is None:
-    #         mean = np.asarray(self.mean).reshape(-1, 1)
-    #         var = np.asarray(self.var).reshape(-1, 1)
-    #     else:
-    #         mean, var = self.model.predict_f(xnew)
-    #
-    #     return mean, var
-    #
-    #
     def save(self):
         # save results
         for i in range(len(self.pitches)):
             auxname = self.train_data[i].name.strip('.wav')
             fname_cov = auxname + '_cov_matrix'
-            fname_param = self.path  + self.kernel_path + auxname + '_kern_params'
+            fname_param = self.path + self.kernel_path + auxname + '_kern_params'
 
             with h5py.File(self.path + self.kernel_path + fname_cov + '.h5', 'w') as hf:
                 hf.create_dataset(fname_cov, data=self.sampled_cov[i])
@@ -322,3 +338,14 @@ class AMT:
                          self.kern_sampled[0][i],
                          self.kern_sampled[1][i]],
                         open(fname_param + ".p", "wb"))
+
+    # def predict(self, xnew=None):
+    #     if xnew is None:
+    #         mean = np.asarray(self.mean).reshape(-1, 1)
+    #         var = np.asarray(self.var).reshape(-1, 1)
+    #     else:
+    #         mean, var = self.model.predict_f(xnew)
+    #
+    #     return mean, var
+            #
+            #
