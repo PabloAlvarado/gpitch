@@ -31,10 +31,27 @@ class AMT:
     Automatic music transcription class
     """
 
-    def __init__(self, pitches, nsec=1, test_filename=None, window_size=4410, run_on_server=True, gpu='0'):
+    def __init__(self, pitches=None, nsec=1, test_filename=None, window_size=4410, run_on_server=True, gpu='0'):
 
-        self.piano_roll = 1
-        self.pitches = pitches
+        self.kernel_path = 'c4dm-04/alvarado/results/sampling_covariance/maps/rectified/'
+        if run_on_server:
+            self.train_path = "c4dm-01/MAPS_original/AkPnBcht/ISOL/NO/"
+            self.test_path = "c4dm-01/MAPS_original/AkPnBcht/MUS/"
+        else:
+            self.train_path = "media/pa/TOSHIBA EXT/Datasets/MAPS/AkPnBcht/ISOL/NO/"
+            self.test_path = "media/pa/TOSHIBA EXT/Datasets/MAPS/AkPnBcht/MUS/"
+
+        # init session
+        self.sess, self.path = gpitch.init_settings(visible_device=gpu, run_on_server=run_on_server)
+
+        self.piano_roll = gpitch.pianoroll.Pianoroll(path=self.path + self.test_path, filename=test_filename,
+                                                     duration=nsec)
+
+        if pitches is not None:
+            self.pitches = pitches
+        else:
+            self.pitches = list(self.piano_roll.pitch_list)
+
         self.train_data = [None]
         self.test_data = Audio()
         self.params = [[], [], []]
@@ -43,7 +60,6 @@ class AMT:
         self.kern_pitches = [None]
         self.model = None
         self.sampled_cov = [None]
-
 
         self.mean = []
         self.var = []
@@ -59,30 +75,18 @@ class AMT:
         self.var9 = []
         self.var10 = []
 
-        # init session
-        self.sess, self.path = gpitch.init_settings(visible_device=gpu, run_on_server=run_on_server)
-
-        self.kernel_path = 'c4dm-04/alvarado/results/sampling_covariance/maps/rectified/'
-
-        if run_on_server:
-            self.train_path = "c4dm-01/MAPS_original/AkPnBcht/ISOL/NO/"
-            self.test_path = "c4dm-01/MAPS_original/AkPnBcht/MUS/"
-        else:
-            self.train_path = "media/pa/TOSHIBA EXT/Datasets/MAPS/AkPnBcht/ISOL/NO/"
-            self.test_path = "media/pa/TOSHIBA EXT/Datasets/MAPS/AkPnBcht/MUS/"
-
-        self.load_train(pitches=pitches)
+        self.load_train()
 
         if test_filename is not None:
             self.load_test(filename=test_filename, start=0, frames=nsec*44100, window_size=window_size)
 
-    def load_train(self, pitches, train_data_path=None):
+    def load_train(self, train_data_path=None):
 
         if train_data_path is not None:
             self.train_path = train_data_path
 
         path = self.path + self.train_path
-        lfiles = gpitch.methods.load_filenames(directory=path, pattern='F', pitches=pitches)
+        lfiles = gpitch.methods.load_filenames(directory=path, pattern='F', pitches=self.pitches)
         nfiles = len(lfiles)
         data = []
 
@@ -99,8 +103,6 @@ class AMT:
             self.test_path = train_data_path
         path = self.path + self.test_path
         self.test_data = Audio(path=path, filename=filename, start=start, frames=frames, window_size=window_size)
-
-        self.piano_roll = 1.
 
     def plot_traindata(self, figsize=None, axis_off=True):
         nfiles = len(self.train_data)
@@ -132,6 +134,10 @@ class AMT:
         if axis_off:
             plt.axis("off")
 
+        plt.figure(figsize=figsize)
+        plt.imshow(self.piano_roll.matrix, cmap=plt.cm.get_cmap('binary'))
+        plt.axis("auto")
+
     def plot_kernel(self, figsize=None, axis=False):
         nfiles = len(self.train_data)
 
@@ -152,8 +158,6 @@ class AMT:
 
             plt.plot(self.kern_sampled[0][i], self.kern_sampled[1][i])
             plt.plot(self.kern_sampled[0][i], self.kern_pitches[i].compute_K(self.kern_sampled[0][i], x0))
-            # x1 = np.linspace(0, (441-1.)/44100, 441).reshape(-1, 1)
-            # plt.plot(self.kern_pitches[i].compute_K(x1, x0))
             plt.title(self.train_data[i].name[18:-13])
             plt.legend(['sampled kernel', 'approximate kernel'])
             if axis is not True:
@@ -222,7 +226,7 @@ class AMT:
                 self.params[1].append(params[1])  # variances
                 self.params[2].append(params[0])  # frequencies
 
-                skern[i] = fftpack.ifft(np.abs(fftpack.fft(self.train_data[i].y.copy().reshape(-1, ))))[0:covsize]
+                skern[i] = fftpack.ifft(np.abs(fftpack.fft(self.train_data[i].y.copy().reshape(-1, ))))[0:covsize].real
                 skern[i] /= np.max(skern[i])
                 xkern[i] = np.linspace(0., (covsize - 1.) / self.train_data[i].fs, covsize).reshape(-1, 1)
             self.kern_sampled = [xkern, skern]

@@ -4,6 +4,7 @@
       <w>asarray</w>
       <w>auxl</w>
       <w>auxname</w>
+      <w>bcht</w>
       <w>covsize</w>
       <w>disp</w>
       <w>figsize</w>
@@ -11,6 +12,7 @@
       <w>filenames</w>
       <w>fname</w>
       <w>hyperparameters</w>
+      <w>isol</w>
       <w>kernelfit</w>
       <w>lenglist</w>
       <w>lengthscales</w>
