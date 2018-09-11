@@ -21,9 +21,9 @@ class SGPRSS(gpflow.sgpr.SGPR):
 
         This method computes
 
-            p(F* | Y )
+            p(source* | Y )
 
-        where F* are points on the GP at Xnew, Y are noisy observations at X.
+        where source* are points on the source at Xnew, Y are noisy observations of the mixture at X.
 
         """
         mean = []
@@ -53,7 +53,7 @@ class SGPRSS(gpflow.sgpr.SGPR):
     @AutoFlow((float_type, [None, None]))
     def predict_s(self, Xnew):
         """
-        Compute the mean and variance of the latent function(s)
+        Compute the mean and variance of the sources
         at the points `Xnew`.
         """
         return self.build_predict_source(Xnew)

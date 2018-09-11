@@ -1,7 +1,6 @@
 import numpy as np
 import pickle
 import h5py
-import gpflow
 import gpitch
 import matplotlib.pyplot as plt
 from scipy import fftpack
@@ -269,7 +268,7 @@ class AMT:
         x_init = self.test_data.X[0].copy()
         y_init = self.test_data.Y[0].copy()
         z_init = self.inducing[0][0].copy()
-        self.model = gpflow.sgpr.SGPR(X=x_init, Y=y_init, kern=kern_model, Z=z_init)
+        self.model = gpitch.sgpr_ss.SGPRSS(X=x_init, Y=y_init, kern=kern_model, Z=z_init)
 
     def reset_model(self, x, y, z):
         self.model.X = x.copy()
