@@ -11,3 +11,4 @@ from . import samplecov
 from . import kernelfit
 from . import init_kernels
 from . import pianoroll
+from . import sgpr_ss

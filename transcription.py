@@ -277,35 +277,9 @@ class AMT:
         self.model.Z = z.copy()
         self.model.likelihood.variance = 1.
 
-        lines_var = []
-        lines_len = []
         for i in range(len(self.pitches)):
-            lines_var.append("self.model.kern.prod_" + str(1 + i) + ".matern12.variance = 0.00001")
-            lines_len.append("self.model.kern.prod_" + str(1 + i) + ".matern12.lengthscales = self.params[0][i].copy()")
-            exec (lines_var[i])
-            exec (lines_len[i])
-
-        # self.model.kern.prod_1.matern12.variance = init_var
-        # self.model.kern.prod_2.matern12.variance = init_var
-        # self.model.kern.prod_3.matern12.variance = init_var
-        # self.model.kern.prod_4.matern12.variance = init_var
-        # self.model.kern.prod_5.matern12.variance = init_var
-        # self.model.kern.prod_6.matern12.variance = init_var
-        # self.model.kern.prod_7.matern12.variance = init_var
-        # self.model.kern.prod_8.matern12.variance = init_var
-        # self.model.kern.prod_9.matern12.variance = init_var
-        # self.model.kern.prod_10.matern12.variance = init_var
-        #
-        # self.model.kern.prod_1.matern12.lengthscales = self.params[0][0].copy()
-        # self.model.kern.prod_2.matern12.lengthscales = self.params[0][1].copy()
-        # self.model.kern.prod_3.matern12.lengthscales = self.params[0][2].copy()
-        # self.model.kern.prod_4.matern12.lengthscales = self.params[0][3].copy()
-        # self.model.kern.prod_5.matern12.lengthscales = self.params[0][4].copy()
-        # self.model.kern.prod_6.matern12.lengthscales = self.params[0][5].copy()
-        # self.model.kern.prod_7.matern12.lengthscales = self.params[0][6].copy()
-        # self.model.kern.prod_8.matern12.lengthscales = self.params[0][7].copy()
-        # self.model.kern.prod_9.matern12.lengthscales = self.params[0][8].copy()
-        # self.model.kern.prod_10.matern12.lengthscales = self.params[0][9].copy()
+            self.model.kern.kern_list[i].kern_list[0].variance = 1.
+            self.model.kern.kern_list[i].kern_list[0].lengthscales = self.params[0][i].copy()
 
     def optimize(self, maxiter, disp=1, nwin=None):
 
@@ -328,22 +302,8 @@ class AMT:
             self.model.optimize(disp=disp, maxiter=maxiter)
 
             # save learned params
-            lines_var = []
             for j in range(len(self.pitches)):
-                lines_var.append("self.matrix_var[j, i] = self.model.kern.prod_" + str(j + 1) +
-                                 ".matern12.variance.value.copy()")
-                exec(lines_var[j])
-
-            # self.var1.append(self.model.kern.prod_1.matern12.variance.value.copy())
-            # self.var2.append(self.model.kern.prod_2.matern12.variance.value.copy())
-            # self.var3.append(self.model.kern.prod_3.matern12.variance.value.copy())
-            # self.var4.append(self.model.kern.prod_4.matern12.variance.value.copy())
-            # self.var5.append(self.model.kern.prod_5.matern12.variance.value.copy())
-            # self.var6.append(self.model.kern.prod_6.matern12.variance.value.copy())
-            # self.var7.append(self.model.kern.prod_7.matern12.variance.value.copy())
-            # self.var8.append(self.model.kern.prod_8.matern12.variance.value.copy())
-            # self.var9.append(self.model.kern.prod_9.matern12.variance.value.copy())
-            # self.var10.append(self.model.kern.prod_10.matern12.variance.value.copy())
+                self.matrix_var[j, i] = self.model.kern.kern_list[j].kern_list[0].variance.value.copy()
 
             # predict mixture function
             mean, var = self.model.predict_f(self.test_data.X[i].copy())
