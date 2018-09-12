@@ -3,56 +3,30 @@ import pickle
 import h5py
 import gpitch
 import matplotlib.pyplot as plt
+from transcription import Audio
 from scipy import fftpack
 
 
-class Audio:
-    def __init__(self, path=None, filename=None, frames=-1, start=0, scaled=True, window_size=None):
-
-        if path is None:
-            self.name = 'unnamed'
-            self.fs = 44100
-            self.x = np.linspace(0., (self.fs - 1.)/self.fs,  self.fs).reshape(-1, 1)
-            self.y = np.cos(2*np.pi*self.x*440.)
-
-        else:
-            self.name = filename
-            self.x, self.y, self.fs = gpitch.readaudio(fname=path + filename, frames=frames, start=start, scaled=scaled)
-
-        if window_size is None:
-            window_size = self.x.size
-        self.wsize = window_size
-        self.X, self.Y = gpitch.segmented(x=self.x, y=self.y, window_size=window_size)
-
-
-class AMT:
+class SoSp:
     """
-    Automatic music transcription class
+    Source separation model class
     """
 
-    def __init__(self, pitches=None, nsec=1, test_filename=None, window_size=4410, run_on_server=True, gpu='0'):
-
-        self.kernel_path = 'c4dm-04/alvarado/results/sampling_covariance/maps/rectified/'
-        if run_on_server:
-            self.train_path = "c4dm-01/MAPS_original/AkPnBcht/ISOL/NO/"
-            self.test_path = "c4dm-01/MAPS_original/AkPnBcht/MUS/"
-        else:
-            self.train_path = "media/pa/TOSHIBA EXT/Datasets/MAPS/AkPnBcht/ISOL/NO/"
-            self.test_path = "media/pa/TOSHIBA EXT/Datasets/MAPS/AkPnBcht/MUS/"
+    def __init__(self, instrument, frames, pitches=None, gpu='0'):
 
         # init session
-        self.sess, self.path = gpitch.init_settings(visible_device=gpu, run_on_server=run_on_server)
+        self.sess, self.path = gpitch.init_settings(visible_device=gpu)
 
-        self.piano_roll = gpitch.pianoroll.Pianoroll(path=self.path + self.test_path, filename=test_filename,
-                                                     duration=nsec)
+        self.instrument = instrument
+        self.pitches = pitches
 
-        if pitches is not None:
-            self.pitches = pitches
-        else:
-            self.pitches = list(self.piano_roll.pitch_list)
+        self.train_path = "/import/c4dm-04/alvarado/datasets/ss_amt/training_data/"
+        self.test_path = "/import/c4dm-04/alvarado/datasets/ss_amt/test_data/"
+        self.kernel_path = '/import/c4dm-04/alvarado/results/sampling_covariance/yoshii/'
 
         self.train_data = [None]
         self.test_data = Audio()
+        self.real_src = []
         self.params = [[], [], []]
         self.kern_sampled = [None]
         self.inducing = [None]
@@ -65,102 +39,101 @@ class AMT:
         self.smean = []
         self.svar = []
 
-        self.matrix_var = []
-        self.matrix_len = []
-
         self.load_train()
+        self.load_test(frames=frames)
 
-        if test_filename is not None:
-            self.load_test(filename=test_filename, start=0, frames=nsec*44100, window_size=window_size)
+        nrow = len(self.pitches)
+        ncol = len(self.test_data.Y)
+        self.matrix_var = np.zeros((nrow, ncol))
 
-            nrow = len(self.pitches)
-            ncol = len(self.test_data.Y)
-            self.matrix_var = np.zeros((nrow, ncol))
-            self.matrix_len = np.zeros((nrow, ncol))
+        self.init_kernel()
+        self.init_model()
 
     def load_train(self, train_data_path=None):
 
         if train_data_path is not None:
             self.train_path = train_data_path
 
-        path = self.path + self.train_path
-        lfiles = gpitch.methods.load_filenames(directory=path, pattern='F', pitches=self.pitches)
+        lfiles = gpitch.methods.load_filenames(directory=self.train_path, pattern=self.instrument, pitches=self.pitches)
         nfiles = len(lfiles)
         data = []
 
         for i in range(nfiles):
-            if lfiles[i].find("S1") is not -1:
-                start = 30000
-            else:
-                start = 20000
-            data.append(Audio(path=path, filename=lfiles[i], start=start, frames=88200))
+            data.append(Audio(path=self.train_path, filename=lfiles[i], frames=32000))
         self.train_data = data
 
-    def load_test(self, filename, window_size, start, frames, train_data_path=None):
-        if train_data_path is not None:
-            self.test_path = train_data_path
-        path = self.path + self.test_path
-        self.test_data = Audio(path=path, filename=filename, start=start, frames=frames, window_size=window_size)
+    def load_test(self, window_size=3200, start=0, frames=-1, test_data_path=None):
 
-    def plot_traindata(self, figsize=None, axis_off=True):
+        test_file = gpitch.methods.load_filenames(directory=self.test_path, pattern=self.instrument + "_mixture")[0]
+
+        if test_data_path is not None:
+            self.test_path = test_data_path
+
+        self.test_data = Audio(path=self.test_path, filename=test_file, start=start, frames=frames,
+                               window_size=window_size)
+
+        names = ['_C_', '_E_', '_G_']
+        for i in range(3):
+            source_file = gpitch.methods.load_filenames(directory=self.test_path, pattern=self.instrument + names[i])[0]
+            self.real_src.append(Audio(path=self.test_path, filename=source_file, start=start, frames=frames,
+                                 window_size=window_size))
+
+    def plot_traindata(self, figsize=None):
         nfiles = len(self.train_data)
 
-        if nfiles <= 4:
+        if nfiles <= 3:
             ncols = nfiles
         else:
-            ncols = 4
+            ncols = 3
 
-        nrows = int(np.ceil(nfiles/4.))
+        nrows = int(np.ceil(nfiles/3.))
 
         if figsize is None:
-            figsize = (16, 2*nrows)
+            figsize = (16, 3*nrows)
 
         plt.figure(figsize=figsize)
         for i in range(nfiles):
             plt.subplot(nrows, ncols, i+1)
             plt.plot(self.train_data[i].x, self.train_data[i].y)
-            plt.legend([self.train_data[i].name[18:-13]])
-            if axis_off:
-                plt.axis("off")
-        plt.suptitle("train data")
+            plt.legend([self.train_data[i].name[9:-10]])
+        plt.suptitle("train data " + self.instrument)
 
-    def plot_testdata(self, figsize=(16, 2), axis_off=False):
+    def plot_testdata(self, figsize=(16, 2*3)):
         plt.figure(figsize=figsize)
+
+        plt.subplot(2, 3, (1, 3))
+        plt.suptitle("test data " + self.instrument)
         plt.plot(self.test_data.x, self.test_data.y)
         plt.legend([self.test_data.name])
-        plt.title("test data")
-        if axis_off:
-            plt.axis("off")
 
-        plt.figure(figsize=figsize)
-        plt.imshow(self.piano_roll.matrix, cmap=plt.cm.get_cmap('binary'))
-        plt.axis("auto")
+        for i in range(3):
+            plt.subplot(2, 3, i + 4)
+            plt.plot(self.real_src[i].x, self.real_src[i].y)
+            plt.legend([self.real_src[i].name[9:-4]])
 
-    def plot_kernel(self, figsize=None, axis=False):
+    def plot_kernel(self, figsize=None):
         nfiles = len(self.train_data)
 
-        if nfiles <= 2:
+        if nfiles <= 3:
             ncols = nfiles
         else:
-            ncols = 2
+            ncols = 3
 
-        nrows = int(np.ceil(nfiles / 2.))
+        nrows = int(np.ceil(nfiles / 3.))
         x0 = np.array(0.).reshape(-1, 1)
 
         if figsize is None:
-            figsize = (16, 2*nrows)
+            figsize = (16, 3*nrows)
 
         plt.figure(figsize=figsize)
+        plt.suptitle("sampled kernels")
         for i in range(nfiles):
             plt.subplot(nrows, ncols, i + 1)
 
             plt.plot(self.kern_sampled[0][i], self.kern_sampled[1][i])
             plt.plot(self.kern_sampled[0][i], self.kern_pitches[i].compute_K(self.kern_sampled[0][i], x0))
             plt.title(self.train_data[i].name[18:-13])
-            plt.legend(['sampled kernel', 'approximate kernel'])
-            if axis is not True:
-                plt.axis("off")
-        plt.suptitle("sampled kernels")
+            plt.legend(['full kernel', 'approx kernel'])
 
     def load_kernel(self):
         path = self.path + self.kernel_path
@@ -220,7 +193,7 @@ class AMT:
                                             maxh=max_par,
                                             ideal_f0=f0)
 
-                self.params[0].append(np.array(1.))  # lengthscale
+                self.params[0].append(np.array(0.1))  # lengthscale
                 self.params[1].append(params[1])  # variances
                 self.params[2].append(params[0])  # frequencies
 
@@ -262,7 +235,7 @@ class AMT:
 
     def reset_model(self, x, y, z):
         self.model.X = x.copy()
-        self.model.Y = 20.*y.copy()
+        self.model.Y = y.copy()
         self.model.Z = z.copy()
         self.model.likelihood.variance = 1.
 
@@ -329,8 +302,3 @@ class AMT:
             mean, var = self.model.predict_f(xnew)
 
         return mean, var
-
-    # def predict_s(self):
-    #     nwin = len(self.test_data.Y)
-    #     for i in range(nwin):
-    #         print i

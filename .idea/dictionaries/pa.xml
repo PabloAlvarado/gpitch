@@ -10,6 +10,7 @@
       <w>figsize</w>
       <w>filel</w>
       <w>filenames</w>
+      <w>filetest</w>
       <w>fname</w>
       <w>hyperparameters</w>
       <w>isol</w>
@@ -41,6 +42,7 @@
       <w>writecov</w>
       <w>wsize</w>
       <w>xkern</w>
+      <w>yoshii</w>
     </words>
   </dictionary>
 </component>

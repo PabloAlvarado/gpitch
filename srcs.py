@@ -25,14 +25,17 @@ def load_filenames(path, inst, names):
 
     return final_list
 
+
 def load_traindata(path, inst, frames=-1, start=0):
     """Load test data, that is, mixture and sources."""
     names = ['_M60_', '_M64_', '_M67_']
     filenames = load_filenames(path=path, inst=inst, names=names)
 
     x, aux, fs = readaudio(fname=path + filenames[0], frames=frames, start=start)
-    traindata = [readaudio(fname=path + filenames[i], frames=frames, start=start, scaled=True)[1] for i in range(len(filenames))]
+    traindata = [readaudio(fname=path + filenames[i], frames=frames, start=start, scaled=True)[1]
+                 for i in range(len(filenames))]
     return x, traindata, fs, filenames
+
 
 def load_testdata(path, inst, frames=-1, start=0):
     """Load test data, that is, mixture and sources."""
@@ -43,6 +46,7 @@ def load_testdata(path, inst, frames=-1, start=0):
     sources = [readaudio(fname=path + filenames[i], frames=frames, start=start)[1] for i in range(1, len(filenames))]
     mix = sum(sources)
     return x, mix, sources, fs, filenames
+
 
 def get_kernel_features(filenames, ytrain, maxh, fs):
     num_pitches = len(filenames)

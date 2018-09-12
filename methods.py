@@ -41,7 +41,10 @@ def readaudio(fname, frames=-1, start=0, aug=False, scaled=False):
         y = np.mean(y, 1) 
     y = y.reshape(-1, 1)
     if scaled:
-        y /= np.max(np.abs(y))
+        beta = np.max(np.abs(y))
+        if beta == 0.:
+            beta = 1.
+        y /= beta
     if aug:
         augnum = 1000  # number of zeros to add
         y = np.append(np.zeros((augnum, 1)), y).reshape(-1, 1)
