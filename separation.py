@@ -39,6 +39,8 @@ class SoSp:
         self.smean = []
         self.svar = []
 
+        self.esource = None
+
         self.load_train()
         self.load_test(frames=frames)
 
@@ -46,7 +48,7 @@ class SoSp:
         ncol = len(self.test_data.Y)
         self.matrix_var = np.zeros((nrow, ncol))
 
-        self.init_kernel()
+        self.init_kernel(load=True)
         self.init_model()
 
     def load_train(self, train_data_path=None):
@@ -70,13 +72,13 @@ class SoSp:
             self.test_path = test_data_path
 
         self.test_data = Audio(path=self.test_path, filename=test_file, start=start, frames=frames,
-                               window_size=window_size)
+                               window_size=window_size, scaled=True)
 
         names = ['_C_', '_E_', '_G_']
         for i in range(3):
             source_file = gpitch.methods.load_filenames(directory=self.test_path, pattern=self.instrument + names[i])[0]
             self.real_src.append(Audio(path=self.test_path, filename=source_file, start=start, frames=frames,
-                                 window_size=window_size))
+                                 window_size=window_size, scaled=False))
 
     def plot_traindata(self, figsize=None):
         nfiles = len(self.train_data)
@@ -120,7 +122,9 @@ class SoSp:
             ncols = 3
 
         nrows = int(np.ceil(nfiles / 3.))
+
         x0 = np.array(0.).reshape(-1, 1)
+        x1 = np.linspace(0., 0.01, 441).reshape(-1, 1)
 
         if figsize is None:
             figsize = (16, 3*nrows)
@@ -130,26 +134,29 @@ class SoSp:
         for i in range(nfiles):
             plt.subplot(nrows, ncols, i + 1)
 
-            plt.plot(self.kern_sampled[0][i], self.kern_sampled[1][i])
-            plt.plot(self.kern_sampled[0][i], self.kern_pitches[i].compute_K(self.kern_sampled[0][i], x0))
+            # plt.plot(self.kern_sampled[0][i], self.kern_sampled[1][i])
+            # plt.plot(self.kern_sampled[0][i], self.kern_pitches[i].compute_K(self.kern_sampled[0][i], x0))
+            plt.plot(self.kern_pitches[i].compute_K(x1, x0))
+
             plt.title(self.train_data[i].name[18:-13])
             plt.legend(['full kernel', 'approx kernel'])
 
     def load_kernel(self):
-        path = self.path + self.kernel_path
-        param_filename = gpitch.load_filenames(directory=path, pattern='params', pitches=self.pitches, ext='.p')
+        path = self.kernel_path
+        param_filename = gpitch.load_filenames(directory=path, pattern=self.instrument, pitches=self.pitches,
+                                               ext='hyperparams.p')
 
         self.params = [[], [], []]
         self.kern_sampled = [[], []]
 
         for i in range(len(self.pitches)):
             aux_param = pickle.load(open(path + param_filename[i], "rb"))
-            self.params[0].append(aux_param[0])
-            self.params[1].append(aux_param[1])
-            self.params[2].append(aux_param[2])
+            self.params[0].append(aux_param[1])  # leng
+            self.params[1].append(aux_param[2])  # var
+            self.params[2].append(aux_param[3])  # freq
 
-            self.kern_sampled[0].append(aux_param[3])
-            self.kern_sampled[1].append(aux_param[4])
+            #self.kern_sampled[0].append(aux_param[3])
+            #self.kern_sampled[1].append(aux_param[4])
 
     def init_kernel(self, covsize=441, num_sam=10000, max_par=20, train=False, save=False, load=False):
 
@@ -207,7 +214,7 @@ class SoSp:
                                                               lengthscale=self.params[0],
                                                               energy=self.params[1],
                                                               frequency=self.params[2],
-                                                              len_fixed=False)
+                                                              len_fixed=True)
 
     def init_inducing(self):
         nwin = len(self.test_data.X)
@@ -302,3 +309,41 @@ class SoSp:
             mean, var = self.model.predict_f(xnew)
 
         return mean, var
+
+    def predict_s(self):
+        s1, s2, s3 = [], [], []
+        for i in range(len(self.smean)):
+            s1.append(self.smean[i][0])
+            s2.append(self.smean[i][1])
+            s3.append(self.smean[i][2])
+        s1 = np.asarray(s1).reshape(-1, 1)
+        s2 = np.asarray(s2).reshape(-1, 1)
+        s3 = np.asarray(s3).reshape(-1, 1)
+        self.esource = [s1, s2, s3]  # estimated sources
+
+    def plot_results(self, figsize=(16, 2*4)):
+        # plt.figure(figsize=figsize)
+
+        # plt.subplot(4, 1, 1)
+        # plt.suptitle("test data " + self.instrument)
+        # plt.plot(self.test_data.x, self.test_data.y)
+        # plt.legend([self.test_data.name])
+        #
+        # for i in range(3):
+        #     plt.subplot(4, 1, i + 2)
+        #     plt.plot(self.real_src[i].x, self.real_src[i].y)
+        #     plt.plot(self.real_src[i].x, self.esource[i])
+        #     plt.legend([self.real_src[i].name[9:-4]])
+
+        # Three subplots sharing both x/y axes
+        f, ax = plt.subplots(4, sharex=True, sharey=True, figsize=(16, 3*4))
+        ax[0].plot(self.test_data.x, self.test_data.y)
+        ax[0].set_title('Sharing both axes')
+        for i in range(3):
+
+            ax[i + 1].plot(self.real_src[i].x, self.real_src[i].y)
+            ax[i + 1].plot(self.real_src[i].x, self.esource[i])
+            ax[i + 1].legend([self.real_src[i].name[9:-4]])
+
+        #f.subplots_adjust(hspace=0)
+        plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)

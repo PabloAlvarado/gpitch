@@ -1,16 +1,54 @@
 import numpy as np
 import tensorflow as tf
 import gpflow
-from scipy.fftpack import fft, ifft, ifftshift
 from gpflow.param import ParamList, Param, transforms
-from gpflow._settings import settings
-
+from gpflow import settings
+from scipy.signal import hann
 
 float_type = settings.dtypes.float_type
 jitter = settings.numerics.jitter_level
 
 int_type = settings.dtypes.int_type
 np_float_type = np.float32 if float_type is tf.float32 else np.float64
+
+
+class Env(gpflow.kernels.Kern):
+    """Envelope kernel"""
+
+    def __init__(self, input_dim, z):
+        gpflow.kernels.Kern.__init__(self, input_dim=input_dim, active_dims=None)
+        self.kernel = gpflow.kernels.RBF(input_dim=input_dim, lengthscales=0.1, variance=0.25)
+        self.kernel.variance.fixed = True
+        self.z = z
+        #self.u = gpflow.param.Param(hann(z.size).reshape(-1, 1), transforms.positive)
+        self.u = gpflow.param.Param(-4.*np.ones(z.shape))
+
+
+    def build_function(self, X):
+        K = self.kernel.K(self.z, self.z)
+        Kx = self.kernel.K(X, self.z)
+        g = tf.matmul(Kx, tf.matmul(tf.matrix_inverse(K + 0.0000001 * tf.eye(tf.shape(self.z)[0], dtype=float_type)), self.u))
+        return 1./ (1. + tf.exp(-g))
+
+    def K(self, X, X2=None, presliced=False):
+
+        if not presliced:
+            X, X2 = self._slice(X, X2)
+
+        if X2 is None:
+            Xhat = self.build_function(X)
+            return tf.matmul(Xhat, Xhat, transpose_b=True)
+
+        else:
+            Xhat = self.build_function(X)
+            Xhat2 = self.build_function(X2)
+            return tf.matmul(Xhat, Xhat2, transpose_b=True)
+
+    def Kdiag(self, X, presliced=False):
+        if not presliced:
+            X, _ = self._slice(X, None)
+        Xhat = self.build_function(X)
+        return tf.reduce_sum(tf.square(Xhat), 1)
 
 
 class Sig(gpflow.kernels.Kern):

@@ -7,10 +7,10 @@
     <list default="true" id="221d81c1-07aa-4421-b433-be9ed964921e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/dictionaries/pa.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/pa.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kernels.py" beforeDir="false" afterPath="$PROJECT_DIR$/kernels.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/methods.py" beforeDir="false" afterPath="$PROJECT_DIR$/methods.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srcs.py" beforeDir="false" afterPath="$PROJECT_DIR$/srcs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/transcription.py" beforeDir="false" afterPath="$PROJECT_DIR$/transcription.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/myplots.py" beforeDir="false" afterPath="$PROJECT_DIR$/myplots.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/separation.py" beforeDir="false" afterPath="$PROJECT_DIR$/separation.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -60,34 +60,37 @@
           <entry key="project.closed" value="3" />
           <entry key="project.open.time.1" value="1" />
           <entry key="project.open.time.10" value="1" />
+          <entry key="project.open.time.13" value="1" />
           <entry key="project.open.time.6" value="2" />
           <entry key="project.open.time.7" value="2" />
-          <entry key="project.open.time.8" value="5" />
-          <entry key="project.opened" value="11" />
+          <entry key="project.open.time.8" value="6" />
+          <entry key="project.open.time.9" value="1" />
+          <entry key="project.opened" value="14" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="dummy" value="2" />
-          <entry key="py" value="5564" />
+          <entry key="py" value="6298" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="2" />
-          <entry key="Python" value="5564" />
+          <entry key="Python" value="6298" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="25" />
+          <entry key="py" value="27" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="25" />
+          <entry key="Python" value="27" />
         </counts>
       </usages-collector>
+      <usages-collector id="statistics.vcs.git.usages" />
     </session>
   </component>
   <component name="FileEditorManager">
@@ -95,8 +98,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/transcription.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1368">
-              <caret line="60" column="30" lean-forward="true" selection-start-line="60" selection-start-column="30" selection-end-line="60" selection-end-column="30" />
+            <state relative-caret-position="216">
+              <caret line="9" column="80" selection-start-line="9" selection-start-column="69" selection-end-line="9" selection-end-column="80" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -108,7 +111,7 @@
         <entry file="file://$PROJECT_DIR$/__init__.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="336">
-              <caret line="14" column="21" lean-forward="true" selection-start-line="14" selection-start-column="21" selection-end-line="14" selection-end-column="21" />
+              <caret line="14" column="21" selection-start-line="14" selection-start-column="21" selection-end-line="14" selection-end-column="21" />
             </state>
           </provider>
         </entry>
@@ -116,8 +119,20 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/separation.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="393">
-              <caret line="242" column="67" lean-forward="true" selection-start-line="242" selection-start-column="67" selection-end-line="242" selection-end-column="67" />
+            <state relative-caret-position="768">
+              <caret line="74" column="56" selection-start-line="74" selection-start-column="56" selection-end-line="74" selection-end-column="56" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/kernels.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="432">
+              <caret line="23" column="39" selection-start-line="23" selection-start-column="39" selection-end-line="23" selection-end-column="39" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -128,8 +143,20 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/methods.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="451">
-              <caret line="44" column="22" selection-start-line="44" selection-start-column="22" selection-end-line="44" selection-end-column="22" />
+            <state relative-caret-position="6576">
+              <caret line="286" selection-start-line="286" selection-end-line="286" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/myplots.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="408">
+              <caret line="21" column="44" selection-start-line="21" selection-start-column="44" selection-end-line="21" selection-end-column="44" />
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -137,7 +164,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/srcs.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="322">
+            <state relative-caret-position="912">
               <caret line="41" column="28" selection-start-line="41" selection-start-column="4" selection-end-line="41" selection-end-column="44" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
@@ -175,6 +202,7 @@
       <find>self.var9</find>
       <find>self.var10</find>
       <find>test_file</find>
+      <find>transform</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -202,6 +230,8 @@
         <option value="$PROJECT_DIR$/transcription.py" />
         <option value="$PROJECT_DIR$/srcs.py" />
         <option value="$PROJECT_DIR$/methods.py" />
+        <option value="$PROJECT_DIR$/myplots.py" />
+        <option value="$PROJECT_DIR$/kernels.py" />
         <option value="$PROJECT_DIR$/separation.py" />
       </list>
     </option>
@@ -219,7 +249,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -231,6 +260,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -409,11 +439,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="456">
           <caret line="21" column="36" selection-start-line="21" selection-start-column="36" selection-end-line="21" selection-end-column="36" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-            <marker date="1536594986000" expanded="true" signature="71:76" ph="..." />
-            <marker date="1536594986000" expanded="true" signature="503:508" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -463,39 +488,53 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="168">
           <caret line="14" selection-start-line="14" selection-end-line="14" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
         </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/kernels.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1440" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/sgpr_ss.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="600">
           <caret line="25" column="95" selection-start-line="25" selection-start-column="95" selection-end-line="25" selection-end-column="95" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-            <marker date="1536685498000" expanded="true" signature="264:269" ph="..." />
-            <marker date="1536685498000" expanded="true" signature="323:328" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="336">
-          <caret line="14" column="21" lean-forward="true" selection-start-line="14" selection-start-column="21" selection-end-line="14" selection-end-column="21" />
+          <caret line="14" column="21" selection-start-line="14" selection-start-column="21" selection-end-line="14" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/kernels.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="23" column="39" selection-start-line="23" selection-start-column="39" selection-end-line="23" selection-end-column="39" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/methods.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6576">
+          <caret line="286" selection-start-line="286" selection-end-line="286" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myplots.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="408">
+          <caret line="21" column="44" selection-start-line="21" selection-start-column="44" selection-end-line="21" selection-end-column="44" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/srcs.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="322">
+        <state relative-caret-position="912">
           <caret line="41" column="28" selection-start-line="41" selection-start-column="4" selection-end-line="41" selection-end-column="44" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
@@ -505,25 +544,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/transcription.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1368">
-          <caret line="60" column="30" lean-forward="true" selection-start-line="60" selection-start-column="30" selection-end-line="60" selection-end-column="30" />
+        <state relative-caret-position="216">
+          <caret line="9" column="80" selection-start-line="9" selection-start-column="69" selection-end-line="9" selection-end-column="80" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/methods.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="451">
-          <caret line="44" column="22" selection-start-line="44" selection-start-column="22" selection-end-line="44" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/separation.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="393">
-          <caret line="242" column="67" lean-forward="true" selection-start-line="242" selection-start-column="67" selection-end-line="242" selection-end-column="67" />
+        <state relative-caret-position="768">
+          <caret line="74" column="56" selection-start-line="74" selection-start-column="56" selection-end-line="74" selection-end-column="56" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>

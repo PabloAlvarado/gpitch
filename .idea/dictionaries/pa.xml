@@ -7,6 +7,7 @@
       <w>bcht</w>
       <w>covsize</w>
       <w>disp</w>
+      <w>esource</w>
       <w>figsize</w>
       <w>filel</w>
       <w>filenames</w>
@@ -31,6 +32,7 @@
       <w>nwin</w>
       <w>pianoroll</w>
       <w>prdic</w>
+      <w>presliced</w>
       <w>pstar</w>
       <w>readcov</w>
       <w>savem</w>
@@ -41,6 +43,7 @@
       <w>svar</w>
       <w>writecov</w>
       <w>wsize</w>
+      <w>xhat</w>
       <w>xkern</w>
       <w>yoshii</w>
     </words>

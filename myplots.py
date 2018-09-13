@@ -5,6 +5,22 @@ from gpitch import logistic, gaussfun
 from scipy.fftpack import fft, ifft, ifftshift
 
 
+def plotgp(m, xnew):
+    """
+    Plot gaussian process
+
+    :param m:
+    :param xnew:
+    :return:
+    """
+    mean, var = m.predict_y(xnew)
+    plt.plot(m.X.value, m.Y.value, 'k.', mew=1)
+    plt.plot(xnew, mean, 'C0', lw=2)
+    plt.fill_between(xnew[:,0],
+                     mean[:,0] - 2*np.sqrt(var[:,0]),
+                     mean[:,0] + 2*np.sqrt(var[:,0]),
+                     color='C0', alpha=0.25)
+
 def plot_predict(x, mean, var, z, nlinfun=logistic, latent=False, plot_z=True, plot_latent=True):
     """Basic plot unit for ploting predictions in general"""
     if latent:
