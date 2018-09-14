@@ -9,6 +9,8 @@ from scipy import fftpack
 class Audio:
     def __init__(self, path=None, filename=None, frames=-1, start=0, scaled=True, window_size=None):
 
+        self.path = path
+
         if path is None:
             self.name = 'unnamed'
             self.fs = 44100
@@ -16,13 +18,22 @@ class Audio:
             self.y = np.cos(2*np.pi*self.x*440.)
 
         else:
-            self.name = filename
-            self.x, self.y, self.fs = gpitch.readaudio(fname=path + filename, frames=frames, start=start, scaled=scaled)
+            self.read(filename=filename, frames=frames, start=start, scaled=scaled)
 
         if window_size is None:
             window_size = self.x.size
         self.wsize = window_size
-        self.X, self.Y = gpitch.segmented(x=self.x, y=self.y, window_size=window_size)
+
+        self.X, self.Y = self.windowed()
+
+    def read(self, filename, frames=-1, start=0, scaled=True):
+        self.name = filename
+        self.x, self.y, self.fs = gpitch.readaudio(fname=self.path + filename, frames=frames, start=start, scaled=scaled)
+
+    def windowed(self):
+        X, Y = gpitch.segmented(x=self.x, y=self.y, window_size=self.wsize)
+        self.X, self.Y = X, Y
+        return X, Y
 
 
 class AMT:

@@ -2,10 +2,11 @@ import numpy as np
 import pickle
 import h5py
 import gpitch
+import scipy.io
 import matplotlib.pyplot as plt
 from transcription import Audio
 from scipy import fftpack
-
+from myplots import plotgp
 
 class SoSp:
     """
@@ -71,14 +72,20 @@ class SoSp:
         if test_data_path is not None:
             self.test_path = test_data_path
 
-        self.test_data = Audio(path=self.test_path, filename=test_file, start=start, frames=frames,
-                               window_size=window_size, scaled=True)
+        # self.test_data = Audio(path=self.test_path, filename=test_file, start=start, frames=frames,
+        #                        window_size=window_size, scaled=True)
+
+        self.test_data = Audio(window_size=window_size)
 
         names = ['_C_', '_E_', '_G_']
         for i in range(3):
             source_file = gpitch.methods.load_filenames(directory=self.test_path, pattern=self.instrument + names[i])[0]
             self.real_src.append(Audio(path=self.test_path, filename=source_file, start=start, frames=frames,
                                  window_size=window_size, scaled=False))
+
+        self.test_data.x = self.real_src[0].x.copy()
+        self.test_data.y = self.real_src[0].y.copy() + self.real_src[1].y.copy() + self.real_src[2].y.copy()
+        self.test_data.windowed()
 
     def plot_traindata(self, figsize=None):
         nfiles = len(self.train_data)
@@ -247,7 +254,7 @@ class SoSp:
         self.model.likelihood.variance = 1.
 
         for i in range(len(self.pitches)):
-            self.model.kern.kern_list[i].kern_list[0].variance = 1.
+            self.model.kern.kern_list[i].kern_list[0].variance = 0.00001
             self.model.kern.kern_list[i].kern_list[0].lengthscales = self.params[0][i].copy()
 
     def optimize(self, maxiter, disp=1, nwin=None):
@@ -311,39 +318,59 @@ class SoSp:
         return mean, var
 
     def predict_s(self):
-        s1, s2, s3 = [], [], []
+        m1, m2, m3 = [], [], []
         for i in range(len(self.smean)):
-            s1.append(self.smean[i][0])
-            s2.append(self.smean[i][1])
-            s3.append(self.smean[i][2])
-        s1 = np.asarray(s1).reshape(-1, 1)
-        s2 = np.asarray(s2).reshape(-1, 1)
-        s3 = np.asarray(s3).reshape(-1, 1)
-        self.esource = [s1, s2, s3]  # estimated sources
+            m1.append(self.smean[i][0])
+            m2.append(self.smean[i][1])
+            m3.append(self.smean[i][2])
+        m1 = np.asarray(m1).reshape(-1, 1)
+        m2 = np.asarray(m2).reshape(-1, 1)
+        m3 = np.asarray(m3).reshape(-1, 1)
 
-    def plot_results(self, figsize=(16, 2*4)):
-        # plt.figure(figsize=figsize)
+        v1, v2, v3 = [], [], []
+        for i in range(len(self.smean)):
+            v1.append(self.svar[i][0])
+            v2.append(self.svar[i][1])
+            v3.append(self.svar[i][2])
+        v1 = np.asarray(v1).reshape(-1, 1)
+        v2 = np.asarray(v2).reshape(-1, 1)
+        v3 = np.asarray(v3).reshape(-1, 1)
+        self.esource = [[m1, v1], [m2, v2], [m3, v3]]  # estimated sources
 
-        # plt.subplot(4, 1, 1)
-        # plt.suptitle("test data " + self.instrument)
-        # plt.plot(self.test_data.x, self.test_data.y)
-        # plt.legend([self.test_data.name])
-        #
-        # for i in range(3):
-        #     plt.subplot(4, 1, i + 2)
-        #     plt.plot(self.real_src[i].x, self.real_src[i].y)
-        #     plt.plot(self.real_src[i].x, self.esource[i])
-        #     plt.legend([self.real_src[i].name[9:-4]])
+    def plot_results(self, figsize=(16, 3*4)):
 
-        # Three subplots sharing both x/y axes
-        f, ax = plt.subplots(4, sharex=True, sharey=True, figsize=(16, 3*4))
-        ax[0].plot(self.test_data.x, self.test_data.y)
-        ax[0].set_title('Sharing both axes')
+        plt.figure(figsize=figsize)
+        plt.subplot(4, 1, 1)
+        plt.suptitle("test data " + self.instrument)
+        plt.plot(self.test_data.x, self.test_data.y)
+        plt.legend([self.test_data.name])
+
         for i in range(3):
+            plt.subplot(4, 1, i + 2)
+            plotgp(x=self.real_src[i].x, y=self.real_src[i].y,
+                   xnew=self.real_src[i].x,
+                   mean=self.esource[i][0], variance=self.esource[i][1])
+            #plt.plot(self.real_src[i].x, self.real_src[i].y)
+            #plt.plot(self.real_src[i].x, self.esource[i])
+            plt.legend([self.real_src[i].name[9:-4]])
+            #plt.ylim(-1., 1.)
 
-            ax[i + 1].plot(self.real_src[i].x, self.real_src[i].y)
-            ax[i + 1].plot(self.real_src[i].x, self.esource[i])
-            ax[i + 1].legend([self.real_src[i].name[9:-4]])
+        # # Three subplots sharing both x/y axes
+        # f, ax = plt.subplots(4, sharex=True, sharey=True, figsize=(16, 3*4))
+        # ax[0].plot(self.test_data.x, self.test_data.y)
+        # ax[0].set_title('Sharing both axes')
+        # for i in range(3):
+        #
+        #     ax[i + 1].plot(self.real_src[i].x, self.real_src[i].y)
+        #     ax[i + 1].plot(self.real_src[i].x, self.esource[i])
+        #     ax[i + 1].legend([self.real_src[i].name[9:-4]])
+        #
+        # #f.subplots_adjust(hspace=0)
+        # plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
 
-        #f.subplots_adjust(hspace=0)
-        plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
+    def save_results(self):
+        source = [self.real_src[0].y, self.real_src[1].y, self.real_src[2].y]
+        esource = [self.esource[0][0], self.esource[1][0], self.esource[2][0]]
+        vsource = [self.esource[0][1], self.esource[1][1], self.esource[2][1]]
+        scipy.io.savemat("metrics/" + self.instrument + ".mat", {'src': source, 'esrc': esource, 'vsrc':vsource})
+

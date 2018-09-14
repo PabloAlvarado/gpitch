@@ -8,6 +8,7 @@
       <w>covsize</w>
       <w>disp</w>
       <w>esource</w>
+      <w>esrc</w>
       <w>figsize</w>
       <w>filel</w>
       <w>filenames</w>
@@ -31,6 +32,7 @@
       <w>nsources</w>
       <w>nwin</w>
       <w>pianoroll</w>
+      <w>plotgp</w>
       <w>prdic</w>
       <w>presliced</w>
       <w>pstar</w>
