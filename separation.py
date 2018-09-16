@@ -8,6 +8,7 @@ from transcription import Audio
 from scipy import fftpack
 from myplots import plotgp
 
+
 class SoSp:
     """
     Source separation model class
@@ -67,7 +68,7 @@ class SoSp:
 
     def load_test(self, window_size=3200, start=0, frames=-1, test_data_path=None):
 
-        test_file = gpitch.methods.load_filenames(directory=self.test_path, pattern=self.instrument + "_mixture")[0]
+        # test_file = gpitch.methods.load_filenames(directory=self.test_path, pattern=self.instrument + "_mixture")[0]
 
         if test_data_path is not None:
             self.test_path = test_data_path
@@ -158,12 +159,12 @@ class SoSp:
 
         for i in range(len(self.pitches)):
             aux_param = pickle.load(open(path + param_filename[i], "rb"))
-            self.params[0].append(aux_param[1])  # leng
+            self.params[0].append(aux_param[1])  # lengthscale
             self.params[1].append(aux_param[2])  # var
             self.params[2].append(aux_param[3])  # freq
 
-            #self.kern_sampled[0].append(aux_param[3])
-            #self.kern_sampled[1].append(aux_param[4])
+            # self.kern_sampled[0].append(aux_param[3])
+            # self.kern_sampled[1].append(aux_param[4])
 
     def init_kernel(self, covsize=441, num_sam=10000, max_par=20, train=False, save=False, load=False):
 
@@ -350,10 +351,10 @@ class SoSp:
             plotgp(x=self.real_src[i].x, y=self.real_src[i].y,
                    xnew=self.real_src[i].x,
                    mean=self.esource[i][0], variance=self.esource[i][1])
-            #plt.plot(self.real_src[i].x, self.real_src[i].y)
-            #plt.plot(self.real_src[i].x, self.esource[i])
+            # plt.plot(self.real_src[i].x, self.real_src[i].y)
+            # plt.plot(self.real_src[i].x, self.esource[i])
             plt.legend([self.real_src[i].name[9:-4]])
-            #plt.ylim(-1., 1.)
+            # plt.ylim(-1., 1.)
 
         # # Three subplots sharing both x/y axes
         # f, ax = plt.subplots(4, sharex=True, sharey=True, figsize=(16, 3*4))
@@ -372,5 +373,4 @@ class SoSp:
         source = [self.real_src[0].y, self.real_src[1].y, self.real_src[2].y]
         esource = [self.esource[0][0], self.esource[1][0], self.esource[2][0]]
         vsource = [self.esource[0][1], self.esource[1][1], self.esource[2][1]]
-        scipy.io.savemat("metrics/" + self.instrument + ".mat", {'src': source, 'esrc': esource, 'vsrc':vsource})
-
+        scipy.io.savemat("metrics/" + self.instrument + ".mat", {'src': source, 'esrc': esource, 'vsrc': vsource})

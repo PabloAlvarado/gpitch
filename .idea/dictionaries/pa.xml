@@ -24,6 +24,7 @@
       <w>multiplot</w>
       <w>ncol</w>
       <w>ncols</w>
+      <w>nlinfun</w>
       <w>npartials</w>
       <w>nplots</w>
       <w>nrow</w>
@@ -40,9 +41,12 @@
       <w>savem</w>
       <w>scov</w>
       <w>sgprss</w>
+      <w>sharex</w>
+      <w>sharey</w>
       <w>skern</w>
       <w>smean</w>
       <w>svar</w>
+      <w>vsource</w>
       <w>writecov</w>
       <w>wsize</w>
       <w>xhat</w>
