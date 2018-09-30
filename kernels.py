@@ -17,18 +17,22 @@ class Env(gpflow.kernels.Kern):
 
     def __init__(self, input_dim, z):
         gpflow.kernels.Kern.__init__(self, input_dim=input_dim, active_dims=None)
-        self.kernel = gpflow.kernels.RBF(input_dim=input_dim, lengthscales=0.1, variance=0.25)
-        self.kernel.variance.fixed = True
-        self.z = z
-        #self.u = gpflow.param.Param(hann(z.size).reshape(-1, 1), transforms.positive)
-        self.u = gpflow.param.Param(-4.*np.ones(z.shape))
 
+        self.kernel = gpflow.kernels.RBF(input_dim=input_dim, lengthscales=0.1, variance=0.25)
+        #self.kernel.variance.fixed = True
+        self.z = gpflow.param.Param(z)
+        self.u = gpflow.param.Param(0.*np.sqrt(0.001)*np.random.randn(z.size, 1))
 
     def build_function(self, X):
-        K = self.kernel.K(self.z, self.z)
-        Kx = self.kernel.K(X, self.z)
-        g = tf.matmul(Kx, tf.matmul(tf.matrix_inverse(K + 0.0000001 * tf.eye(tf.shape(self.z)[0], dtype=float_type)), self.u))
-        return 1./ (1. + tf.exp(-g))
+        
+        K = self.kernel.K(self.z) + 0.001*tf.eye(tf.shape(self.z)[0], dtype=float_type)
+        Kx = self.kernel.K(self.z, X)
+        L = tf.cholesky(K)
+        A = tf.matrix_triangular_solve(L, Kx, lower=True)
+        V = tf.matrix_triangular_solve(L, self.u)
+        g = tf.matmul(A, V, transpose_a=True)
+        
+        return tf.log( 1. + tf.exp(g))
 
     def K(self, X, X2=None, presliced=False):
 

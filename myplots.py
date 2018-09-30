@@ -49,7 +49,7 @@ def plotgp(x, y, xnew, mean, variance):
     Plot gaussian process
 
     """
-    plt.plot(x, y, '.k', ms=2, mew=1)
+    plt.plot(x, y, '.k', ms=3, mew=1)
     plt.plot(xnew, mean, 'C0', lw=2)
     plt.fill_between(xnew[:, 0],
                      mean[:, 0] - 2*np.sqrt(variance[:, 0]),

@@ -51,3 +51,24 @@ def get_cov(x, num_sam, size):
     kern = cov[0, :].copy().reshape(-1, 1)
     kern /= np.max(np.abs(kern))
     return cov, kern, samples
+
+
+def autocorr(x, size):
+    """
+    Infer covariance matrix by sampling segments from a large vector
+    """
+    num_sam = x.size - size
+    samples = num_sam * [None]
+    for i in range(num_sam):
+        idx = i
+        samples[i] = x[idx: idx + size].copy()
+        
+    samples = np.asarray(samples)
+    samples =  np.squeeze(samples, 2).T
+    
+    r = np.zeros((samples.shape[0], ))
+    for i in range(samples.shape[1]):
+        r += samples[0, i].copy() * samples[:,i].copy()
+    r /= np.max(np.abs(r))
+    
+    return r, samples
