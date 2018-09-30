@@ -14,9 +14,12 @@
       <w>filenames</w>
       <w>filetest</w>
       <w>fname</w>
+      <w>fsum</w>
+      <w>gabor</w>
       <w>hyperparameters</w>
       <w>isol</w>
       <w>kernelfit</w>
+      <w>learnkern</w>
       <w>lenglist</w>
       <w>lengthscales</w>
       <w>lfiles</w>
@@ -25,6 +28,7 @@
       <w>ncol</w>
       <w>ncols</w>
       <w>nlinfun</w>
+      <w>npar</w>
       <w>npartials</w>
       <w>nplots</w>
       <w>nrow</w>
@@ -32,8 +36,10 @@
       <w>nsec</w>
       <w>nsources</w>
       <w>nwin</w>
+      <w>opti</w>
       <w>pianoroll</w>
       <w>plotgp</w>
+      <w>popt</w>
       <w>prdic</w>
       <w>presliced</w>
       <w>pstar</w>

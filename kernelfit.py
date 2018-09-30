@@ -1,6 +1,28 @@
 import gpitch
 import numpy as np
 import scipy.optimize as opti
+import scipy
+
+
+def gabor(x, v, l, f):
+    return v*np.exp(-np.abs(x)/l) * np.cos(2*np.pi*x*f)
+
+
+def func(x, *p):
+    fsum = np.zeros(x.size)
+    for i in range(len(p)/3):
+        m = 3*i
+        fsum += gabor(x, p[m+0], p[m+1], p[m+2])
+    return fsum
+
+
+def learn_kernel(x, y, m):
+    list_init_params = []
+    for i in range(m):
+        list_init_params.append([1., 1., i+1.])
+    p0 = np.array(list_init_params).reshape(-1, )
+    popt = scipy.optimize.curve_fit(func, x, y, p0=p0)[0]
+    return popt
 
 
 def loss_func(p, x, y):
@@ -62,4 +84,39 @@ def fit(kern, audio, file_name, max_par, fs=44100):
     variance = pstar[2: npartials + 2]
     frequency = pstar[npartials + 2:]
     params = [lengthscale, variance, frequency]
+    return params, kern_init, kern_approx
+
+
+def fit2(kern, audio, file_name, max_par, fs=44100):
+    """Fit kernel to data """
+
+    # time vector for kernel
+    n = kern.size
+    xkern = np.linspace(0., (n - 1.) / fs, n).reshape(-1, )
+
+    # initialize parameters
+    if0 = gpitch.find_ideal_f0([file_name])[0]
+    init_f, init_v = gpitch.init_cparam(y=audio, fs=fs, maxh=max_par, ideal_f0=if0, scaled=False)[0:2]
+
+    list_init_params = []
+    for i in range(init_v.size):
+        list_init_params.append([init_v[i], 0.1, init_f[i]])
+
+    p0 = np.array(list_init_params).reshape(-1, )
+
+    # optimization
+    popt = scipy.optimize.curve_fit(func, xkern, kern.reshape(-1,), p0, bounds=(0., p0.size*[20000.]))[0]
+
+    # compute initial and learned kernel
+    kern_init = func(xkern, *p0)
+    kern_approx = func(xkern, *popt)
+
+    # get kernel hyperparameters
+    # npartials = (pstar.size - 2) / 2
+    # noise_var = pstar[0]
+    # lengthscale = pstar[1]
+    # variance = pstar[2: npartials + 2]
+    # frequency = pstar[npartials + 2:]
+    # params = [lengthscale, variance, frequency]
+    params = popt
     return params, kern_init, kern_approx

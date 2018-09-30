@@ -4,7 +4,7 @@ import h5py
 import gpitch
 import scipy.io
 import matplotlib.pyplot as plt
-from transcription import Audio
+from gpitch.audio import Audio
 from scipy import fftpack
 from myplots import plotgp
 

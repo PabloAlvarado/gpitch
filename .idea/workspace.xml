@@ -8,8 +8,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="221d81c1-07aa-4421-b433-be9ed964921e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/kernels.py" beforeDir="false" afterPath="$PROJECT_DIR$/kernels.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/samplecov.py" beforeDir="false" afterPath="$PROJECT_DIR$/samplecov.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/pa.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/pa.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kernelfit.py" beforeDir="false" afterPath="$PROJECT_DIR$/kernelfit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/separation.py" beforeDir="false" afterPath="$PROJECT_DIR$/separation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transcription.py" beforeDir="false" afterPath="$PROJECT_DIR$/transcription.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -21,37 +25,38 @@
     <session id="676858185">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="4" />
+          <entry key="project.closed" value="5" />
           <entry key="project.open.time.1" value="1" />
-          <entry key="project.open.time.6" value="3" />
+          <entry key="project.open.time.6" value="4" />
           <entry key="project.open.time.7" value="2" />
           <entry key="project.open.time.8" value="1" />
-          <entry key="project.opened" value="7" />
+          <entry key="project.opened" value="8" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="18" />
+          <entry key="py" value="24" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="18" />
+          <entry key="Python" value="24" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="654" />
           <entry key="dummy" value="2" />
-          <entry key="py" value="7616" />
+          <entry key="py" value="8583" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="2" />
-          <entry key="Python" value="8270" />
+          <entry key="Python" value="9237" />
         </counts>
       </usages-collector>
+      <usages-collector id="statistics.vcs.git.usages" />
     </session>
     <session id="714664401">
       <usages-collector id="statistics.lifecycle.project">
@@ -102,13 +107,38 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/separation.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="8400">
-              <caret line="358" column="48" selection-start-line="358" selection-start-column="48" selection-end-line="358" selection-end-column="48" />
+            <state relative-caret-position="144">
+              <caret line="6" column="17" selection-start-line="6" selection-start-column="17" selection-end-line="6" selection-end-column="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/transcription.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="48">
+              <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/audio.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="72">
+              <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
-                <marker date="1537028482000" expanded="true" signature="2159:2321" ph="..." />
-                <marker date="1537028482000" expanded="true" signature="12330:12331" ph="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/__init__.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="288">
+              <caret line="12" column="23" lean-forward="true" selection-start-line="12" selection-start-column="23" selection-end-line="12" selection-end-column="23" />
             </state>
           </provider>
         </entry>
@@ -116,7 +146,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/myplots.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="384">
+            <state relative-caret-position="288">
               <caret line="16" column="44" selection-start-line="16" selection-start-column="44" selection-end-line="16" selection-end-column="44" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
@@ -125,11 +155,46 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/kernels.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="384">
-              <caret line="27" column="32" lean-forward="true" selection-start-line="27" selection-start-column="32" selection-end-line="27" selection-end-column="32" />
+            <state relative-caret-position="225">
+              <caret line="117" column="12" selection-start-line="117" selection-start-column="6" selection-end-line="117" selection-end-column="12" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/training.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <folding>
+                <element signature="e#0#23#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/kernelfit.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="298">
+              <caret line="98" column="27" lean-forward="true" selection-start-line="98" selection-start-column="27" selection-end-line="98" selection-end-column="27" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/samplecov.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="154">
+              <caret line="48" column="43" selection-start-line="48" selection-start-column="43" selection-end-line="48" selection-end-column="43" />
             </state>
           </provider>
         </entry>
@@ -174,6 +239,7 @@
       <find>test_file</find>
       <find>transform</find>
       <find>m.</find>
+      <find>Cosine</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -191,27 +257,27 @@
         <option value="$PROJECT_DIR$/../code-paper/maps/sample-cov-matrices/demo_learn_kernel.py" />
         <option value="$PROJECT_DIR$/init_models.py" />
         <option value="$PROJECT_DIR$/Audio.py" />
-        <option value="$PROJECT_DIR$/audio.py" />
         <option value="$PROJECT_DIR$/samplecov.py" />
-        <option value="$PROJECT_DIR$/kernelfit.py" />
         <option value="$PROJECT_DIR$/pianoroll.py" />
         <option value="$PROJECT_DIR$/mapsm.py" />
         <option value="$PROJECT_DIR$/sgr_ss.py" />
-        <option value="$PROJECT_DIR$/../../../.local/anaconda2/lib/python2.7/site-packages/gpflow-0.5-py2.7.egg/gpflow/sgpr.py" />
+        <option value="$USER_HOME$/.local/anaconda2/lib/python2.7/site-packages/gpflow-0.5-py2.7.egg/gpflow/sgpr.py" />
         <option value="$PROJECT_DIR$/sgpr_ss.py" />
-        <option value="$PROJECT_DIR$/__init__.py" />
         <option value="$PROJECT_DIR$/srcs.py" />
         <option value="$PROJECT_DIR$/methods.py" />
-        <option value="$PROJECT_DIR$/transcription.py" />
-        <option value="$PROJECT_DIR$/../../../latebreak-ismir18/metrics/compute_metrics.m" />
+        <option value="$USER_HOME$/latebreak-ismir18/metrics/compute_metrics.m" />
         <option value="$PROJECT_DIR$/init_kernels.py" />
-        <option value="$PROJECT_DIR$/separation.py" />
         <option value="$PROJECT_DIR$/myplots.py" />
         <option value="$PROJECT_DIR$/kernels.py" />
+        <option value="$PROJECT_DIR$/transcription.py" />
+        <option value="$PROJECT_DIR$/audio.py" />
+        <option value="$PROJECT_DIR$/__init__.py" />
+        <option value="$PROJECT_DIR$/separation.py" />
+        <option value="$PROJECT_DIR$/kernelfit.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6" fullScreen="true">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="960" />
     <option name="y" value="25" />
     <option name="width" value="960" />
@@ -232,6 +298,10 @@
             <path>
               <item name="gpitch" type="b2602c69:ProjectViewProjectNode" />
               <item name="gpitch" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="gpitch" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
             </path>
           </expand>
           <select />
@@ -302,7 +372,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="-30" width="1920" height="1110" extended-state="6" />
+    <frame x="0" y="25" width="1920" height="1055" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
@@ -389,25 +459,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/audio.py" />
-    <entry file="file://$PROJECT_DIR$/samplecov.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1128">
-          <caret line="48" column="43" selection-start-line="48" selection-start-column="43" selection-end-line="48" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/init_models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1176">
           <caret line="29" column="49" selection-start-line="29" selection-start-column="49" selection-end-line="29" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/kernelfit.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1056">
-          <caret line="46" column="93" selection-start-line="46" selection-start-column="93" selection-end-line="46" selection-end-column="93" />
         </state>
       </provider>
     </entry>
@@ -432,27 +487,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../../../.local/anaconda2/lib/python2.7/site-packages/gpflow-0.5-py2.7.egg/gpflow/gpr.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="251">
-          <caret line="66" column="3" selection-start-line="65" selection-end-line="88" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../../../.local/anaconda2/lib/python2.7/site-packages/gpflow-0.5-py2.7.egg/gpflow/_settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="101">
-          <caret line="117" column="7" lean-forward="true" selection-start-line="117" selection-start-column="7" selection-end-line="117" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../../../.local/anaconda2/lib/python2.7/site-packages/gpflow-0.5-py2.7.egg/gpflow/sgpr.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2448">
-          <caret line="186" lean-forward="true" selection-start-line="186" selection-end-line="186" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/.local/anaconda2/lib/python2.7/site-packages/gpflow-0.5-py2.7.egg/gpflow/gpr.py" />
+    <entry file="file://$USER_HOME$/.local/anaconda2/lib/python2.7/site-packages/gpflow-0.5-py2.7.egg/gpflow/_settings.py" />
+    <entry file="file://$USER_HOME$/.local/anaconda2/lib/python2.7/site-packages/gpflow-0.5-py2.7.egg/gpflow/sgpr.py" />
     <entry file="file://$PROJECT_DIR$/pdgp.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="168">
@@ -467,27 +504,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/transcription.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="696">
-          <caret line="34" column="28" selection-start-line="34" selection-start-column="28" selection-end-line="34" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="14" column="21" selection-start-line="14" selection-start-column="21" selection-end-line="14" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../../../latebreak-ismir18/metrics/compute_metrics.m">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="731">
-          <caret line="53" column="56" selection-start-line="53" selection-start-column="56" selection-end-line="53" selection-end-column="56" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/latebreak-ismir18/metrics/compute_metrics.m" />
     <entry file="file://$PROJECT_DIR$/srcs.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="322">
@@ -509,14 +526,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/separation.py">
+    <entry file="file://$PROJECT_DIR$/myplots.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8400">
-          <caret line="358" column="48" selection-start-line="358" selection-start-column="48" selection-end-line="358" selection-end-column="48" />
+        <state relative-caret-position="288">
+          <caret line="16" column="44" selection-start-line="16" selection-start-column="44" selection-end-line="16" selection-end-column="44" />
           <folding>
-            <element signature="e#0#18#0" expanded="true" />
-            <marker date="1537028482000" expanded="true" signature="2159:2321" ph="..." />
-            <marker date="1537028482000" expanded="true" signature="12330:12331" ph="..." />
+            <element signature="e#0#31#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -528,20 +543,70 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/myplots.py">
+    <entry file="file://$PROJECT_DIR$/training.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="384">
-          <caret line="16" column="44" selection-start-line="16" selection-start-column="44" selection-end-line="16" selection-end-column="44" />
+        <state>
           <folding>
-            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#0#23#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/kernels.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="384">
-          <caret line="27" column="32" lean-forward="true" selection-start-line="27" selection-start-column="32" selection-end-line="27" selection-end-column="32" />
+        <state relative-caret-position="225">
+          <caret line="117" column="12" selection-start-line="117" selection-start-column="6" selection-end-line="117" selection-end-column="12" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/transcription.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="48">
+          <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="288">
+          <caret line="12" column="23" lean-forward="true" selection-start-line="12" selection-start-column="23" selection-end-line="12" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/separation.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="6" column="17" selection-start-line="6" selection-start-column="17" selection-end-line="6" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/audio.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72">
+          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/samplecov.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="154">
+          <caret line="48" column="43" selection-start-line="48" selection-start-column="43" selection-end-line="48" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/kernelfit.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="298">
+          <caret line="98" column="27" lean-forward="true" selection-start-line="98" selection-start-column="27" selection-end-line="98" selection-end-column="27" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
