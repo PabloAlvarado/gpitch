@@ -14,7 +14,7 @@ class SoSp:
     Source separation model class
     """
 
-    def __init__(self, instrument, frames, pitches=None, gpu='0'):
+    def __init__(self, instrument, frames, pitches=None, gpu='0', train=False, save=False, load=False):
 
         # init session
         self.sess, self.path = gpitch.init_settings(visible_device=gpu)
@@ -50,7 +50,7 @@ class SoSp:
         ncol = len(self.test_data.Y)
         self.matrix_var = np.zeros((nrow, ncol))
 
-        self.init_kernel(load=True)
+        self.init_kernel(train=train, save=save, load=load)
         self.init_model()
 
     def load_train(self, train_data_path=None):
@@ -166,7 +166,8 @@ class SoSp:
             # self.kern_sampled[0].append(aux_param[3])
             # self.kern_sampled[1].append(aux_param[4])
 
-    def init_kernel(self, covsize=441, num_sam=10000, max_par=20, train=False, save=False, load=False):
+    def init_kernel(self, covsize=441, num_sam=10000, max_par=20, train=False, save=False, load=False,
+                    single_lengthscale=False):
 
         nfiles = len(self.train_data)
         self.params = [[], [], []]
@@ -208,9 +209,14 @@ class SoSp:
                                             maxh=max_par,
                                             ideal_f0=f0)
 
-                self.params[0].append(np.array(0.1))  # lengthscale
-                self.params[1].append(params[1])  # variances
-                self.params[2].append(params[0])  # frequencies
+                if single_lengthscale:
+                    self.params[0].append(np.array(0.1))  # lengthscale
+                    self.params[1].append(params[1])  # variances
+                    self.params[2].append(params[0])  # frequencies
+                else:
+                    self.params[0].append(0.1 + 0.*params[1])  # lengthscale
+                    self.params[1].append(params[1])  # variances
+                    self.params[2].append(params[0])  # frequencies
 
                 skern[i] = fftpack.ifft(np.abs(fftpack.fft(self.train_data[i].y.copy().reshape(-1, ))))[0:covsize].real
                 skern[i] /= np.max(skern[i])
@@ -218,11 +224,14 @@ class SoSp:
             self.kern_sampled = [xkern, skern]
 
         # init kernel specific pitch
-        self.kern_pitches = gpitch.init_kernels.init_kern_com(num_pitches=len(self.train_data),
-                                                              lengthscale=self.params[0],
-                                                              energy=self.params[1],
-                                                              frequency=self.params[2],
-                                                              len_fixed=True)
+        if single_lengthscale:
+            self.kern_pitches = gpitch.init_kernels.init_kern_com(num_pitches=len(self.train_data),
+                                                                  lengthscale=self.params[0],
+                                                                  energy=self.params[1],
+                                                                  frequency=self.params[2],
+                                                                  len_fixed=True)
+        else:
+            self.kern_pitches = gpitch.init_kernels
 
     def init_inducing(self):
         nwin = len(self.test_data.X)

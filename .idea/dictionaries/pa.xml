@@ -2,6 +2,7 @@
   <dictionary name="pa">
     <words>
       <w>asarray</w>
+      <w>autocorr</w>
       <w>auxl</w>
       <w>auxname</w>
       <w>bcht</w>

@@ -1,5 +1,5 @@
 from gpflow.kernels import Matern32, Matern12
-from gpitch.kernels import MercerCosMix
+from gpitch.kernels import MercerCosMix, Cosine
 import gpflow
 import pickle
 
@@ -56,3 +56,53 @@ def load_params(num_sources, fname):
         frequency.append(hparam[i][3].copy())
 
     return lengthscale, variance, frequency
+
+
+def init_pitch_kern(num_pitches, lengthscale, energy, frequency, len_fixed=True):
+    """Initialize kernels for activations and components"""
+
+    kern_com, kern_exp, kern_per = [], [], []
+
+    for i in range(num_pitches):
+        kern_exp.append(Matern12(1, lengthscales=lengthscale[i].copy(), variance=1.0) )
+        kern_exp[i].lengthscales.fixed = len_fixed
+
+        kern_per.append(MercerCosMix(1, energy=energy[i].copy(), frequency=frequency[i].copy(), variance=1.0,))
+        kern_per[i].fixed = True
+
+        kern_com.append( kern_exp[i] * kern_per[i] )
+    return kern_com
+
+
+def matern12specmix(variance, lengthscale, frequency):
+    npartials = variance.size
+    kern_list = []
+    for i in range(npartials):
+        kern_list.append(Matern12(input_dim=1, variance=variance[i], lengthscales=lengthscale[i]) *
+                         Cosine(input_dim=1, frequency=frequency[i], variance=1.0))
+    return gpflow.kernels.Add(kern_list)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

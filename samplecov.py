@@ -64,11 +64,11 @@ def autocorr(x, size):
         samples[i] = x[idx: idx + size].copy()
         
     samples = np.asarray(samples)
-    samples =  np.squeeze(samples, 2).T
+    samples = np.squeeze(samples, 2).T
     
     r = np.zeros((samples.shape[0], ))
     for i in range(samples.shape[1]):
-        r += samples[0, i].copy() * samples[:,i].copy()
+        r += samples[0, i].copy() * samples[:, i].copy()
     r /= np.max(np.abs(r))
     
-    return r, samples
+    return r.reshape(-1, 1), samples

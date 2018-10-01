@@ -87,7 +87,7 @@ def fit(kern, audio, file_name, max_par, fs=44100):
     return params, kern_init, kern_approx
 
 
-def fit2(kern, audio, file_name, max_par, fs=44100):
+def kernel_fit(kern, audio, file_name, max_par, fs):
     """Fit kernel to data """
 
     # time vector for kernel
@@ -97,11 +97,9 @@ def fit2(kern, audio, file_name, max_par, fs=44100):
     # initialize parameters
     if0 = gpitch.find_ideal_f0([file_name])[0]
     init_f, init_v = gpitch.init_cparam(y=audio, fs=fs, maxh=max_par, ideal_f0=if0, scaled=False)[0:2]
-
     list_init_params = []
     for i in range(init_v.size):
         list_init_params.append([init_v[i], 0.1, init_f[i]])
-
     p0 = np.array(list_init_params).reshape(-1, )
 
     # optimization
@@ -111,12 +109,6 @@ def fit2(kern, audio, file_name, max_par, fs=44100):
     kern_init = func(xkern, *p0)
     kern_approx = func(xkern, *popt)
 
-    # get kernel hyperparameters
-    # npartials = (pstar.size - 2) / 2
-    # noise_var = pstar[0]
-    # lengthscale = pstar[1]
-    # variance = pstar[2: npartials + 2]
-    # frequency = pstar[npartials + 2:]
-    # params = [lengthscale, variance, frequency]
-    params = popt
-    return params, kern_init, kern_approx
+    # rearrange learned parameters
+    popt = popt.reshape(-1, 3)  # variance, lengthscale, frequency
+    return [popt[:, 0], popt[:, 1], popt[:, 2]], kern_init, kern_approx
