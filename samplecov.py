@@ -71,4 +71,4 @@ def autocorr(x, size):
         r += samples[0, i].copy() * samples[:,i].copy()
     r /= np.max(np.abs(r))
     
-    return r, samples
+    return r.reshape(-1, 1), samples

@@ -14,7 +14,7 @@ class SoSp:
     Source separation model class
     """
 
-    def __init__(self, instrument, frames, pitches=None, gpu='0'):
+    def __init__(self, instrument, frames, pitches=None, gpu='0', load=True):
 
         # init session
         self.sess, self.path = gpitch.init_settings(visible_device=gpu)
@@ -24,7 +24,7 @@ class SoSp:
 
         self.train_path = "/import/c4dm-04/alvarado/datasets/ss_amt/training_data/"
         self.test_path = "/import/c4dm-04/alvarado/datasets/ss_amt/test_data/"
-        self.kernel_path = '/import/c4dm-04/alvarado/results/sampling_covariance/yoshii/'
+        self.kernel_path = '/import/c4dm-04/alvarado/results/sampling_covariance/icassp19/'
 
         self.train_data = [None]
         self.test_data = Audio()
@@ -50,7 +50,7 @@ class SoSp:
         ncol = len(self.test_data.Y)
         self.matrix_var = np.zeros((nrow, ncol))
 
-        self.init_kernel(load=True)
+        self.init_kernel(load=load)
         self.init_model()
 
     def load_train(self, train_data_path=None):
@@ -163,8 +163,8 @@ class SoSp:
             self.params[1].append(aux_param[2])  # var
             self.params[2].append(aux_param[3])  # freq
 
-            # self.kern_sampled[0].append(aux_param[3])
-            # self.kern_sampled[1].append(aux_param[4])
+            self.kern_sampled[0].append(aux_param[4])  # time vector
+            self.kern_sampled[1].append(aux_param[5])  # sampled kernel
 
     def init_kernel(self, covsize=441, num_sam=10000, max_par=20, train=False, save=False, load=False):
 
