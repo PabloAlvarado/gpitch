@@ -3,7 +3,7 @@ from gpitch import readaudio, segmented
 
 
 class Audio:
-    def __init__(self, path=None, filename=None, frames=-1, start=0, scaled=True, window_size=None):
+    def __init__(self, path=None, filename=None, frames=-1, start=0, scaled=False, window_size=None):
 
         self.path = path
 
@@ -22,7 +22,7 @@ class Audio:
 
         self.X, self.Y = self.windowed()
 
-    def read(self, filename, frames=-1, start=0, scaled=True):
+    def read(self, filename, frames=-1, start=0, scaled=False):
         self.name = filename
         self.x, self.y, self.fs = readaudio(fname=self.path + filename, frames=frames, start=start, scaled=scaled)
 

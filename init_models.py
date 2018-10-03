@@ -25,7 +25,7 @@ def init_iv(x, num_sources, nivps_a, nivps_c, fs):
     return z
 
 
-def init_liv(x, y, num_sources=1, win_size=3, thres=0.001):
+def init_liv(x, y, num_sources=1, win_size=9, thres=0.0025):
     """
     Initialize location of inducing varibales by using locations of 
     peaks and valleys of test data "y" or extrema.
@@ -33,6 +33,7 @@ def init_liv(x, y, num_sources=1, win_size=3, thres=0.001):
     # change shape
     x = x.reshape(-1,)
     y = y.reshape(-1,)
+
     # smooth signal
     win = signal.hann(win_size)
     y_smooth = signal.convolve(y, win, mode='same')/ sum(win)

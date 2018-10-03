@@ -556,8 +556,19 @@ class KernelGPR(gpflow.kernels.Kern):
         return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.m.kern.variance * self.variance))
 
 
+class Gammaexponential(gpflow.kernels.Stationary):
+    """
+    The Exponential kernel
+    """
+    def __init__(self, input_dim, variance=1., lengthscales=1., gamma=1.):
+        gpflow.kernels.Stationary.__init__(self, input_dim=input_dim, variance=variance, lengthscales=lengthscales)
+        self.gamma = Param(gamma, transforms.Logistic(0.00001, 2.))
 
-
+    def K(self, X, X2=None, presliced=False):
+        if not presliced:
+            X, X2 = self._slice(X, X2)
+        r = self.euclid_dist(X, X2)
+        return self.variance * tf.exp(-r**self.gamma)
 
 
 

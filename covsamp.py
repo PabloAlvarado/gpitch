@@ -34,6 +34,8 @@ def approximate_kernel(p, x):
     npartials = (nparams - 2) / 2
     bias = np.sqrt(p[0] * p[0])
     k_e = (1. + np.sqrt(3.) * np.abs(x) / np.sqrt(p[1] * p[1])) * np.exp(- np.sqrt(3.) * np.abs(x) / np.sqrt(p[1] * p[1]))
+    # k_e = np.exp(- np.abs(x) / np.sqrt(p[1] * p[1]))
+
     k_partials = [np.sqrt(p[i] * p[i]) * np.cos(2 * np.pi * np.sqrt(p[i + npartials] * p[i + npartials]) * np.abs(x))
                   for i in range(2, 2 + npartials)]
     k_fun = 0.*bias + k_e * sum(k_partials)
@@ -50,7 +52,7 @@ def approximate_kernel(p, x):
 
 def optimize_kern(x, y, p0):
     """Optimization of kernel"""
-    phat = sp.optimize.minimize(loss_func, p0, method='L-BFGS-B', args=(x, y), tol=1e-16, options={'disp': True})
+    phat = sp.optimize.minimize(loss_func, p0, method='L-BFGS-B', args=(x, y), tol=1e-12, options={'disp': True})
     pstar = np.sqrt(phat.x ** 2).copy()
     return pstar
 

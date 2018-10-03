@@ -231,8 +231,8 @@ class SoSp:
 
         for i in range(nwin):
             a, b = gpitch.init_liv(x=self.test_data.X[i], y=self.test_data.Y[i], num_sources=1)
-            z[i] = a[0][0]
-            u[i] = b
+            z[i] = a[0][0][::1]
+            u[i] = b[::1]
         self.inducing = [z, u]
 
     def init_model(self):
@@ -253,12 +253,14 @@ class SoSp:
         self.model.Y = y.copy()
         self.model.Z = z.copy()
         self.model.likelihood.variance = 1.
+        # self.model.likelihood.variance = 0.0001
+        # self.model.likelihood.variance.fixed = True
 
         for i in range(len(self.pitches)):
-            self.model.kern.kern_list[i].kern_list[0].variance = 0.00001
+            self.model.kern.kern_list[i].kern_list[0].variance = 1.
             self.model.kern.kern_list[i].kern_list[0].lengthscales = self.params[0][i].copy()
 
-    def optimize(self, maxiter, disp=1, nwin=None):
+    def optimize(self, maxiter=1000, disp=1, nwin=None):
 
         self.mean = []
         self.var = []
