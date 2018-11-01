@@ -14,6 +14,7 @@
       <w>filenames</w>
       <w>filetest</w>
       <w>fname</w>
+      <w>freqs</w>
       <w>fsum</w>
       <w>gabor</w>
       <w>gammaexponential</w>
@@ -58,7 +59,9 @@
       <w>wsize</w>
       <w>xhat</w>
       <w>xkern</w>
+      <w>xout</w>
       <w>yoshii</w>
+      <w>yout</w>
     </words>
   </dictionary>
 </component>
