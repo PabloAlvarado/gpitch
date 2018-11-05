@@ -16,7 +16,7 @@ def windowed(x, y, ws):
     return xout, yout
 
 
-def merged_y(y, ws, n):
+def merged_mean(y, ws, n):
     nw = len(y)
     ll = (ws-1)/2
     for i in range(len(y)):
@@ -28,6 +28,28 @@ def merged_y(y, ws, n):
             win[-ll:] = 1.
         else:
             win = signal.hann(ws).reshape(-1, 1)
+        y[i] = y[i]*win
+    yout = np.zeros((n, 1))
+    yout[0:ll] = y[0][0:ll]
+    yout[-ll:] = y[-1][-ll:]
+    for i in range(nw-1):
+        yout[(i + 1) * ll: (i + 2) * ll + 1] = y[i][ll:].copy() + y[i+1][0:ll+1].copy()
+    return yout
+
+
+def merged_variance(y, ws, n):
+    nw = len(y)
+    ll = (ws-1)/2
+    for i in range(len(y)):
+        if i == 0:
+            win = signal.hann(ws).reshape(-1, 1)
+            win[0:ll] = 1.
+        elif i == nw-1:
+            win = signal.hann(ws).reshape(-1, 1)
+            win[-ll:] = 1.
+        else:
+            win = signal.hann(ws).reshape(-1, 1)
+        win = win**2
         y[i] = y[i]*win
     yout = np.zeros((n, 1))
     yout[0:ll] = y[0][0:ll]

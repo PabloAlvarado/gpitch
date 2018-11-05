@@ -241,8 +241,11 @@ class SoSp:
 
         for i in range(nwin):
             a, b = gpitch.init_liv(x=self.test_data.X[i], y=self.test_data.Y[i], num_sources=1)
-            z[i] = a[0][0][::1]
+            z[i] = a[0][0][::1]  # use extrema as inducing variables
             u[i] = b[::1]
+
+            # z[i] = self.test_data.X[i].copy() # use all data as inducing variables
+            # u[i] = self.test_data.Y[i].copy()
         self.inducing = [z, u]
 
     def init_model(self):
@@ -345,9 +348,9 @@ class SoSp:
         # m3 = np.asarray(m3).reshape(-1, 1)
         ws_aux = 2001
         n_aux = self.test_data.x.size
-        m1 = window_overlap.merged_y(y=m1, ws=ws_aux, n=n_aux)
-        m2 = window_overlap.merged_y(y=m2, ws=ws_aux, n=n_aux)
-        m3 = window_overlap.merged_y(y=m3, ws=ws_aux, n=n_aux)
+        m1 = window_overlap.merged_mean(y=m1, ws=ws_aux, n=n_aux)
+        m2 = window_overlap.merged_mean(y=m2, ws=ws_aux, n=n_aux)
+        m3 = window_overlap.merged_mean(y=m3, ws=ws_aux, n=n_aux)
 
         v1, v2, v3 = [], [], []
         for i in range(len(self.smean)):
@@ -357,9 +360,9 @@ class SoSp:
         # v1 = np.asarray(v1).reshape(-1, 1)
         # v2 = np.asarray(v2).reshape(-1, 1)
         # v3 = np.asarray(v3).reshape(-1, 1)
-        v1 = window_overlap.merged_y(y=v1, ws=ws_aux, n=n_aux)
-        v2 = window_overlap.merged_y(y=v2, ws=ws_aux, n=n_aux)
-        v3 =  window_overlap.merged_y(y=v3, ws=ws_aux, n=n_aux)
+        v1 = window_overlap.merged_variance(y=v1, ws=ws_aux, n=n_aux)
+        v2 = window_overlap.merged_variance(y=v2, ws=ws_aux, n=n_aux)
+        v3 =  window_overlap.merged_variance(y=v3, ws=ws_aux, n=n_aux)
 
 
         if m1.size == 224001:
