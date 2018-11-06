@@ -323,8 +323,8 @@ class MercerCosMix(gpflow.kernels.Kern):
     The Mercer Cosine Mixture kernel for audio.
     """
 
-    def __init__(self, input_dim, energy=np.asarray([1.]), frequency=np.asarray([2*np.pi]), variance=1.0,
-                 features_as_params=False):
+    def __init__(self, input_dim, energy=np.asarray([1.]), frequency=np.asarray([2*np.pi]),
+                 variance=1.0, features_as_params=False):
         """
         - input_dim is the dimension of the input to the kernel
         - variance is the (initial) value for the variance parameter(s)
@@ -340,8 +340,8 @@ class MercerCosMix(gpflow.kernels.Kern):
             energy_list = []
             frequency_list = []
             for i in range(energy.size):
-                energy_list.append(Param(energy[i], transforms.positive))
-                frequency_list.append(Param(frequency[i], transforms.positive))
+                energy_list.append( Param(energy[i], transforms.positive) )
+                frequency_list.append( Param(frequency[i], transforms.positive) )
 
             self.energy = ParamList(energy_list)
             self.frequency = ParamList(frequency_list)
@@ -354,8 +354,8 @@ class MercerCosMix(gpflow.kernels.Kern):
         m = self.num_features
         phi_list = 2*m*[None]
         for i in range(m):
-            phi_list[i] = tf.sqrt(self.energy[i])*tf.cos(2*np.pi*self.frequency[i]*(X + 1e-12))
-            phi_list[i + m] = tf.sqrt(self.energy[i])*tf.sin(2*np.pi*self.frequency[i]*(X + 1e-12))
+            phi_list[i] = tf.sqrt(self.energy[i])*tf.cos(2*np.pi*self.frequency[i]*X)
+            phi_list[i + m] = tf.sqrt(self.energy[i])*tf.sin(2*np.pi*self.frequency[i]*X)
         phi = tf.stack(phi_list)
         return tf.reshape(phi, (2*m, n))
 
