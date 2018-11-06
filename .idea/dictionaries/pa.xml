@@ -20,6 +20,7 @@
       <w>gabor</w>
       <w>gammaexponential</w>
       <w>hyperparameters</w>
+      <w>icassp</w>
       <w>isol</w>
       <w>kdiag</w>
       <w>kernelfit</w>
@@ -49,6 +50,7 @@
       <w>pstar</w>
       <w>rbound</w>
       <w>readcov</w>
+      <w>rmse</w>
       <w>savem</w>
       <w>scov</w>
       <w>sgpr</w>

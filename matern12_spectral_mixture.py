@@ -16,8 +16,7 @@ class Matern12sm(gpflow.kernels.Kern):
     """
     Matern spectral mixture kernel with single lengthscale.
     """
-    def __init__(self, input_dim,  variance=1., lengthscales=None, energy=None, frequencies=None,
-                 len_fixed=True):
+    def __init__(self, input_dim,  variance=1., lengthscales=None, energy=None, frequencies=None, len_fixed=True):
         gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
         energy_l = []
         freq_l = []
@@ -67,3 +66,49 @@ class Matern12sm(gpflow.kernels.Kern):
         for i in range(self.num_partials):
             self.energy[i].fixed = fix_energy
             self.frequency[i].fixed = fix_freq
+
+
+class MercerMatern12sm(gpflow.kernels.Kern):
+    """
+    The Mercer Matern 1/2 spectral mixture kernel
+    """
+    def __init__(self, input_dim, energy=np.asarray([1.]), frequency=np.asarray([2*np.pi]), variance=1.,
+                 lengthscale=1.):
+        gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
+        self.variance = Param(variance, transforms.positive())
+        self.lengthscale = Param(lengthscale, transforms.positive())
+
+        self.num_features = len(frequency)
+        self.energy = energy
+        self.frequency = frequency
+
+    def phi_features(self, X):
+        n = tf.shape(X)[0]
+        m = self.num_features
+        phi_list = 2*m*[None]
+
+        for i in range(m):
+            phi_list[i] = tf.sqrt(self.energy[i]) * tf.cos(2 * np.pi * self.frequency[i] * (X + 1e-12))
+            phi_list[i + m] = tf.sqrt(self.energy[i]) * tf.sin(2 * np.pi * self.frequency[i] * (X + 1e-12))
+        phi = tf.stack(phi_list)
+
+        return tf.reshape(phi, (2*m, n))
+
+    def K(self, X, X2=None, presliced=False):
+        if not presliced:
+            X, X2 = self._slice(X, X2)
+
+        if X2 is None:
+            phi = self.phi_features(X)
+            k = tf.matmul(phi * self.variance, phi, transpose_a=True)
+            return k
+
+        else:
+            phi = self.phi_features(X)
+            phi2 = self.phi_features(X2)
+            k = tf.matmul(phi * self.variance, phi2, transpose_a=True)
+            return k
+
+    def Kdiag(self, X, presliced=False):
+
+        return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance))

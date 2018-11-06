@@ -90,7 +90,7 @@ class SoSp:
         self.test_data.y = self.real_src[0].y.copy() + self.real_src[1].y.copy() + self.real_src[2].y.copy()
 
         if self.test_data.y.size == 16000*14:
-            self.test_data.y = np.vstack((self.test_data.y, np.zeros((1, 1)) ))
+            self.test_data.y = np.vstack((self.test_data.y, np.zeros((1, 1))))
             self.test_data.x = np.linspace(0.,
                                            (self.test_data.y.size - 1.)/self.test_data.fs,
                                            self.test_data.y.size).reshape(-1, 1)
@@ -194,7 +194,8 @@ class SoSp:
 
                 # approx kernel
                 params = gpitch.kernelfit.fit(kern=skern[i], audio=self.train_data[i].y,
-                                              file_name=self.train_data[i].name, max_par=max_par)[0]
+                                              file_name=self.train_data[i].name, max_par=max_par,
+                                              fs=self.train_data[i].fs)[0]
                 self.params[0].append(params[0])  # lengthscale
                 self.params[1].append(params[1])  # variances
                 self.params[2].append(params[2])   # frequencies
@@ -362,8 +363,7 @@ class SoSp:
         # v3 = np.asarray(v3).reshape(-1, 1)
         v1 = window_overlap.merged_variance(y=v1, ws=ws_aux, n=n_aux)
         v2 = window_overlap.merged_variance(y=v2, ws=ws_aux, n=n_aux)
-        v3 =  window_overlap.merged_variance(y=v3, ws=ws_aux, n=n_aux)
-
+        v3 = window_overlap.merged_variance(y=v3, ws=ws_aux, n=n_aux)
 
         if m1.size == 224001:
             m1 = m1[0:-1].reshape(-1, 1)
@@ -421,4 +421,3 @@ class SoSp:
         for i in range(num_sources):
             list_mse.append(np.sqrt(mse(y_true=self.real_src[i].y, y_pred=self.esource[i][0])))
         return np.mean(list_mse)
-

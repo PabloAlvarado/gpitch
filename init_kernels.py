@@ -29,12 +29,13 @@ def init_kern_com(num_pitches, lengthscale, energy, frequency, len_fixed=True):
         #
         # kern_com.append( kern_exp[i] * kern_per[i] )
         kern_com.append(
-                        Matern12sm(1,
-                                   variance=1.,
-                                   lengthscales=lengthscale[i].copy(),
-                                   energy=energy[i].copy(),
-                                   frequencies=frequency[i].copy(),
-                                   len_fixed=len_fixed)
+                        Matern12sm(
+                            1,
+                            variance=1.,
+                            lengthscales=lengthscale[i].copy(),
+                            energy=energy[i].copy(),
+                            frequencies=frequency[i].copy(),
+                            len_fixed=len_fixed)
                         )
     return kern_com
 
