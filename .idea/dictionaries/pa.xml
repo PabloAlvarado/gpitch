@@ -1,6 +1,7 @@
 <component name="ProjectDictionaryState">
   <dictionary name="pa">
     <words>
+      <w>aerr</w>
       <w>asarray</w>
       <w>auxl</w>
       <w>auxname</w>
@@ -20,6 +21,7 @@
       <w>gammaexponential</w>
       <w>hyperparameters</w>
       <w>isol</w>
+      <w>kdiag</w>
       <w>kernelfit</w>
       <w>learnkern</w>
       <w>lenglist</w>
@@ -45,9 +47,11 @@
       <w>prdic</w>
       <w>presliced</w>
       <w>pstar</w>
+      <w>rbound</w>
       <w>readcov</w>
       <w>savem</w>
       <w>scov</w>
+      <w>sgpr</w>
       <w>sgprss</w>
       <w>sharex</w>
       <w>sharey</w>

@@ -16,7 +16,7 @@ class SoSp:
     Source separation model class
     """
 
-    def __init__(self, instrument, frames, pitches=None, gpu='0', load=True):
+    def __init__(self, instrument, frames, pitches=None, gpu='0', load=True, reg=False):
 
         # init session
         self.sess, self.path = gpitch.init_settings(visible_device=gpu)
@@ -53,7 +53,7 @@ class SoSp:
         self.matrix_var = np.zeros((nrow, ncol))
 
         self.init_kernel(load=load)
-        self.init_model()
+        self.init_model(reg=reg)
 
     def load_train(self, train_data_path=None):
 
@@ -248,7 +248,7 @@ class SoSp:
             # u[i] = self.test_data.Y[i].copy()
         self.inducing = [z, u]
 
-    def init_model(self):
+    def init_model(self, reg):
         """Hi"""
         self.init_inducing()  # init inducing points
 
@@ -259,7 +259,7 @@ class SoSp:
         x_init = self.test_data.X[0].copy()
         y_init = self.test_data.Y[0].copy()
         z_init = self.inducing[0][0].copy()
-        self.model = gpitch.sgpr_ss.SGPRSS(X=x_init, Y=y_init, kern=kern_model, Z=z_init)
+        self.model = gpitch.sgpr_ss.SGPRSS(X=x_init, Y=y_init, kern=kern_model, Z=z_init, reg=reg)
 
     def reset_model(self, x, y, z):
         self.model.X = x.copy()

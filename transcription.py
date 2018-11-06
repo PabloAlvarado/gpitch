@@ -4,6 +4,7 @@ import h5py
 import gpitch
 import matplotlib.pyplot as plt
 from scipy import fftpack
+from gpitch.audio import Audio
 
 
 class AMT:
@@ -11,8 +12,9 @@ class AMT:
     Automatic music transcription class
     """
 
-    def __init__(self, pitches=None, nsec=1, test_filename=None, window_size=4410, run_on_server=True, gpu='0'):
+    def __init__(self, pitches=None, nsec=1, test_filename=None, window_size=2001, run_on_server=True, gpu='0', reg=False):
 
+        # define location of files to use
         self.kernel_path = 'c4dm-04/alvarado/results/sampling_covariance/maps/rectified/'
         if run_on_server:
             self.train_path = "c4dm-01/MAPS_original/AkPnBcht/ISOL/NO/"
@@ -24,14 +26,18 @@ class AMT:
         # init session
         self.sess, self.path = gpitch.init_settings(visible_device=gpu, run_on_server=run_on_server)
 
+
+        # create piano roll object
         self.piano_roll = gpitch.pianoroll.Pianoroll(path=self.path + self.test_path, filename=test_filename,
                                                      duration=nsec)
 
+        # define list of pitches to detect
         if pitches is not None:
             self.pitches = pitches
         else:
             self.pitches = list(self.piano_roll.pitch_list)
 
+        # init attributes
         self.train_data = [None]
         self.test_data = Audio()
         self.params = [[], [], []]
@@ -58,6 +64,9 @@ class AMT:
             ncol = len(self.test_data.Y)
             self.matrix_var = np.zeros((nrow, ncol))
             self.matrix_len = np.zeros((nrow, ncol))
+
+        self.init_kernel(covsize=2205, num_sam=10000, max_par=20, train=True)
+        self.init_model(reg=reg)
 
     def load_train(self, train_data_path=None):
 
@@ -228,7 +237,7 @@ class AMT:
             u[i] = b
         self.inducing = [z, u]
 
-    def init_model(self):
+    def init_model(self, reg):
         """Hi"""
         self.init_inducing()  # init inducing points
 
@@ -239,7 +248,7 @@ class AMT:
         x_init = self.test_data.X[0].copy()
         y_init = self.test_data.Y[0].copy()
         z_init = self.inducing[0][0].copy()
-        self.model = gpitch.sgpr_ss.SGPRSS(X=x_init, Y=y_init, kern=kern_model, Z=z_init)
+        self.model = gpitch.sgpr_ss.SGPRSS(X=x_init, Y=y_init, kern=kern_model, Z=z_init, reg=reg)
 
     def reset_model(self, x, y, z):
         self.model.X = x.copy()
