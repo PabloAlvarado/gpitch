@@ -3,11 +3,10 @@ import tensorflow as tf
 import gpflow
 from gpflow.param import ParamList, Param, transforms
 from gpflow import settings
-from scipy.signal import hann
+
 
 float_type = settings.dtypes.float_type
 jitter = settings.numerics.jitter_level
-
 int_type = settings.dtypes.int_type
 np_float_type = np.float32 if float_type is tf.float32 else np.float64
 
@@ -16,7 +15,7 @@ class Matern12sm(gpflow.kernels.Kern):
     """
     Matern spectral mixture kernel with single lengthscale.
     """
-    def __init__(self, input_dim,  variance=1., lengthscales=None, energy=None, frequencies=None, len_fixed=True):
+    def __init__(self, input_dim,  variance=1., lengthscales=None, energy=None, frequency=None, len_fixed=False):
         gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
         energy_l = []
         freq_l = []
@@ -25,7 +24,7 @@ class Matern12sm(gpflow.kernels.Kern):
 
         for i in range(self.num_partials):
             energy_l.append(Param(energy[i], transforms.positive))
-            freq_l.append(Param(frequencies[i], transforms.positive))
+            freq_l.append(Param(frequency[i], transforms.positive))
 
         self.energy = ParamList(energy_l)
         self.frequency = ParamList(freq_l)
@@ -73,15 +72,32 @@ class MercerMatern12sm(gpflow.kernels.Stationary):
     The Mercer Matern 1/2 spectral mixture kernel
     """
     def __init__(self, input_dim, energy=np.asarray([1.]), frequency=np.asarray([2*np.pi]), variance=1.,
-                 lengthscales=1.):
+                 lengthscales=1., len_fixed=False):
         gpflow.kernels.Stationary.__init__(self, input_dim, variance=variance, lengthscales=lengthscales,
                                            active_dims=None, ARD=False)
         # self.variance = Param(variance, transforms.positive())
         # self.lengthscale = Param(lengthscale, transforms.positive())
 
         self.num_partials = len(frequency)
-        self.energy = energy
-        self.frequency = frequency
+
+        energy_list = []
+        frequency_list = []
+
+        for i in range(self.num_partials):
+            energy_list.append(Param(energy[i], transforms.positive))
+            frequency_list.append(Param(frequency[i], transforms.positive))
+
+        self.energy = ParamList(energy_list)
+        self.frequency = ParamList(frequency_list)
+
+        self.energy.fixed = True
+        self.frequency.fixed = True
+
+        # self.energy = energy
+        # self.frequency = frequency
+
+        if len_fixed:
+            self.lengthscales.fixed = True
 
     def K(self, X, X2=None, presliced=False):
         if not presliced:
@@ -101,11 +117,8 @@ class MercerMatern12sm(gpflow.kernels.Stationary):
             return self.variance * tf.exp(-r) * k
 
     def Kdiag(self, X, presliced=False):
-        # return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.variance))
-        var = tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.energy[0]))
-        for i in range(1, self.num_partials):
-            var += tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.energy[i]))
-        return self.variance * var
+        var = self.variance * reduce(tf.add, self.energy)
+        return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(var))
 
     def phi_features(self, X):
         n = tf.shape(X)[0]

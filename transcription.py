@@ -232,8 +232,8 @@ class AMT:
 
         for i in range(nwin):
             a, b = gpitch.init_liv(x=self.test_data.X[i], y=self.test_data.Y[i], num_sources=1)
-            z[i] = a[0][0]
-            u[i] = b
+            z[i] = a[0][0][::3]
+            u[i] = b[::3]
         self.inducing = [z, u]
 
     def init_model(self, reg):
@@ -287,15 +287,15 @@ class AMT:
                 self.matrix_var[j, i] = self.model.kern.kern_list[j].variance.value.copy()
 
 
-            # predict mixture function
-            mean, var = self.model.predict_f(self.test_data.X[i].copy())
-            self.mean.append(mean)
-            self.var.append(var)
-
-            # predict sources
-            smean, svar = self.model.predict_s(self.test_data.X[i].copy())
-            self.smean.append(smean)
-            self.svar.append(svar)
+            # # predict mixture function
+            # mean, var = self.model.predict_f(self.test_data.X[i].copy())
+            # self.mean.append(mean)
+            # self.var.append(var)
+            #
+            # # predict sources
+            # smean, svar = self.model.predict_s(self.test_data.X[i].copy())
+            # self.smean.append(smean)
+            # self.svar.append(svar)
 
     def save(self):
         # save results

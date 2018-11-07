@@ -96,7 +96,7 @@ class SoSp:
                                            self.test_data.y.size).reshape(-1, 1)
             # print self.test_data.fs
 
-        self.test_data.windowed()
+        self.test_data.windowed(overlap=True)
 
     def plot_traindata(self, figsize=None):
         nfiles = len(self.train_data)
