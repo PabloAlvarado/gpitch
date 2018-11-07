@@ -88,7 +88,8 @@ class AMT:
         if train_data_path is not None:
             self.test_path = train_data_path
         path = self.path + self.test_path
-        self.test_data = Audio(path=path, filename=filename, start=start, frames=frames, window_size=window_size, overlap=overlap)
+        self.test_data = Audio(path=path, filename=filename, start=start, frames=frames, window_size=window_size,
+                               overlap=overlap)
 
     def plot_traindata(self, figsize=None, axis_off=True):
         nfiles = len(self.train_data)
@@ -285,7 +286,6 @@ class AMT:
             for j in range(len(self.pitches)):
                 # self.matrix_var[j, i] = self.model.kern.kern_list[j].kern_list[0].variance.value.copy()
                 self.matrix_var[j, i] = self.model.kern.kern_list[j].variance.value.copy()
-
 
             # # predict mixture function
             # mean, var = self.model.predict_f(self.test_data.X[i].copy())

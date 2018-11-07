@@ -6,6 +6,7 @@
       <w>auxl</w>
       <w>auxname</w>
       <w>bcht</w>
+      <w>bfgs</w>
       <w>covsize</w>
       <w>disp</w>
       <w>esource</w>
@@ -14,11 +15,13 @@
       <w>filel</w>
       <w>filenames</w>
       <w>filetest</w>
+      <w>flipud</w>
       <w>fname</w>
       <w>freqs</w>
       <w>fsum</w>
       <w>gabor</w>
       <w>gammaexponential</w>
+      <w>hparam</w>
       <w>hyperparameters</w>
       <w>icassp</w>
       <w>isol</w>
@@ -29,11 +32,13 @@
       <w>lengthscales</w>
       <w>lfiles</w>
       <w>loadm</w>
+      <w>msize</w>
       <w>multiplot</w>
       <w>ncol</w>
       <w>ncols</w>
       <w>nlinfun</w>
       <w>npar</w>
+      <w>nparams</w>
       <w>npartials</w>
       <w>nplots</w>
       <w>nrow</w>
@@ -59,6 +64,7 @@
       <w>sharey</w>
       <w>skern</w>
       <w>smean</w>
+      <w>sqrt</w>
       <w>svar</w>
       <w>vsource</w>
       <w>writecov</w>

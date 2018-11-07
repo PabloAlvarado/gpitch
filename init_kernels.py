@@ -1,5 +1,5 @@
 from gpflow.kernels import Matern32
-from matern12_spectral_mixture import Matern12sm, MercerMatern12sm
+from matern12_spectral_mixture import MercerMatern12sm
 import pickle
 
 

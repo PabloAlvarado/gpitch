@@ -1,5 +1,5 @@
 import numpy as np
-import scipy as sp
+from scipy import optimize
 
 
 def sample_cov(x, niter, msize):
@@ -7,7 +7,7 @@ def sample_cov(x, niter, msize):
     cov = np.zeros((msize, msize))
     samples = niter*[None]
     for i in range(niter):
-        idx = np.random.randint(0, x.size - msize)  # sample start index to get audio segment of sise msize
+        idx = np.random.randint(0, x.size - msize)  # sample start index to get audio segment of size msize
         samples[i] = x[idx: idx + msize].copy()
         # if np.random.randint(0, 2):
         #     samples[i] = np.flipud(samples[i].copy())
@@ -19,21 +19,22 @@ def sample_cov(x, niter, msize):
 
 
 def loss_func(p, x, y):
-    '''
+    """
     Loss function to fit function to kernel observations
-    '''
-    f =  np.sqrt(np.square(approximate_kernel(p, x) - y).mean())
+    """
+    f = np.sqrt(np.square(approximate_kernel(p, x) - y).mean())
     return f
 
 
 def approximate_kernel(p, x):
-    '''
+    """
     approximate kernel
-    '''
+    """
     nparams = p.size
     npartials = (nparams - 2) / 2
     bias = np.sqrt(p[0] * p[0])
-    # k_e = (1. + np.sqrt(3.) * np.abs(x) / np.sqrt(p[1] * p[1])) * np.exp(- np.sqrt(3.) * np.abs(x) / np.sqrt(p[1] * p[1]))
+    # k_e = (1. + np.sqrt(3.) * np.abs(x) / np.sqrt(p[1] * p[1])) * np.exp(- np.sqrt(3.) *
+    # np.abs(x) / np.sqrt(p[1] * p[1]))
     k_e = np.exp(- np.abs(x) / np.sqrt(p[1] * p[1]))
 
     k_partials = [np.sqrt(p[i] * p[i]) * np.cos(2 * np.pi * np.sqrt(p[i + npartials] * p[i + npartials]) * np.abs(x))
@@ -52,7 +53,7 @@ def approximate_kernel(p, x):
 
 def optimize_kern(x, y, p0):
     """Optimization of kernel"""
-    phat = sp.optimize.minimize(loss_func, p0, method='L-BFGS-B', args=(x, y), tol=1e-12, options={'disp': True})
+    phat = optimize.minimize(loss_func, p0, method='L-BFGS-B', args=(x, y), tol=1e-12, options={'disp': True})
     pstar = np.sqrt(phat.x ** 2).copy()
     return pstar
 
