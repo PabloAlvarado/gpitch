@@ -57,7 +57,7 @@ def plotgp(x, y, xnew, mean, variance):
                      color='C0', alpha=0.25)
 
 
-def plot_predict(x, mean, var, z, nlinfun=logistic, latent=False, plot_z=True, plot_latent=True):
+def plot_predict(x, mean, var, z, nlinfun=logistic, latent=False, plot_z=True, plot_latent=False):
     """Basic plot unit for ploting predictions in general"""
     if latent:
         plt.plot(x, nlinfun(mean), 'C0', lw=2)

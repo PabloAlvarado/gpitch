@@ -34,9 +34,14 @@ def init_liv(x, y, num_sources=1, win_size=9, thres=0.0025, dec=1):
     x = x.reshape(-1,)
     y = y.reshape(-1,)
 
+    # energy
+    win1 = signal.hann(1600)
+    energy = signal.convolve(np.abs(y), win1, mode='same') / sum(win1)
+    energy /= np.max(energy)
+
     # smooth signal
-    win = signal.hann(win_size)
-    y_smooth = signal.convolve(y, win, mode='same')/ sum(win)
+    win2 = signal.hann(win_size)
+    y_smooth = signal.convolve(y, win2, mode='same')/ sum(win2)
 
     # detect zero crossing of data gradient
     f_sign = np.sign(np.gradient(y_smooth))
@@ -46,17 +51,15 @@ def init_liv(x, y, num_sources=1, win_size=9, thres=0.0025, dec=1):
     # get data where its gradient is zero (peaks and valleys)
     x_all = x[idx].copy()
     y_all = y[idx].copy()
+    energy_all = energy[idx].copy()
 
-    # get only values outside the "noise range" defined by threshold
-    idx1 = np.where(y_all >  thres)
-    idx2 = np.where(y_all < -thres)
-    aux1 = np.hstack((x_all[idx1], x_all[idx2]))
-    aux2 = np.hstack((y_all[idx1], y_all[idx2]))
+    # get only values above threshold energy
+    idx1 = np.where(energy_all > thres)
 
     # sort vector
-    idx3 = np.argsort(aux1)
-    x_final = aux1[idx3].copy().reshape(-1, 1)
-    y_final = aux2[idx3].copy().reshape(-1, 1)
+    idx3 = np.argsort(idx1)
+    x_final = x_all[idx3].copy().reshape(-1, 1)
+    y_final = y_all[idx3].copy().reshape(-1, 1)
     
     za = []
     zc = []
