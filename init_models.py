@@ -25,7 +25,7 @@ def init_iv(x, num_sources, nivps_a, nivps_c, fs):
     return z
 
 
-def init_liv(x, y, num_sources=1, win_size=9, thres=0.0025):
+def init_liv(x, y, num_sources=1, win_size=9, thres=0.0025, dec=1):
     """
     Initialize location of inducing varibales by using locations of 
     peaks and valleys of test data "y" or extrema.
@@ -61,10 +61,10 @@ def init_liv(x, y, num_sources=1, win_size=9, thres=0.0025):
     za = []
     zc = []
     for i in range(num_sources):
-        za.append(x_final.copy())  # location ind v act
-        zc.append(x_final.copy())  # location ind v comp
+        za.append(x_final[::dec].copy())  # location ind v act
+        zc.append(x_final[::dec].copy())  # location ind v comp
     z = [za, zc]
-    return z, y_final
+    return z, y_final[::dec]
 
 def init_kernel_training(y, list_files, fs, maxh=25):
     num_pitches = len(list_files)
