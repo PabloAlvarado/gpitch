@@ -9,7 +9,7 @@ class Pianoroll:
         self.duration = duration
         self.fs = fs
         self.xn = int(round(duration*fs))
-        self.x = np.linspace(0., (self.xn -1.)/self.fs, self.xn).reshape(-1, 1)
+        self.x = np.linspace(0., (self.xn - 1.) / self.fs, self.xn).reshape(-1, 1)
         self.pr_dic = dict([(str(i), np.zeros((self.xn, 1))) for i in range(21, 109)])
 
         if filename is None:
@@ -39,6 +39,3 @@ class Pianoroll:
 
         self.matrix = np.asarray(self.matrix).reshape(88, -1)
         self.matrix = np.flipud(self.matrix)
-
-
-
