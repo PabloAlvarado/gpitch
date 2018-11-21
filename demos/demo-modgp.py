@@ -42,19 +42,19 @@ m.zc.fixed = True
 
 # optimization
 method = tf.train.AdamOptimizer(learning_rate=0.005)
-m.optimize(method=method, maxiter=2500)
+m.optimize(method=method, maxiter=1000)
 
 # predict
 xtest = x[::4].copy()
 mu_a, var_a, mu_c, var_c, m_src = m.predict_act_n_com(xtest)
 
-# plot data
-plt.figure(figsize=(8, 8))
+# plot results
+plt.figure(figsize=(12, 8))
 plt.subplot(3, 1, 1)
+plt.plot(xtest, m_src[0], lw=2)
+plt.plot(z[0][0], u, 'o', mfc="none", ms=7, mew=2)
 plt.plot(x, y, 'k--')
-plt.plot(xtest, m_src[0])
-plt.plot(z[0][0], u, 'o', mfc="none")
-plt.legend(['data', 'prediction', 'maxima data (ind. points)'])
+plt.legend(['prediction', 'maxima data (ind. points)', 'data'])
 
 plt.subplot(3, 1, 2)
 plt.plot(x, envelope, 'k--')
