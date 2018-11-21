@@ -103,8 +103,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/gpitch/matern12_spectral_mixture.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="326">
-              <caret line="92" column="34" lean-forward="true" selection-start-line="92" selection-start-column="34" selection-end-line="92" selection-end-column="34" />
+            <state relative-caret-position="350">
+              <caret line="93" column="37" lean-forward="true" selection-start-line="93" selection-start-column="37" selection-end-line="93" selection-end-column="37" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -409,8 +409,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/gpitch/matern12_spectral_mixture.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="326">
-          <caret line="92" column="34" lean-forward="true" selection-start-line="92" selection-start-column="34" selection-end-line="92" selection-end-column="34" />
+        <state relative-caret-position="350">
+          <caret line="93" column="37" lean-forward="true" selection-start-line="93" selection-start-column="37" selection-end-line="93" selection-end-column="37" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
