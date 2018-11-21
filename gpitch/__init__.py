@@ -10,3 +10,6 @@ from . import sgpr_ss
 from . import pdgp
 from . import separation
 from . import transcription
+
+from . import  kernelfit
+from . import  samplecov
