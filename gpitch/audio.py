@@ -29,9 +29,9 @@ class Audio:
 
     def windowed(self, overlap):
         if overlap:
-            X, Y = window_overlap.windowed(x=self.x, y=self.y, ws=self.wsize)
+            xwin, ywin = window_overlap.windowed(x=self.x, y=self.y, ws=self.wsize)
         else:
-            X, Y = segmented(x=self.x, y=self.y, window_size=self.wsize)
+            xwin, ywin = segmented(x=self.x, y=self.y, window_size=self.wsize)
 
-        self.X, self.Y = X, Y
-        return X, Y
+        self.X, self.Y = xwin, ywin
+        return xwin, ywin
