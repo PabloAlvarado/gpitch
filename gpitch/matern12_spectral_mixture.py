@@ -90,8 +90,8 @@ class MercerMatern12sm(gpflow.kernels.Stationary):
         self.energy = ParamList(energy_list)
         self.frequency = ParamList(frequency_list)
 
-        self.energy.fixed = True
-        self.frequency.fixed = True
+        # self.energy.fixed = True
+        # self.frequency.fixed = True
 
         # self.energy = energy
         # self.frequency = frequency
