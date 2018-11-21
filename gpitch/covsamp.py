@@ -56,8 +56,3 @@ def optimize_kern(x, y, p0):
     phat = optimize.minimize(loss_func, p0, method='L-BFGS-B', args=(x, y), tol=1e-12, options={'disp': True})
     pstar = np.sqrt(phat.x ** 2).copy()
     return pstar
-
-
-
-
-
