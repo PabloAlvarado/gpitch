@@ -18,7 +18,7 @@ class Env(gpflow.kernels.Kern):
     def __init__(self, input_dim, z):
         gpflow.kernels.Kern.__init__(self, input_dim=input_dim, active_dims=None)
 
-        self.kernel = gpflow.kernels.RBF(input_dim=input_dim, lengthscales=0.1, variance=0.25)
+        self.kernel = gpflow.kernels.RBF(input_dim=input_dim, lengthscales=0.5, variance=1.0)
         #self.kernel.variance.fixed = True
         self.z = gpflow.param.Param(z)
         self.u = gpflow.param.Param(0.*np.sqrt(0.001)*np.random.randn(z.size, 1))

@@ -4,34 +4,35 @@ import h5py
 import gpitch
 import matplotlib.pyplot as plt
 from scipy import fftpack
+from gpitch.audio import Audio
 
 
 class AMT:
     """
     Automatic music transcription class
     """
+    def __init__(self, pitches=None, nsec=1, test_filename=None, window_size=2001, gpu='0', reg=False, load=True,
+                 overlap=False):
 
-    def __init__(self, pitches=None, nsec=1, test_filename=None, window_size=4410, run_on_server=True, gpu='0'):
-
+        # define location of files to use
         self.kernel_path = 'c4dm-04/alvarado/results/sampling_covariance/maps/rectified/'
-        if run_on_server:
-            self.train_path = "c4dm-01/MAPS_original/AkPnBcht/ISOL/NO/"
-            self.test_path = "c4dm-01/MAPS_original/AkPnBcht/MUS/"
-        else:
-            self.train_path = "media/pa/TOSHIBA EXT/Datasets/MAPS/AkPnBcht/ISOL/NO/"
-            self.test_path = "media/pa/TOSHIBA EXT/Datasets/MAPS/AkPnBcht/MUS/"
+        self.train_path = "c4dm-01/MAPS_original/AkPnBcht/ISOL/NO/"
+        self.test_path = "c4dm-01/MAPS_original/AkPnBcht/MUS/"
 
         # init session
-        self.sess, self.path = gpitch.init_settings(visible_device=gpu, run_on_server=run_on_server)
+        self.sess, self.path = gpitch.init_settings(visible_device=gpu)
 
+        # create piano roll object
         self.piano_roll = gpitch.pianoroll.Pianoroll(path=self.path + self.test_path, filename=test_filename,
                                                      duration=nsec)
 
+        # define list of pitches to detect
         if pitches is not None:
             self.pitches = pitches
         else:
             self.pitches = list(self.piano_roll.pitch_list)
 
+        # init attributes
         self.train_data = [None]
         self.test_data = Audio()
         self.params = [[], [], []]
@@ -40,24 +41,30 @@ class AMT:
         self.kern_pitches = [None]
         self.model = None
         self.sampled_cov = [None]
-
         self.mean = []
         self.var = []
         self.smean = []
         self.svar = []
-
         self.matrix_var = []
         self.matrix_len = []
 
+        # load training data
         self.load_train()
 
+        # load test data
         if test_filename is not None:
-            self.load_test(filename=test_filename, start=0, frames=nsec*44100, window_size=window_size)
+            self.load_test(filename=test_filename, start=0, frames=nsec*44100, window_size=window_size, overlap=overlap)
 
             nrow = len(self.pitches)
             ncol = len(self.test_data.Y)
             self.matrix_var = np.zeros((nrow, ncol))
             self.matrix_len = np.zeros((nrow, ncol))
+
+        # initialize kernels
+        self.init_kernel(load=load)
+
+        # initialize regression model
+        self.init_model(reg=reg)
 
     def load_train(self, train_data_path=None):
 
@@ -77,11 +84,12 @@ class AMT:
             data.append(Audio(path=path, filename=lfiles[i], start=start, frames=88200))
         self.train_data = data
 
-    def load_test(self, filename, window_size, start, frames, train_data_path=None):
+    def load_test(self, filename, window_size, start, frames, train_data_path=None, overlap=False):
         if train_data_path is not None:
             self.test_path = train_data_path
         path = self.path + self.test_path
-        self.test_data = Audio(path=path, filename=filename, start=start, frames=frames, window_size=window_size)
+        self.test_data = Audio(path=path, filename=filename, start=start, frames=frames, window_size=window_size,
+                               overlap=overlap)
 
     def plot_traindata(self, figsize=None, axis_off=True):
         nfiles = len(self.train_data)
@@ -177,7 +185,8 @@ class AMT:
 
                 # approx kernel
                 params = gpitch.kernelfit.fit(kern=skern[i], audio=self.train_data[i].y,
-                                              file_name=self.train_data[i].name, max_par=max_par)[0]
+                                              file_name=self.train_data[i].name, max_par=max_par,
+                                              fs=self.train_data[i].fs)[0]
                 self.params[0].append(params[0])  # lengthscale
                 self.params[1].append(params[1])  # variances
                 self.params[2].append(params[2])   # frequencies
@@ -224,11 +233,11 @@ class AMT:
 
         for i in range(nwin):
             a, b = gpitch.init_liv(x=self.test_data.X[i], y=self.test_data.Y[i], num_sources=1)
-            z[i] = a[0][0]
-            u[i] = b
+            z[i] = a[0][0][::3]
+            u[i] = b[::3]
         self.inducing = [z, u]
 
-    def init_model(self):
+    def init_model(self, reg):
         """Hi"""
         self.init_inducing()  # init inducing points
 
@@ -239,7 +248,7 @@ class AMT:
         x_init = self.test_data.X[0].copy()
         y_init = self.test_data.Y[0].copy()
         z_init = self.inducing[0][0].copy()
-        self.model = gpitch.sgpr_ss.SGPRSS(X=x_init, Y=y_init, kern=kern_model, Z=z_init)
+        self.model = gpitch.sgpr_ss.SGPRSS(X=x_init, Y=y_init, kern=kern_model, Z=z_init, reg=reg)
 
     def reset_model(self, x, y, z):
         self.model.X = x.copy()
@@ -248,8 +257,10 @@ class AMT:
         self.model.likelihood.variance = 1.
 
         for i in range(len(self.pitches)):
-            self.model.kern.kern_list[i].kern_list[0].variance = 1.
-            self.model.kern.kern_list[i].kern_list[0].lengthscales = self.params[0][i].copy()
+            # self.model.kern.kern_list[i].kern_list[0].variance = 1.
+            # self.model.kern.kern_list[i].kern_list[0].lengthscales = self.params[0][i].copy()
+            self.model.kern.kern_list[i].variance = 1.
+            self.model.kern.kern_list[i].lengthscales = self.params[0][i].copy()
 
     def optimize(self, maxiter, disp=1, nwin=None):
 
@@ -273,17 +284,18 @@ class AMT:
 
             # save learned params
             for j in range(len(self.pitches)):
-                self.matrix_var[j, i] = self.model.kern.kern_list[j].kern_list[0].variance.value.copy()
+                # self.matrix_var[j, i] = self.model.kern.kern_list[j].kern_list[0].variance.value.copy()
+                self.matrix_var[j, i] = self.model.kern.kern_list[j].variance.value.copy()
 
-            # predict mixture function
-            mean, var = self.model.predict_f(self.test_data.X[i].copy())
-            self.mean.append(mean)
-            self.var.append(var)
-
-            # predict sources
-            smean, svar = self.model.predict_s(self.test_data.X[i].copy())
-            self.smean.append(smean)
-            self.svar.append(svar)
+            # # predict mixture function
+            # mean, var = self.model.predict_f(self.test_data.X[i].copy())
+            # self.mean.append(mean)
+            # self.var.append(var)
+            #
+            # # predict sources
+            # smean, svar = self.model.predict_s(self.test_data.X[i].copy())
+            # self.smean.append(smean)
+            # self.svar.append(svar)
 
     def save(self):
         # save results
