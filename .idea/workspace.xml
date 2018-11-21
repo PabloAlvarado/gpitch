@@ -6,7 +6,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="720bb2d6-351b-4ab5-b25d-15571c0e2769" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/gpitch/windowed.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gpitch/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/gpitch/__init__.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -28,27 +29,6 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/gpitch/pianoroll.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="288">
-              <caret line="12" column="46" selection-start-line="12" selection-start-column="46" selection-end-line="12" selection-end-column="46" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/gpitch/__init__.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="6" selection-start-line="6" selection-end-line="6" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gpitch/samplecov.py">
           <provider selected="true" editor-type-id="text-editor">
             <state>
@@ -60,11 +40,12 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/gpitch/window_overlap.py">
+        <entry file="file://$PROJECT_DIR$/gpitch/__init__.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
+            <state relative-caret-position="288">
+              <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
               <folding>
-                <element signature="e#0#18#0" expanded="true" />
+                <element signature="e#0#21#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -82,12 +63,13 @@
         <option value="$PROJECT_DIR$/gpitch/covsamp.py" />
         <option value="$PROJECT_DIR$/gpitch/init_models.py" />
         <option value="$PROJECT_DIR$/gpitch/kernels.py" />
-        <option value="$PROJECT_DIR$/gpitch/__init__.py" />
         <option value="$PROJECT_DIR$/gpitch/pianoroll.py" />
+        <option value="$PROJECT_DIR$/gpitch/matern12_spectral_mixture.py" />
+        <option value="$PROJECT_DIR$/gpitch/__init__.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="6" fullScreen="true">
     <option name="x" value="235" />
     <option name="y" value="41" />
     <option name="width" value="1400" />
@@ -151,9 +133,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="67" y="25" width="1853" height="1055" extended-state="6" />
+    <frame x="0" y="-30" width="1920" height="1110" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.16338798" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.15761729" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -229,32 +212,6 @@
     <entry file="file://$PROJECT_DIR$/gpitch/linear.py" />
     <entry file="file://$PROJECT_DIR$/gpitch/mapsm.py" />
     <entry file="file://$PROJECT_DIR$/gpitch/new_win_overlap.py" />
-    <entry file="file://$PROJECT_DIR$/gpitch/kernelfit.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gpitch/pianoroll.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="12" column="46" selection-start-line="12" selection-start-column="46" selection-end-line="12" selection-end-column="46" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gpitch/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="6" selection-start-line="6" selection-end-line="6" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/gpitch/source_separation.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-731">
@@ -276,6 +233,45 @@
     <entry file="file://$PROJECT_DIR$/gpitch/plot_settings.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
+    <entry file="file://$PROJECT_DIR$/gpitch/matern12_spectral_mixture.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="878">
+          <caret line="100" lean-forward="true" selection-start-line="100" selection-end-line="100" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gpitch/window_overlap.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="18" column="23" lean-forward="true" selection-start-line="18" selection-start-column="23" selection-end-line="18" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gpitch/pianoroll.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="284">
+          <caret line="12" column="46" selection-start-line="12" selection-start-column="46" selection-end-line="12" selection-end-column="46" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gpitch/kernelfit.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/gpitch/samplecov.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -285,11 +281,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gpitch/window_overlap.py">
+    <entry file="file://$PROJECT_DIR$/gpitch/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
+        <state relative-caret-position="288">
+          <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
           <folding>
-            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#0#21#0" expanded="true" />
           </folding>
         </state>
       </provider>
