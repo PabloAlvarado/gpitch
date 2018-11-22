@@ -6,10 +6,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="720bb2d6-351b-4ab5-b25d-15571c0e2769" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/gpitch.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gpitch.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demos/notebooks/demo-modgp.png" beforeDir="false" afterPath="$PROJECT_DIR$/demos/notebooks/demo-modgp.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gpitch/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/gpitch/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gpitch/init_kernels.py" beforeDir="false" afterPath="$PROJECT_DIR$/gpitch/init_kernels.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gpitch/kernels.py" beforeDir="false" afterPath="$PROJECT_DIR$/gpitch/kernels.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gpitch/likelihoods.py" beforeDir="false" afterPath="$PROJECT_DIR$/gpitch/likelihoods.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gpitch/matern12_spectral_mixture.py" beforeDir="false" afterPath="$PROJECT_DIR$/gpitch/matern12_spectral_mixture.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpitch/srcs.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gpitch/pdgp.py" beforeDir="false" afterPath="$PROJECT_DIR$/gpitch/pdgp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gpitch/sgpr_ss.py" beforeDir="false" afterPath="$PROJECT_DIR$/gpitch/sgpr_ss.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,46 +26,12 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/gpitch/audio.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="192">
-              <caret line="8" column="12" selection-start-line="8" selection-start-column="12" selection-end-line="8" selection-end-column="12" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/gpitch/separation.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-4117">
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gpitch/__init__.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="336">
-              <caret line="14" column="24" selection-start-line="14" selection-start-column="24" selection-end-line="14" selection-end-column="24" />
+            <state relative-caret-position="360">
+              <caret line="15" selection-start-line="15" selection-end-line="15" />
               <folding>
-                <element signature="e#0#21#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/gpitch/transcription.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-360">
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
+                <element signature="e#0#22#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -68,7 +40,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gpitch/kernelfit.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-720">
+            <state>
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -77,9 +49,42 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/gpitch/kernels.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="96">
+              <caret line="4" column="29" selection-start-line="4" selection-start-column="29" selection-end-line="4" selection-end-column="29" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/gpitch/likelihoods.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="299">
+              <caret line="282" column="43" selection-start-line="282" selection-start-column="38" selection-end-line="282" selection-end-column="43" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/gpitch/init_kernels.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="48">
+              <caret line="2" column="13" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
+              <folding>
+                <element signature="e#0#35#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gpitch/samplecov.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="264">
+            <state relative-caret-position="240">
               <caret line="11" column="41" selection-start-line="11" selection-start-column="41" selection-end-line="11" selection-end-column="41" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
@@ -91,7 +96,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gpitch/methods.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="235">
+            <state relative-caret-position="456">
               <caret line="31" column="21" selection-start-line="31" selection-start-column="21" selection-end-line="31" selection-end-column="21" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
@@ -100,11 +105,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gpitch/matern12_spectral_mixture.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="350">
-              <caret line="93" column="37" lean-forward="true" selection-start-line="93" selection-start-column="37" selection-end-line="93" selection-end-column="37" />
+            <state relative-caret-position="312">
+              <caret line="68" column="22" selection-start-line="68" selection-start-column="22" selection-end-line="68" selection-end-column="22" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -113,10 +118,22 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/gpitch/sgpr_ss.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="240">
+              <caret line="10" selection-start-line="10" selection-end-line="10" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/gpitch/pdgp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="336">
-              <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
+            <state relative-caret-position="1176">
+              <caret line="79" column="42" selection-start-line="79" selection-start-column="42" selection-end-line="79" selection-end-column="42" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -129,7 +146,16 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>find</find>
+      <find>AutoFlow</find>
+      <find>AutoFlowMinibatchData</find>
+      <find>MinibatchData</find>
+      <find>Param</find>
     </findStrings>
+    <replaceStrings>
+      <replace>autoflow</replace>
+      <replace>Minibatch</replace>
+      <replace>Parameter</replace>
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -140,10 +166,14 @@
         <option value="$PROJECT_DIR$/gpitch/audio.py" />
         <option value="$PROJECT_DIR$/gpitch/covsamp.py" />
         <option value="$PROJECT_DIR$/gpitch/init_models.py" />
-        <option value="$PROJECT_DIR$/gpitch/kernels.py" />
         <option value="$PROJECT_DIR$/gpitch/pianoroll.py" />
+        <option value="$PROJECT_DIR$/gpitch/kernels.py" />
+        <option value="$PROJECT_DIR$/gpitch/init_kernels.py" />
+        <option value="$PROJECT_DIR$/gpitch/sgpr_ss.py" />
         <option value="$PROJECT_DIR$/gpitch/__init__.py" />
+        <option value="$PROJECT_DIR$/gpitch/likelihoods.py" />
         <option value="$PROJECT_DIR$/gpitch/matern12_spectral_mixture.py" />
+        <option value="$PROJECT_DIR$/gpitch/pdgp.py" />
       </list>
     </option>
   </component>
@@ -183,7 +213,7 @@
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
-    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -214,7 +244,7 @@
     <frame x="0" y="-30" width="1920" height="1110" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.15761729" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.15761729" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -237,16 +267,6 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/gpitch/evaluation.py" />
     <entry file="file://$PROJECT_DIR$/gpitch/evaluation_old.py" />
-    <entry file="file://$PROJECT_DIR$/gpitch/init_kernels.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1152">
-          <caret line="48" lean-forward="true" selection-start-line="48" selection-end-line="48" />
-          <folding>
-            <element signature="e#0#35#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/gpitch/init_models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="168">
@@ -267,40 +287,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gpitch/kernels.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/gpitch/linear.py" />
     <entry file="file://$PROJECT_DIR$/gpitch/mapsm.py" />
     <entry file="file://$PROJECT_DIR$/gpitch/new_win_overlap.py" />
-    <entry file="file://$PROJECT_DIR$/gpitch/source_separation.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-731">
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gpitch/training.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gpitch/plot_settings.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/gpitch/source_separation.py" />
+    <entry file="file://$PROJECT_DIR$/gpitch/training.py" />
+    <entry file="file://$PROJECT_DIR$/gpitch/plot_settings.py" />
     <entry file="file://$PROJECT_DIR$/gpitch/window_overlap.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="432">
@@ -321,9 +313,10 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/gpitch/srcs.py" />
     <entry file="file://$PROJECT_DIR$/gpitch/audio.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
+        <state relative-caret-position="144">
           <caret line="8" column="12" selection-start-line="8" selection-start-column="12" selection-end-line="8" selection-end-column="12" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
@@ -333,44 +326,25 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/gpitch/separation.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4117">
+        <state>
           <folding>
             <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gpitch/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="14" column="24" selection-start-line="14" selection-start-column="24" selection-end-line="14" selection-end-column="24" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/gpitch/transcription.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-360">
+        <state>
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gpitch/kernelfit.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-720">
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/gpitch/samplecov.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
+        <state relative-caret-position="240">
           <caret line="11" column="41" selection-start-line="11" selection-start-column="41" selection-end-line="11" selection-end-column="41" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
@@ -380,7 +354,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/gpitch/methods.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="235">
+        <state relative-caret-position="456">
           <caret line="31" column="21" selection-start-line="31" selection-start-column="21" selection-end-line="31" selection-end-column="21" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
@@ -388,29 +362,76 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gpitch/srcs.py">
+    <entry file="file://$PROJECT_DIR$/gpitch/kernelfit.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#0#13#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gpitch/pdgp.py">
+    <entry file="file://$PROJECT_DIR$/gpitch/init_kernels.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
+        <state relative-caret-position="48">
+          <caret line="2" column="13" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
+          <folding>
+            <element signature="e#0#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gpitch/sgpr_ss.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="10" selection-start-line="10" selection-end-line="10" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gpitch/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="15" selection-start-line="15" selection-end-line="15" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gpitch/likelihoods.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="299">
+          <caret line="282" column="43" selection-start-line="282" selection-start-column="38" selection-end-line="282" selection-end-column="43" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gpitch/kernels.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="96">
+          <caret line="4" column="29" selection-start-line="4" selection-start-column="29" selection-end-line="4" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gpitch/matern12_spectral_mixture.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="312">
+          <caret line="68" column="22" selection-start-line="68" selection-start-column="22" selection-end-line="68" selection-end-column="22" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gpitch/matern12_spectral_mixture.py">
+    <entry file="file://$PROJECT_DIR$/gpitch/pdgp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="350">
-          <caret line="93" column="37" lean-forward="true" selection-start-line="93" selection-start-column="37" selection-end-line="93" selection-end-column="37" />
+        <state relative-caret-position="1176">
+          <caret line="79" column="42" selection-start-line="79" selection-start-column="42" selection-end-line="79" selection-end-column="42" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>

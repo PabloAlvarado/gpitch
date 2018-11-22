@@ -1,13 +1,15 @@
 import gpflow
 import tensorflow as tf
-from gpflow.param import AutoFlow, DataHolder
+from gpflow.params import DataHolder
+from gpflow import autoflow
 from gpflow import settings
 import numpy as np
+
 
 float_type = settings.dtypes.float_type
 
 
-class SGPRSS(gpflow.sgpr.SGPR):
+class SGPRSS(gpflow.models.sgpr.SGPR):
     """
     Sparse Gaussian process regression for source separation
     """
@@ -20,7 +22,7 @@ class SGPRSS(gpflow.sgpr.SGPR):
             var_list = []
             for i in range(D):
                 var_list.append(kern.kern_list[i].variance)
-            kern.var_vector = gpflow.param.ParamList(var_list)
+            kern.var_vector = gpflow.params.ParamList(var_list)
 
         gpflow.sgpr.SGPR.__init__(self, X=X, Y=Y, kern=kern, Z=Z, mean_function=mean_function)
         self.Z = DataHolder(Z, on_shape_change='pass')
@@ -105,7 +107,7 @@ class SGPRSS(gpflow.sgpr.SGPR):
             var.append(svar)
         return mean, var
 
-    @AutoFlow((float_type, [None, None]))
+    @autoflow((float_type, [None, None]))
     def predict_s(self, Xnew):
         """
         Compute the mean and variance of the sources

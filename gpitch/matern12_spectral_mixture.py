@@ -1,8 +1,11 @@
 import numpy as np
 import tensorflow as tf
 import gpflow
-from gpflow.param import ParamList, Param, transforms
+from gpflow.params import ParamList, Parameter
+from gpflow import transforms
 from gpflow import settings
+from gpflow.decors import params_as_tensors
+import functools
 
 
 float_type = settings.dtypes.float_type
@@ -23,18 +26,19 @@ class Matern12sm(gpflow.kernels.Kern):
         self.num_partials = len(energy)
 
         for i in range(self.num_partials):
-            energy_l.append(Param(energy[i], transforms.positive))
-            freq_l.append(Param(frequency[i], transforms.positive))
+            energy_l.append(Parameter(energy[i], transforms.positive))
+            freq_l.append(Parameter(frequency[i], transforms.positive))
 
         self.energy = ParamList(energy_l)
         self.frequency = ParamList(freq_l)
-        self.variance = Param(variance, transforms.positive)
-        self.lengthscales = Param(lengthscales, transforms.positive)
+        self.variance = Parameter(variance, transforms.positive)
+        self.lengthscales = Parameter(lengthscales, transforms.positive)
 
         self.vars_n_freqs_fixed(fix_energy=True, fix_freq=True)
         if len_fixed:
             self.lengthscales.fixed = True
 
+    @params_as_tensors
     def K(self, X, X2=None, presliced=False):
         if not presliced:
             X, X2 = self._slice(X, X2)
@@ -55,12 +59,14 @@ class Matern12sm(gpflow.kernels.Kern):
             k += self.energy[i] * tf.cos(r2)
         return self.variance * tf.exp(-r1) * k
 
+    @params_as_tensors
     def Kdiag(self, X):
         var = tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.energy[0]))
         for i in range(1, self.num_partials):
             var += tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(self.energy[i]))
         return self.variance * var
 
+    @params_as_tensors
     def vars_n_freqs_fixed(self, fix_energy=True, fix_freq=True):
         for i in range(self.num_partials):
             self.energy[i].fixed = fix_energy
@@ -75,8 +81,8 @@ class MercerMatern12sm(gpflow.kernels.Stationary):
                  lengthscales=1., len_fixed=False):
         gpflow.kernels.Stationary.__init__(self, input_dim, variance=variance, lengthscales=lengthscales,
                                            active_dims=None, ARD=False)
-        # self.variance = Param(variance, transforms.positive())
-        # self.lengthscale = Param(lengthscale, transforms.positive())
+        # self.variance = Parameter(variance, transforms.positive())
+        # self.lengthscale = Parameter(lengthscale, transforms.positive())
 
         self.num_partials = len(frequency)
 
@@ -84,8 +90,8 @@ class MercerMatern12sm(gpflow.kernels.Stationary):
         frequency_list = []
 
         for i in range(self.num_partials):
-            energy_list.append(Param(energy[i], transforms.positive))
-            frequency_list.append(Param(frequency[i], transforms.positive))
+            energy_list.append(Parameter(energy[i], transforms.positive))
+            frequency_list.append(Parameter(frequency[i], transforms.positive))
 
         self.energy = ParamList(energy_list)
         self.frequency = ParamList(frequency_list)
@@ -99,6 +105,7 @@ class MercerMatern12sm(gpflow.kernels.Stationary):
         if len_fixed:
             self.lengthscales.fixed = True
 
+    @params_as_tensors
     def K(self, X, X2=None, presliced=False):
         if not presliced:
             X, X2 = self._slice(X, X2)
@@ -116,10 +123,12 @@ class MercerMatern12sm(gpflow.kernels.Stationary):
             k = tf.matmul(phi, phi2, transpose_a=True)
             return self.variance * tf.exp(-r) * k
 
+    @params_as_tensors
     def Kdiag(self, X, presliced=False):
-        var = self.variance * reduce(tf.add, self.energy)
+        var = self.variance * functools.reduce(tf.add, self.energy)
         return tf.fill(tf.stack([tf.shape(X)[0]]), tf.squeeze(var))
 
+    @params_as_tensors
     def phi_features(self, X):
         n = tf.shape(X)[0]
         m = self.num_partials

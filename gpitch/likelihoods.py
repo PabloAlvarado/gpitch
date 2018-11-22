@@ -2,7 +2,7 @@ import gpflow
 import tensorflow as tf
 import numpy as np
 import itertools
-from gpflow.param import transforms
+from gpflow import transforms
 
 
 def exp_value_closed_form(mean, var, b):
@@ -71,7 +71,7 @@ class LooLik(gpflow.likelihoods.Likelihood):
     '''Leave One Out likelihood'''
     def __init__(self, version):
         gpflow.likelihoods.Likelihood.__init__(self)
-        self.variance = gpflow.param.Param(1., transforms.positive)
+        self.variance = gpflow.params.Parameter(1., transforms.positive)
         self.version = version
     def logp(self, F, Y):
         f1, g1 = F[:, 0], F[:, 1]
@@ -137,7 +137,7 @@ class ModLik(gpflow.likelihoods.Likelihood):
     '''Modulated GP likelihood'''
     def __init__(self, transfunc):
         gpflow.likelihoods.Likelihood.__init__(self)
-        self.variance = gpflow.param.Param(1., transforms.positive)
+        self.variance = gpflow.params.Parameter(1., transforms.positive)
         self.transfunc = transfunc
 
     def logp(self, F, Y):
@@ -200,7 +200,7 @@ class SsLik(gpflow.likelihoods.Likelihood):
     '''Source separation likelihood'''
     def __init__(self, nlinfun, quad=True):
         gpflow.likelihoods.Likelihood.__init__(self)
-        self.variance = gpflow.param.Param(1., transforms.positive)
+        self.variance = gpflow.params.Parameter(1., transforms.positive)
         self.nlinfun = nlinfun
         self.quad = quad
 
@@ -280,7 +280,7 @@ class MpdLik(gpflow.likelihoods.Likelihood):
     '''Modulated GP likelihood'''
     def __init__(self, nlinfun, num_sources):
         gpflow.likelihoods.Likelihood.__init__(self)
-        self.variance = gpflow.param.Param(1., transforms.positive)
+        self.variance = gpflow.params.Parameter(1., transforms.positive)
         self.nlinfun = nlinfun
         self.num_sources = num_sources
 

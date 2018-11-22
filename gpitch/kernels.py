@@ -1,9 +1,11 @@
 import numpy as np
 import tensorflow as tf
 import gpflow
-from gpflow.param import ParamList, Param, transforms
+from gpflow.params import ParamList, Parameter
+from gpflow import transforms
 from gpflow import settings
 from scipy.signal import hann
+
 
 float_type = settings.dtypes.float_type
 jitter = settings.numerics.jitter_level
@@ -20,8 +22,8 @@ class Env(gpflow.kernels.Kern):
 
         self.kernel = gpflow.kernels.RBF(input_dim=input_dim, lengthscales=0.5, variance=1.0)
         #self.kernel.variance.fixed = True
-        self.z = gpflow.param.Param(z)
-        self.u = gpflow.param.Param(0.*np.sqrt(0.001)*np.random.randn(z.size, 1))
+        self.z = gpflow.params.Parameter(z)
+        self.u = gpflow.params.Parameter(0.*np.sqrt(0.001)*np.random.randn(z.size, 1))
 
     def build_function(self, X):
         
@@ -65,8 +67,8 @@ class Sig(gpflow.kernels.Kern):
         """
         gpflow.kernels.Kern.__init__(self, input_dim, active_dims)
 
-        self.a = Param(a)
-        self.b = Param(b)
+        self.a = Parameter(a)
+        self.b = Parameter(b)
 
     def K(self, X, X2=None, presliced=False):
         if not presliced:
@@ -122,8 +124,8 @@ class Cosine(gpflow.kernels.Kern):
 
     def __init__(self, input_dim, variance=1., frequency=1.):
         gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
-        self.variance = Param(variance, transforms.positive)
-        self.frequency = Param(frequency, transforms.positive)
+        self.variance = Parameter(variance, transforms.positive)
+        self.frequency = Parameter(frequency, transforms.positive)
 
     def square_dist(self, X, X2):
         X = 2. * np.pi * self.frequency * X
@@ -165,10 +167,10 @@ class Matern32sm_old(gpflow.kernels.Kern):
             variances = 0.125*np.ones((numc, 1))
             frequencies = 1.*np.arange(1, numc+1)
 
-        self.lengthscales = Param(lengthscales, transforms.Logistic(0., 10.) )
+        self.lengthscales = Parameter(lengthscales, transforms.Logistic(0., 10.) )
         for i in range(self.numc): # generate a param object for each  var, and freq, they must be (numc,) arrays.
-            setattr(self, 'variance_' + str(i+1), Param(variances[i], transforms.Logistic(0., 0.25) ) )
-            setattr(self, 'frequency_' + str(i+1), Param(frequencies[i], transforms.positive ) )
+            setattr(self, 'variance_' + str(i+1), Parameter(variances[i], transforms.Logistic(0., 0.25) ) )
+            setattr(self, 'frequency_' + str(i+1), Parameter(frequencies[i], transforms.positive ) )
 
         for i in range(self.numc):
             exec('self.variance_' + str(i + 1) + '.fixed = ' + str(True))
@@ -217,14 +219,14 @@ class Matern32sm(gpflow.kernels.Kern):
             variances = 0.125*np.ones((num_partials, 1))
             frequencies = 1.*(1. + np.arange(num_partials))
 
-        self.lengthscales = Param(lengthscales, transforms.Logistic(0., 2.))
+        self.lengthscales = Parameter(lengthscales, transforms.Logistic(0., 2.))
 
         for i in range(self.num_partials):
-            var_l.append(Param(variances[i], transforms.Logistic(0., 0.25)))
-            freq_l.append(Param(frequencies[i], transforms.positive))
+            var_l.append(Parameter(variances[i], transforms.Logistic(0., 0.25)))
+            freq_l.append(Parameter(frequencies[i], transforms.positive))
 
-        self.variance = ParamList(var_l)
-        self.frequency = ParamList(freq_l)
+        self.variance = ParameterList(var_l)
+        self.frequency = ParameterList(freq_l)
 
     def K(self, X, X2=None, presliced=False):
         if not presliced:
@@ -276,13 +278,13 @@ class Matern32sml(gpflow.kernels.Kern):
             frequencies = 1.*(1. + np.arange(num_partials))
 
         for i in range(self.num_partials):
-            len_l.append(Param(lengthscales[i], transforms.Logistic(0., 2.)))
-            var_l.append(Param(variances[i], transforms.Logistic(0., 1.)))
-            freq_l.append(Param(frequencies[i], transforms.positive))
+            len_l.append(Parameter(lengthscales[i], transforms.Logistic(0., 2.)))
+            var_l.append(Parameter(variances[i], transforms.Logistic(0., 1.)))
+            freq_l.append(Parameter(frequencies[i], transforms.positive))
 
-        self.lengthscales = ParamList(len_l)
-        self.variance = ParamList(var_l)
-        self.frequency = ParamList(freq_l)
+        self.lengthscales = ParameterList(len_l)
+        self.variance = ParameterList(var_l)
+        self.frequency = ParameterList(freq_l)
 
     def K(self, X, X2=None, presliced=False):
         if not presliced:
@@ -334,14 +336,14 @@ class MercerCosMix(gpflow.kernels.Kern):
         """
         gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
         self.num_features = len(frequency)
-        self.variance = Param(variance, transforms.Logistic(0., 0.25))
+        self.variance = Parameter(variance, transforms.Logistic(0., 0.25))
 
         if features_as_params:
             energy_list = []
             frequency_list = []
             for i in range(energy.size):
-                energy_list.append( Param(energy[i], transforms.positive) )
-                frequency_list.append( Param(frequency[i], transforms.positive) )
+                energy_list.append( Parameter(energy[i], transforms.positive) )
+                frequency_list.append( Parameter(frequency[i], transforms.positive) )
 
             self.energy = ParamList(energy_list)
             self.frequency = ParamList(frequency_list)
@@ -401,7 +403,7 @@ class Spectrum(gpflow.kernels.Kern):
         self.num_partials = len(frequency)
 
         self.energy = energy
-        self.variance = Param(variance, transforms.positive)
+        self.variance = Parameter(variance, transforms.positive)
         self.frequency = frequency
 
     def K(self, X, X2=None, presliced=False):
@@ -438,7 +440,7 @@ class Spectrum2(gpflow.kernels.Kern):
         self.num_partials = len(frequency)
 
         self.energy = energy
-        self.variance = Param(variance, transforms.positive)
+        self.variance = Parameter(variance, transforms.positive)
         self.frequency = frequency
 
     def square_dist_2(self, X, X2):
@@ -483,9 +485,9 @@ class NonParam(gpflow.kernels.Kern):
         self.ARD = False
         self.numsamples = numsamples
 
-        self.variance = gpflow.param.Param(variance, transform=gpflow.transforms.positive)
+        self.variance = gpflow.params.Parameter(variance, transform=gpflow.transforms.positive)
 
-        self.L = gpflow.param.Param(np.eye(self.numsamples),
+        self.L = gpflow.params.Parameter(np.eye(self.numsamples),
                                     transform=gpflow.transforms.LowerTriangular(N=self.numsamples))
 
     def K(self, X, X2=None, presliced=False):
@@ -502,7 +504,7 @@ class MeanGP(gpflow.kernels.Stationary):
 
         gpflow.kernels.Stationary.__init__(self, input_dim=input_dim, active_dims=None, ARD=False)
         eyem = tf.eye(xkern.size, dtype=float_type)
-        self.variance = Param(variance, transforms.positive)
+        self.variance = Parameter(variance, transforms.positive)
         self.plen = plen
         self.pvar = pvar
         self.fkern = fkern
@@ -525,7 +527,7 @@ class KernelGPR(gpflow.kernels.Kern):
     """
     def __init__(self, input_dim, gpm, variance=1.0):
         gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
-        self.variance = Param(variance, transforms.positive)
+        self.variance = Parameter(variance, transforms.positive)
         self.m = gpm
         self.m.fixed = True
 
@@ -562,7 +564,7 @@ class Gammaexponential(gpflow.kernels.Stationary):
     """
     def __init__(self, input_dim, variance=1., lengthscales=1., gamma=1.):
         gpflow.kernels.Stationary.__init__(self, input_dim=input_dim, variance=variance, lengthscales=lengthscales)
-        self.gamma = Param(gamma, transforms.Logistic(0.00001, 2.))
+        self.gamma = Parameter(gamma, transforms.Logistic(0.00001, 2.))
 
     def K(self, X, X2=None, presliced=False):
         if not presliced:
