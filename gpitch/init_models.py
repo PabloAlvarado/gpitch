@@ -5,6 +5,10 @@ import numpy as np
 import gpflow
 from scipy import signal
 
+import gpitch
+import pickle
+from gpitch.matern12_spectral_mixture import MercerMatern12sm as Mercer
+
 
 def init_liv(x, y, num_sources=1, win_size=9, thres=0.0025, dec=1):
     """
@@ -16,7 +20,7 @@ def init_liv(x, y, num_sources=1, win_size=9, thres=0.0025, dec=1):
     y = y.reshape(-1, )
 
     # energy
-    win1 = signal.hann(1600)
+    win1 = signal.hann(800)
     energy = signal.convolve(np.abs(y), win1, mode='same') / sum(win1)
     energy /= np.max(energy)
 
@@ -27,7 +31,7 @@ def init_liv(x, y, num_sources=1, win_size=9, thres=0.0025, dec=1):
     # detect zero crossing of data gradient
     f_sign = np.sign(np.gradient(y_smooth))
     f_change_sign = np.diff(f_sign)
-    idx = np.where(f_change_sign)
+    idx = np.argwhere(f_change_sign)
 
     # get data where its gradient is zero (peaks and valleys)
     x_all = x[idx].copy()
@@ -35,12 +39,12 @@ def init_liv(x, y, num_sources=1, win_size=9, thres=0.0025, dec=1):
     energy_all = energy[idx].copy()
 
     # get only values above threshold energy
-    idx1 = np.where(energy_all > thres)
+    idx1 = np.argwhere(energy_all.reshape(-1, ) > thres)
 
     # sort vector
-    idx3 = np.argsort(idx1)
-    x_final = x_all[idx3].copy().reshape(-1, 1)
-    y_final = y_all[idx3].copy().reshape(-1, 1)
+    idx2 = np.sort(idx1.copy())
+    x_final = x_all[idx2].copy().reshape(-1, 1)
+    y_final = y_all[idx2].copy().reshape(-1, 1)
 
     za = []
     zc = []
@@ -196,3 +200,36 @@ def init_kern(num_pitches, energy, frequency):
         k_com.append(k_com_a[i]*k_com_b[i])
     kern = [k_act, k_com]
     return kern
+
+
+
+def init_kern_component(path, pitches, fixed=True):
+    fname = gpitch.load_filenames(directory=path,
+                                  pattern='params',
+                                  pitches=pitches,
+                                  ext='.p')
+    params = []
+    k_act, k_com = [], []
+    for i in range(len(fname)):
+        
+        k_act.append(Matern12(1, lengthscales=0.25, variance=3.5))
+        
+        params.append(
+                      pickle.load(
+                                  open(path + fname[i], "rb")
+                                 )
+                     )
+
+        k_com.append(
+                       Mercer(input_dim=1,
+                              energy=params[i][1],
+                              frequency=params[i][2],
+                              lengthscales=params[i][0],
+                              variance=1.)
+                      )
+        if fixed:
+            k_com[i].energy.fixed = True
+            k_com[i].frequency.fixed = True
+            k_com[i].lengthscales.fixed = True
+
+    return [k_act, k_com]

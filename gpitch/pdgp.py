@@ -167,7 +167,7 @@ class Pdgp(gpflow.model.Model):
 
         scale = tf.cast(self.num_data, settings.dtypes.float_type) / \
             tf.cast(tf.shape(self.x)[0], settings.dtypes.float_type)  # re-scale for minibatch size
-        return tf.reduce_sum(var_exp) * scale - kl
+        return tf.reduce_sum(var_exp) * scale - kl - 100*reduce(tf.add, map(tf.abs, self.q_mu_act)) - 100*reduce(tf.add, map(tf.abs, self.q_mu_com))
 
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_act(self, xnew):
