@@ -15,7 +15,9 @@ class Pianoroll:
         if filename is None:
             self.name = "unnamed"
         else:
-            self.name = gpitch.load_filenames(directory=path, pattern=filename.strip('.wav'), pitches=None,
+            self.name = gpitch.load_filenames(directory=path,
+                                              pattern=filename.strip('.wav'),
+                                              pitches=None,
                                               ext='.txt')[0]
 
         aux = pd.read_table(self.path + self.name)

@@ -14,34 +14,34 @@ float_type = settings.dtypes.float_type
 jitter = settings.numerics.jitter_level
 
 
-def predict_windowed(model, xnew, ws=1600):
-    n = xnew.size
-    m_a_l = [[] for _ in range(model.num_sources)]
-    v_a_l = [[] for _ in range(model.num_sources)]
-    m_c_l = [[] for _ in range(model.num_sources)]
-    v_c_l = [[] for _ in range(model.num_sources)]
-    m_s_l = [[] for _ in range(model.num_sources)]
-
-    for i in range(n/ws):
-        x = xnew[i*ws : (i+1)*ws].copy()
-        m_a, v_a = model.predict_act(x)
-        m_c, v_c = model.predict_com(x)
-
-        for j in range(model.num_sources):
-            m_a_l[j].append(m_a[j].copy())
-            v_a_l[j].append(v_a[j].copy())
-            m_c_l[j].append(m_c[j].copy())
-            v_c_l[j].append(v_c[j].copy())
-            m_s_l[j].append(gpitch.logistic(m_a[j]) * m_c[j])
-
-    for j in range(model.num_sources):
-        m_a_l[j] = np.asarray(m_a_l[j]).reshape(-1, 1)
-        v_a_l[j] = np.asarray(v_a_l[j]).reshape(-1, 1)
-        m_c_l[j] = np.asarray(m_c_l[j]).reshape(-1, 1)
-        v_c_l[j] = np.asarray(v_c_l[j]).reshape(-1, 1)
-        m_s_l[j] = gpitch.logistic(m_a_l[j]) * m_c_l[j]
-
-    return m_a_l, v_a_l, m_c_l, v_c_l, m_s_l
+# def predict_windowed(model, xnew, ws=4410):
+#     n = xnew.size
+#     m_a_l = [[] for _ in range(model.num_sources)]
+#     v_a_l = [[] for _ in range(model.num_sources)]
+#     m_c_l = [[] for _ in range(model.num_sources)]
+#     v_c_l = [[] for _ in range(model.num_sources)]
+#     m_s_l = [[] for _ in range(model.num_sources)]
+#
+#     for i in range(n/ws):
+#         x = xnew[i*ws : (i+1)*ws].copy()
+#         m_a, v_a = model.predict_act(x)
+#         m_c, v_c = model.predict_com(x)
+#
+#         for j in range(model.num_sources):
+#             m_a_l[j].append(m_a[j].copy())
+#             v_a_l[j].append(v_a[j].copy())
+#             m_c_l[j].append(m_c[j].copy())
+#             v_c_l[j].append(v_c[j].copy())
+#             m_s_l[j].append(gpitch.logistic(m_a[j]) * m_c[j])
+#
+#     for j in range(model.num_sources):
+#         m_a_l[j] = np.asarray(m_a_l[j]).reshape(-1, 1)
+#         v_a_l[j] = np.asarray(v_a_l[j]).reshape(-1, 1)
+#         m_c_l[j] = np.asarray(m_c_l[j]).reshape(-1, 1)
+#         v_c_l[j] = np.asarray(v_c_l[j]).reshape(-1, 1)
+#         m_s_l[j] = gpitch.logistic(m_a_l[j]) * m_c_l[j]
+#
+#     return m_a_l, v_a_l, m_c_l, v_c_l, m_s_l
 
 
 
@@ -110,6 +110,35 @@ class Pdgp(gpflow.model.Model):
         self.q_sqrt_com = ParamList(q_sqrt_com_l)
         self.q_sqrt_act = ParamList(q_sqrt_act_l)
 
+    def predict_windowed(self, xnew, ws=4410):
+        n = xnew.size
+        m_a_l = [[] for _ in range(self.num_sources)]
+        v_a_l = [[] for _ in range(self.num_sources)]
+        m_c_l = [[] for _ in range(self.num_sources)]
+        v_c_l = [[] for _ in range(self.num_sources)]
+        m_s_l = [[] for _ in range(self.num_sources)]
+
+        for i in range(n / ws):
+            x = xnew[i * ws: (i + 1) * ws].copy()
+            m_a, v_a = self.predict_act(x)
+            m_c, v_c = self.predict_com(x)
+
+            for j in range(self.num_sources):
+                m_a_l[j].append(m_a[j].copy())
+                v_a_l[j].append(v_a[j].copy())
+                m_c_l[j].append(m_c[j].copy())
+                v_c_l[j].append(v_c[j].copy())
+                m_s_l[j].append(gpitch.logistic(m_a[j]) * m_c[j])
+
+        for j in range(self.num_sources):
+            m_a_l[j] = np.asarray(m_a_l[j]).reshape(-1, 1)
+            v_a_l[j] = np.asarray(v_a_l[j]).reshape(-1, 1)
+            m_c_l[j] = np.asarray(m_c_l[j]).reshape(-1, 1)
+            v_c_l[j] = np.asarray(v_c_l[j]).reshape(-1, 1)
+            m_s_l[j] = gpitch.logistic(m_a_l[j]) * m_c_l[j]
+
+        return m_a_l, v_a_l, m_c_l, v_c_l, m_s_l
+
     def build_prior_kl(self):
         """
         compute KL divergences.
@@ -167,7 +196,7 @@ class Pdgp(gpflow.model.Model):
 
         scale = tf.cast(self.num_data, settings.dtypes.float_type) / \
             tf.cast(tf.shape(self.x)[0], settings.dtypes.float_type)  # re-scale for minibatch size
-        return tf.reduce_sum(var_exp) * scale - kl - 100*reduce(tf.add, map(tf.abs, self.q_mu_act)) - 100*reduce(tf.add, map(tf.abs, self.q_mu_com))
+        return tf.reduce_sum(var_exp) * scale - kl - 1000*reduce(tf.add, map(tf.abs, self.q_mu_act)) - 1000*reduce(tf.add, map(tf.abs, self.q_mu_com))
 
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_act(self, xnew):

@@ -10,7 +10,7 @@ import pickle
 from gpitch.matern12_spectral_mixture import MercerMatern12sm as Mercer
 
 
-def init_liv(x, y, num_sources=1, win_size=9, thres=0.0025, dec=1):
+def init_inducing_extrema(x, y, num_sources=1, win_size=9, thres=0.0025, dec=1):
     """
     Initialize location of inducing varibales by using locations of
     peaks and valleys of test data "y" or extrema.
@@ -55,7 +55,7 @@ def init_liv(x, y, num_sources=1, win_size=9, thres=0.0025, dec=1):
     return z, y_final[::dec]
 
 
-def init_iv(x, num_sources, nivps_a, nivps_c, fs):
+def init_inducing(x, num_sources, nivps_a, nivps_c, fs):
     """
     Initialize inducing variables
     :param num_sources: number of sources
@@ -212,7 +212,7 @@ def init_kern_component(path, pitches, fixed=True):
     k_act, k_com = [], []
     for i in range(len(fname)):
         
-        k_act.append(Matern12(1, lengthscales=0.25, variance=3.5))
+        k_act.append(Matern32(1, lengthscales=0.2, variance=3.5))
         
         params.append(
                       pickle.load(

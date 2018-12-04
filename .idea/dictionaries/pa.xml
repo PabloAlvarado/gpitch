@@ -3,9 +3,12 @@
     <words>
       <w>bfgs</w>
       <w>disp</w>
+      <w>esource</w>
       <w>flipud</w>
       <w>fname</w>
+      <w>fnames</w>
       <w>fsorted</w>
+      <w>gpitch</w>
       <w>hparam</w>
       <w>hyperparams</w>
       <w>initilize</w>
@@ -13,7 +16,10 @@
       <w>lengthscale</w>
       <w>matern</w>
       <w>maxh</w>
+      <w>maxiter</w>
+      <w>minibatch</w>
       <w>msize</w>
+      <w>nfiles</w>
       <w>nfpc</w>
       <w>nivps</w>
       <w>nparams</w>
@@ -27,6 +33,7 @@
       <w>totalnumf</w>
       <w>varibales</w>
       <w>wsize</w>
+      <w>xnew</w>
       <w>xwin</w>
       <w>ywin</w>
     </words>
