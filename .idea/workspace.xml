@@ -6,11 +6,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="720bb2d6-351b-4ab5-b25d-15571c0e2769" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/pa.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/pa.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demos/notebooks/demo-thesis-Copy1.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/demos/notebooks/demo-thesis-Copy1.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/demos/notebooks/demo-thesis.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/demos/notebooks/demo-thesis.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpitch/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/gpitch/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gpitch/pdgp.py" beforeDir="false" afterPath="$PROJECT_DIR$/gpitch/pdgp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpitch/transcription_svi.py" beforeDir="false" afterPath="$PROJECT_DIR$/gpitch/transcription_svi.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -29,10 +28,10 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gpitch/transcription_svi.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="450">
+            <state relative-caret-position="1800">
               <caret line="87" column="39" selection-start-line="87" selection-start-column="39" selection-end-line="87" selection-end-column="39" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
@@ -41,11 +40,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/gpitch/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="7" selection-start-line="7" selection-end-line="7" />
+            <state relative-caret-position="690">
+              <caret line="23" column="46" lean-forward="true" selection-start-line="23" selection-start-column="46" selection-end-line="23" selection-end-column="46" />
               <folding>
                 <element signature="e#0#48#0" expanded="true" />
               </folding>
@@ -116,8 +115,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gpitch/pdgp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="587">
-              <caret line="204" selection-start-line="204" selection-end-line="204" />
+            <state relative-caret-position="437">
+              <caret line="202" column="31" selection-start-line="202" selection-start-column="31" selection-end-line="202" selection-end-column="31" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -165,9 +164,9 @@
         <option value="$PROJECT_DIR$/gpitch/audio.py" />
         <option value="$PROJECT_DIR$/gpitch/init_models.py" />
         <option value="$PROJECT_DIR$/gpitch/models.py" />
-        <option value="$PROJECT_DIR$/gpitch/pdgp.py" />
         <option value="$PROJECT_DIR$/gpitch/pianoroll.py" />
         <option value="$PROJECT_DIR$/gpitch/transcription_svi.py" />
+        <option value="$PROJECT_DIR$/gpitch/pdgp.py" />
       </list>
     </option>
   </component>
@@ -393,16 +392,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gpitch/pdgp.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="587">
-          <caret line="204" selection-start-line="204" selection-end-line="204" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/gpitch/matern12_spectral_mixture.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2490">
@@ -443,16 +432,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gpitch/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="7" selection-start-line="7" selection-end-line="7" />
-          <folding>
-            <element signature="e#0#48#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/gpitch/audio.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="510">
@@ -470,12 +449,32 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/gpitch/pdgp.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="437">
+          <caret line="202" column="31" selection-start-line="202" selection-start-column="31" selection-end-line="202" selection-end-column="31" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/gpitch/transcription_svi.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
+        <state relative-caret-position="1800">
           <caret line="87" column="39" selection-start-line="87" selection-start-column="39" selection-end-line="87" selection-end-column="39" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gpitch/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="690">
+          <caret line="23" column="46" lean-forward="true" selection-start-line="23" selection-start-column="46" selection-end-line="23" selection-end-column="46" />
+          <folding>
+            <element signature="e#0#48#0" expanded="true" />
           </folding>
         </state>
       </provider>
