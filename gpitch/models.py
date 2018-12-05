@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from gpitch.pianoroll import Pianoroll
 
+
 class GpitchModel:
     def __init__(self, test_fname, frames, path, pitches=None, gpu='0', maps=True, extrema=True):
 

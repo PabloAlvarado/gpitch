@@ -46,7 +46,7 @@ jitter = settings.numerics.jitter_level
 
 
 class Pdgp(gpflow.model.Model):
-    def __init__(self, x, y, z, kern, whiten=True, minibatch_size=None, nlinfun=logistic_tf):
+    def __init__(self, x, y, z, kern, whiten=True, minibatch_size=None, nlinfun=logistic_tf, reg=False):
         """
         Pitch detection using Gaussian process.
 
@@ -66,6 +66,7 @@ class Pdgp(gpflow.model.Model):
         if minibatch_size is None:
             minibatch_size = x.shape[0]
 
+        self.reg = reg
         self.minibatch_size = minibatch_size
         self.num_data = x.shape[0]
         self.num_sources = len(kern[0])
@@ -196,7 +197,14 @@ class Pdgp(gpflow.model.Model):
 
         scale = tf.cast(self.num_data, settings.dtypes.float_type) / \
             tf.cast(tf.shape(self.x)[0], settings.dtypes.float_type)  # re-scale for minibatch size
-        return tf.reduce_sum(var_exp) * scale - kl - 1000*reduce(tf.add, map(tf.abs, self.q_mu_act)) - 1000*reduce(tf.add, map(tf.abs, self.q_mu_com))
+
+        lik = tf.reduce_sum(var_exp) * scale - kl
+        if self.reg:
+            regularization = -7*tf.reduce_sum(reduce(tf.add, map(tf.abs, self.q_mu_act)) +
+                                    reduce(tf.add, map(tf.abs, self.q_mu_com)))
+            return lik + regularization
+        else:
+            return lik
 
     @gpflow.param.AutoFlow((tf.float64, [None, None]))
     def predict_act(self, xnew):

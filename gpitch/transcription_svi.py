@@ -6,13 +6,31 @@ from gpitch.matern12_spectral_mixture import MercerMatern12sm as Mercer
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from gpitch.myplots import plot_predict
+import numpy as np
+import time
+
+
+class Logger:
+    def __init__(self, model):
+        self.model = model
+        self.i = 1
+        self.logf = []
+
+    def callback(self, x):
+        if (self.i % 20) == 0:
+            self.logf.append(self.model._objective(x)[0])
+        self.i += 1
+
+    def array(self):
+        return (-np.array(self.logf))
+
 
 class AmtSvi(GpitchModel):
     """
     Automatic music transcription using stochastic variational inference class
     """
     def __init__(self, test_fname, frames, path, pitches=None, gpu='0', maps=True, extrema=True,
-                 minibatch_size=100):
+                 minibatch_size=100, reg=False):
         GpitchModel.__init__(self,
                              pitches=pitches,
                              test_fname=test_fname,
@@ -21,9 +39,11 @@ class AmtSvi(GpitchModel):
                              gpu=gpu,
                              maps=maps,
                              extrema=extrema)
+        self.reg = reg
         self.path_load = path[2]
         self.kernels = self.init_kernels()
         self.model = self.init_model(minibatch_size)
+        self.logger = Logger(self.model)
         self.prediction = None
 
     def plot_results(self, figsize=(12, 2 * 88)):
@@ -54,6 +74,7 @@ class AmtSvi(GpitchModel):
             plt.subplot(88, 1, j+1)
             plt.plot(self.data_test.x, self.data_test.y)
             plt.plot(self.data_test.x, esource[j])
+            plt.plot(self.piano_roll.x, self.piano_roll.pr_dic[str(self.pitches[j])], lw=2)
 
     def predict(self, xnew=None):
         if xnew is None:
@@ -62,14 +83,17 @@ class AmtSvi(GpitchModel):
 
     def optimize(self, maxiter, learning_rate):
         method = tf.train.AdamOptimizer(learning_rate=learning_rate)
-        self.model.optimize(maxiter=maxiter, method=method)
+        start_time = time.time()
+        self.model.optimize(maxiter=maxiter, method=method, callback=self.logger.callback)
+        print("Time optimizing (seconds): {0}".format(time.time() - start_time))
 
     def init_model(self, minibatch_size):
         return gpitch.pdgp.Pdgp(x=self.data_test.x.copy(),
                                 y=self.data_test.y.copy(),
                                 z=self.z,
                                 kern=self.kernels,
-                                minibatch_size=minibatch_size)
+                                minibatch_size=minibatch_size,
+                                reg=self.reg)
 
     def init_kernels(self, fixed=True):
         fname = gpitch.load_filenames(directory=self.path_load,
