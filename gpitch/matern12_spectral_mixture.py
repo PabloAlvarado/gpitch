@@ -15,7 +15,13 @@ class Matern12sm(gpflow.kernels.Kern):
     """
     Matern spectral mixture kernel with single lengthscale.
     """
-    def __init__(self, input_dim,  variance=1., lengthscales=None, energy=None, frequency=None, len_fixed=False):
+    def __init__(self,
+                 input_dim,
+                 variance=1.,
+                 lengthscales=None,
+                 energy=None,
+                 frequency=None,
+                 len_fixed=False):
         gpflow.kernels.Kern.__init__(self, input_dim, active_dims=None)
         energy_l = []
         freq_l = []
@@ -71,8 +77,13 @@ class MercerMatern12sm(gpflow.kernels.Stationary):
     """
     The Mercer Matern 1/2 spectral mixture kernel
     """
-    def __init__(self, input_dim, energy=np.asarray([1.]), frequency=np.asarray([2*np.pi]), variance=1.,
-                 lengthscales=1., len_fixed=False):
+    def __init__(self,
+                 input_dim,
+                 energy=np.asarray([1.]),
+                 frequency=np.asarray([2*np.pi]),
+                 variance=1.,
+                 lengthscales=1.,
+                 len_fixed=False):
         gpflow.kernels.Stationary.__init__(self, input_dim, variance=variance, lengthscales=lengthscales,
                                            active_dims=None, ARD=False)
         # self.variance = Param(variance, transforms.positive())

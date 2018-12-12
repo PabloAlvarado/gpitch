@@ -3,6 +3,8 @@ import gpitch
 from gpitch.models import GpitchModel
 from gpflow.kernels import Matern32
 from gpitch.matern12_spectral_mixture import MercerMatern12sm as Mercer
+from gpitch.matern12_spectral_mixture import Matern12sm
+
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from gpitch.myplots import plot_predict
@@ -30,7 +32,7 @@ class AmtSvi(GpitchModel):
     Automatic music transcription using stochastic variational inference class
     """
     def __init__(self, test_fname, frames, path, pitches=None, gpu='0', maps=True, extrema=True,
-                 minibatch_size=100, reg=False):
+                 minibatch_size=100, reg=False, mercer=True):
         GpitchModel.__init__(self,
                              pitches=pitches,
                              test_fname=test_fname,
@@ -40,11 +42,22 @@ class AmtSvi(GpitchModel):
                              maps=maps,
                              extrema=extrema)
         self.reg = reg
+        self.mercer = mercer
         self.path_load = path[2]
         self.kernels = self.init_kernels()
         self.model = self.init_model(minibatch_size)
         self.logger = Logger(self.model)
         self.prediction = None
+
+    def save_results(self, save_path):
+        aux = save_path + self.data_test.filename.strip(".wav") + "_transcription.p"
+        pickle.dump(
+                    obj=self.prediction,
+                    file=open(
+                              aux, "wb"
+                             ),
+                    protocol=2
+                   )
 
     def plot_results(self, figsize=(12, 2 * 88)):
         """
@@ -107,18 +120,28 @@ class AmtSvi(GpitchModel):
             k_act.append(Matern32(1, lengthscales=0.2, variance=3.5))
 
             params.append(
-                pickle.load(
-                    open(self.path_load + fname[i], "rb")
-                )
-            )
+                          pickle.load(
+                                      open(self.path_load + fname[i], "rb")
+                                     )
+                         )
 
-            k_com.append(
-                         Mercer(input_dim=1,
-                                energy=params[i][1],
-                                frequency=params[i][2],
-                                lengthscales=params[i][0],
-                                variance=1.)
-            )
+            if self.mercer:
+                k_com.append(
+                             Mercer(input_dim=1,
+                                    energy=params[i][1],
+                                    frequency=params[i][2],
+                                    lengthscales=params[i][0],
+                                    variance=1.
+                                    )
+                            )
+            else:
+                k_com.append(
+                             Matern12sm(input_dim=1,
+                                        energy=params[i][1],
+                                        frequency=params[i][2],
+                                        lengthscales=params[i][0],
+                                        variance=1.)
+                )
             if fixed:
                 k_com[i].energy.fixed = True
                 k_com[i].frequency.fixed = True
