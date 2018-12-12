@@ -176,7 +176,7 @@ class AmtSvi(GpitchModel):
                                 minibatch_size=minibatch_size,
                                 reg=self.reg)
 
-    def init_kernels(self, fixed=True, maxh=3):
+    def init_kernels(self, fixed=True, maxh=10):
         fname = gpitch.load_filenames(directory=self.path_load,
                                       pattern='params',
                                       pitches=self.pitches,
