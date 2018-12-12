@@ -99,6 +99,7 @@ class AmtSvi(GpitchModel):
                          v_c[j],
                          self.model.zc[j].value,
                          plot_z=False)
+        plt.savefig("act_com.png")
 
         # plot sources
         plt.figure(figsize=figsize)
@@ -107,6 +108,7 @@ class AmtSvi(GpitchModel):
             plt.plot(self.data_test.x, self.data_test.y)
             plt.plot(self.data_test.x, esource[j])
             plt.plot(self.piano_roll.x, self.piano_roll.pr_dic[str(self.pitches[j])], lw=2)
+        plt.savefig("sources.png")
 
         # plot pianoroll
         # ground truth
@@ -125,6 +127,7 @@ class AmtSvi(GpitchModel):
                    interpolation="none",
                    extent=[self.data_test.x[0], self.data_test.x[-1], 21, 108],
                    aspect="auto")
+        plt.savefig("piano_roll.png")
 
 
         # plot elbo
@@ -163,7 +166,7 @@ class AmtSvi(GpitchModel):
         method = tf.train.AdamOptimizer(learning_rate=learning_rate)
         start_time = time.time()
         self.model.optimize(maxiter=maxiter, method=method, callback=self.logger.callback)
-        print("Time optimizing (seconds): {0}".format(time.time() - start_time))
+        print("Time optimizing (minutes): {0}".format( (time.time() - start_time)/60. ))
 
     def init_model(self, minibatch_size):
         return gpitch.pdgp.Pdgp(x=self.data_test.x.copy(),

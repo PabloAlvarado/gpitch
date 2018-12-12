@@ -42,7 +42,7 @@ class GpitchModel:
                                          num_sources=len(self.pitches),
                                          win_size=37,
                                          thres=0.1,
-                                         dec=29)
+                                         dec=21)
             return z, u
         else:
             z = init_inducing(x=self.data_test.x.copy(),
