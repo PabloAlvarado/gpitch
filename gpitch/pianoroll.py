@@ -36,6 +36,10 @@ class Pianoroll:
                 self.pr_dic[key][(onset[j] <= self.x) & (self.x < offset[j])] = 1.
 
         self.matrix = []
+        self.compute_matrix()
+
+    def compute_matrix(self):
+        self.matrix = []
         for pitch in range(21, 109):
             self.matrix.append(self.pr_dic[str(pitch)].copy())
 

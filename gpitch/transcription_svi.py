@@ -4,14 +4,17 @@ from gpitch.models import GpitchModel
 from gpflow.kernels import Matern32
 from gpitch.matern12_spectral_mixture import MercerMatern12sm as Mercer
 from gpitch.matern12_spectral_mixture import Matern12sm
+from scipy import signal
 
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from gpitch.myplots import plot_predict
 import numpy as np
 import time
+from gpitch.pianoroll import Pianoroll
 
 
+# callback to get elbo values
 class Logger:
     def __init__(self, model):
         self.model = model
@@ -48,6 +51,17 @@ class AmtSvi(GpitchModel):
         self.model = self.init_model(minibatch_size)
         self.logger = Logger(self.model)
         self.prediction = None
+        self.pitch_dim = len(self.pitches)
+
+        self.prediction_pr = Pianoroll(path=self.path_test,
+                                       filename=test_fname,
+                                       fs=20,
+                                       duration=self.data_test.x[-1, 0].copy())
+
+        self.model.za.fixed = True
+        self.model.zc.fixed = True
+        print("number of induncing variables: {0}".format(len(self.model.za[0].value)))
+        print("pitches to detect {0}".format(self.pitches))
 
     def save_results(self, save_path):
         aux = save_path + self.data_test.filename.strip(".wav") + "_transcription.p"
@@ -59,14 +73,18 @@ class AmtSvi(GpitchModel):
                     protocol=2
                    )
 
-    def plot_results(self, figsize=(12, 2 * 88)):
+    def plot_results(self, figsize=None):
         """
         plot prediction components and activations
         """
+        # plot activations and components
+        if figsize is None:
+            figsize = (12, 2 * self.pitch_dim )
+
         plt.figure(figsize=figsize)
         m_a, v_a, m_c, v_c, esource = self.prediction
         for j in range(len(self.pitches)):
-            plt.subplot(88, 2, 2 * (j + 1) - 1)
+            plt.subplot(self.pitch_dim, 2, 2 * (j + 1) - 1)
             plot_predict(self.data_test.x.copy(),
                          m_a[j],
                          v_a[j],
@@ -75,19 +93,66 @@ class AmtSvi(GpitchModel):
                          latent=True,
                          plot_latent=False)
 
-            plt.subplot(88, 2, 2 * (j + 1))
+            plt.subplot(self.pitch_dim, 2, 2 * (j + 1))
             plot_predict(self.data_test.x.copy(),
                          m_c[j],
                          v_c[j],
                          self.model.zc[j].value,
                          plot_z=False)
 
+        # plot sources
         plt.figure(figsize=figsize)
         for j in range(len(self.pitches)):
-            plt.subplot(88, 1, j+1)
+            plt.subplot(self.pitch_dim, 1, j+1)
             plt.plot(self.data_test.x, self.data_test.y)
             plt.plot(self.data_test.x, esource[j])
             plt.plot(self.piano_roll.x, self.piano_roll.pr_dic[str(self.pitches[j])], lw=2)
+
+        # plot pianoroll
+        # ground truth
+        plt.figure()
+        plt.subplot(1, 2, 1)
+        plt.imshow(self.piano_roll.matrix,
+                   cmap=plt.cm.get_cmap('binary'),
+                   interpolation="none",
+                   extent=[self.data_test.x[0], self.data_test.x[-1], 21, 108],
+                   aspect="auto")
+
+        # prediction
+        plt.subplot(1, 2, 2)
+        plt.imshow(self.prediction_pr.matrix,
+                   cmap=plt.cm.get_cmap('binary'),
+                   interpolation="none",
+                   extent=[self.data_test.x[0], self.data_test.x[-1], 21, 108],
+                   aspect="auto")
+
+
+        # plot elbo
+        plt.figure()
+        plt.title("ELBO")
+        plt.plot(self.logger.array())
+
+
+    def predict_pianoroll(self):
+
+        win = signal.hann(2050)  # smoothing window
+        aux1 = []
+        aux2 = []
+        for i in range(self.pitch_dim):
+            # get absolute value sources
+            aux1.append(np.abs(self.prediction[-1][i]))
+
+            # get envelope
+            aux2.append(signal.convolve(aux1[i].reshape(-1), win, mode='same') / win.size)
+
+            # downsample
+            aux2[i] = aux2[i][::2205].reshape(-1, 1)
+
+            # save on dictionary
+            self.prediction_pr.pr_dic[str(self.pitches[i])] = aux2[i]
+
+            # update piano roll matrix
+            self.prediction_pr.compute_matrix()
 
     def predict(self, xnew=None):
         if xnew is None:
@@ -108,7 +173,7 @@ class AmtSvi(GpitchModel):
                                 minibatch_size=minibatch_size,
                                 reg=self.reg)
 
-    def init_kernels(self, fixed=True):
+    def init_kernels(self, fixed=True, maxh=3):
         fname = gpitch.load_filenames(directory=self.path_load,
                                       pattern='params',
                                       pitches=self.pitches,
@@ -128,8 +193,8 @@ class AmtSvi(GpitchModel):
             if self.mercer:
                 k_com.append(
                              Mercer(input_dim=1,
-                                    energy=params[i][1],
-                                    frequency=params[i][2],
+                                    energy=params[i][1][0:maxh],
+                                    frequency=params[i][2][0:maxh],
                                     lengthscales=params[i][0],
                                     variance=1.
                                     )
@@ -137,8 +202,8 @@ class AmtSvi(GpitchModel):
             else:
                 k_com.append(
                              Matern12sm(input_dim=1,
-                                        energy=params[i][1],
-                                        frequency=params[i][2],
+                                        energy=params[i][1][0:maxh],
+                                        frequency=params[i][2][0:maxh],
                                         lengthscales=params[i][0],
                                         variance=1.)
                 )

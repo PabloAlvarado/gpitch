@@ -26,7 +26,7 @@ noise_var = 0.000001
 y = component * envelope + np.sqrt(noise_var) * np.random.randn(component.size, 1)
 
 #  use maxima as inducing points
-z, u = gpitch.init_liv(x=x, y=y, win_size=31, thres=0.05, dec=1)
+z, u = gpitch.init_inducing_extrema(x=x, y=y, win_size=31, thres=0.05, dec=1)
 
 # init kernels
 kact = gpflow.kernels.Matern32(input_dim=1, lengthscales=1.0, variance=1.0)
