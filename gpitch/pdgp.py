@@ -200,7 +200,7 @@ class Pdgp(gpflow.model.Model):
 
         lik = tf.reduce_sum(var_exp) * scale - kl
         if self.reg:
-            regularization = -5*tf.reduce_sum(reduce(tf.add, map(tf.abs, self.q_mu_act)) +
+            regularization = -tf.reduce_sum(reduce(tf.add, map(tf.abs, self.q_mu_act)) +
                                     reduce(tf.add, map(tf.abs, self.q_mu_com)))
             return lik + regularization
         else:

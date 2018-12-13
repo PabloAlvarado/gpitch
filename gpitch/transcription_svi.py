@@ -34,8 +34,12 @@ class AmtSvi(GpitchModel):
     """
     Automatic music transcription using stochastic variational inference class
     """
-    def __init__(self, test_fname, frames, path, pitches=None, gpu='0', maps=True, extrema=True,
-                 minibatch_size=100, reg=False, mercer=True):
+    def __init__(self, test_fname,
+                 frames, path,
+                 pitches=None, gpu='0',
+                 maps=True, extrema=True,
+                 minibatch_size=100, reg=False,
+                 mercer=True, start=0):
         GpitchModel.__init__(self,
                              pitches=pitches,
                              test_fname=test_fname,
@@ -43,7 +47,8 @@ class AmtSvi(GpitchModel):
                              path=path,
                              gpu=gpu,
                              maps=maps,
-                             extrema=extrema)
+                             extrema=extrema,
+                             start=start)
         self.reg = reg
         self.mercer = mercer
         self.path_load = path[2]
@@ -60,6 +65,7 @@ class AmtSvi(GpitchModel):
 
         self.model.za.fixed = True
         self.model.zc.fixed = True
+        print("analyzing file {0}".format(test_fname))
         print("number of induncing variables: {0}".format(len(self.model.za[0].value)))
         print("pitches to detect {0}".format(self.pitches))
 
@@ -72,6 +78,11 @@ class AmtSvi(GpitchModel):
                              ),
                     protocol=2
                    )
+
+    def plot(self):
+        self.plot_data_train()
+        self.plot_data_test()
+        self.plot_results()
 
     def plot_results(self, figsize=None):
         """
@@ -99,7 +110,7 @@ class AmtSvi(GpitchModel):
                          v_c[j],
                          self.model.zc[j].value,
                          plot_z=False)
-        plt.savefig("act_com.png")
+        # plt.savefig("act_com.png")
 
         # plot sources
         plt.figure(figsize=figsize)
@@ -108,11 +119,11 @@ class AmtSvi(GpitchModel):
             plt.plot(self.data_test.x, self.data_test.y)
             plt.plot(self.data_test.x, esource[j])
             plt.plot(self.piano_roll.x, self.piano_roll.pr_dic[str(self.pitches[j])], lw=2)
-        plt.savefig("sources.png")
+        # plt.savefig("sources.png")
 
         # plot pianoroll
         # ground truth
-        plt.figure()
+        plt.figure(figsize=(12, 4))
         plt.subplot(1, 2, 1)
         plt.imshow(self.piano_roll.matrix,
                    cmap=plt.cm.get_cmap('binary'),
@@ -127,14 +138,13 @@ class AmtSvi(GpitchModel):
                    interpolation="none",
                    extent=[self.data_test.x[0], self.data_test.x[-1], 21, 108],
                    aspect="auto")
-        plt.savefig("piano_roll.png")
+        # plt.savefig("piano_roll.png")
 
 
         # plot elbo
-        plt.figure()
+        plt.figure(figsize=(12, 4))
         plt.title("ELBO")
         plt.plot(self.logger.array())
-
 
     def predict_pianoroll(self):
 
@@ -161,6 +171,7 @@ class AmtSvi(GpitchModel):
         if xnew is None:
             xnew = self.data_test.x.copy()
         self.prediction = self.model.predict_windowed(xnew)
+        self.predict_pianoroll()
 
     def optimize(self, maxiter, learning_rate):
         method = tf.train.AdamOptimizer(learning_rate=learning_rate)
@@ -176,7 +187,7 @@ class AmtSvi(GpitchModel):
                                 minibatch_size=minibatch_size,
                                 reg=self.reg)
 
-    def init_kernels(self, fixed=True, maxh=10):
+    def init_kernels(self, fixed=True, maxh=20):
         fname = gpitch.load_filenames(directory=self.path_load,
                                       pattern='params',
                                       pitches=self.pitches,

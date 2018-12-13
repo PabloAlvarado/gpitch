@@ -7,12 +7,13 @@ from gpitch.pianoroll import Pianoroll
 
 
 class GpitchModel:
-    def __init__(self, test_fname, frames, path, pitches=None, gpu='0', maps=True, extrema=True):
+    def __init__(self, test_fname, frames, path, pitches=None, gpu='0',
+                 maps=True, extrema=True, start=0):
 
         self.path_train = path[0]
         self.path_test = path[1]
         self.data_test = Audio(path=self.path_test, filename=test_fname, frames=frames[1],
-                               scaled=True)
+                               scaled=True, start=start)
         init_settings(gpu)
 
 
@@ -40,9 +41,9 @@ class GpitchModel:
             z, u = init_inducing_extrema(x=self.data_test.x.copy(),
                                          y=self.data_test.y.copy(),
                                          num_sources=len(self.pitches),
-                                         win_size=37,
-                                         thres=0.1,
-                                         dec=41)
+                                         win_size=31,
+                                         thres=0.05,
+                                         dec=29)
             return z, u
         else:
             z = init_inducing(x=self.data_test.x.copy(),
@@ -81,7 +82,7 @@ class GpitchModel:
     def plot_data_test(self, xlim=None, figsize=None):
 
         if figsize is None:
-            figsize = (12, 3)
+            figsize = (12, 2)
 
         if xlim is None:
             xlim = (self.data_test.x[0], self.data_test.x[-1])
