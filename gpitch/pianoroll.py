@@ -4,7 +4,7 @@ import pandas as pd
 
 
 class Pianoroll:
-    def __init__(self, path, filename=None, fs=20, duration=10.):
+    def __init__(self, path, filename=None, fs=100, duration=10.):
         self.path = path
         self.duration = duration
         self.fs = fs

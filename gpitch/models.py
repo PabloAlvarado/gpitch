@@ -21,7 +21,6 @@ class GpitchModel:
         if maps:
             self.piano_roll = Pianoroll(path=self.path_test,
                                         filename=test_fname,
-                                        fs=20,
                                         duration=self.data_test.x[-1, 0].copy())
 
         if pitches is None:
@@ -41,7 +40,7 @@ class GpitchModel:
             z, u = init_inducing_extrema(x=self.data_test.x.copy(),
                                          y=self.data_test.y.copy(),
                                          num_sources=len(self.pitches),
-                                         win_size=31,
+                                         win_size=37,
                                          thres=0.05,
                                          dec=29)
             return z, u

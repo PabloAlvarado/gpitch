@@ -60,7 +60,6 @@ class AmtSvi(GpitchModel):
 
         self.prediction_pr = Pianoroll(path=self.path_test,
                                        filename=test_fname,
-                                       fs=20,
                                        duration=self.data_test.x[-1, 0].copy())
 
         self.model.za.fixed = True
@@ -148,7 +147,7 @@ class AmtSvi(GpitchModel):
 
     def predict_pianoroll(self):
 
-        win = signal.hann(2050)  # smoothing window
+        win = signal.hann(2205)  # smoothing window
         aux1 = []
         aux2 = []
         for i in range(self.pitch_dim):
@@ -159,7 +158,7 @@ class AmtSvi(GpitchModel):
             aux2.append(signal.convolve(aux1[i].reshape(-1), win, mode='same') / win.size)
 
             # downsample
-            aux2[i] = aux2[i][::2205].reshape(-1, 1)
+            aux2[i] = aux2[i][::441].reshape(-1, 1)
 
             # save on dictionary
             self.prediction_pr.pr_dic[str(self.pitches[i])] = aux2[i]
