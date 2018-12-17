@@ -118,6 +118,7 @@ class AmtSvi(GpitchModel):
             plt.plot(self.data_test.x, self.data_test.y)
             plt.plot(self.data_test.x, esource[j])
             plt.plot(self.piano_roll.x, self.piano_roll.pr_dic[str(self.pitches[j])], lw=2)
+            plt.plot(self.prediction_pr.x, self.prediction_pr.pr_dic[str(self.pitches[j])], lw=2)
         # plt.savefig("sources.png")
 
         # plot pianoroll
@@ -156,6 +157,7 @@ class AmtSvi(GpitchModel):
 
             # get envelope
             aux2.append(signal.convolve(aux1[i].reshape(-1), win, mode='same') / win.size)
+            aux2[i] = np.max(aux1[i])*aux2[i]/np.max(aux2[i])
 
             # downsample
             aux2[i] = aux2[i][::441].reshape(-1, 1)
@@ -164,7 +166,7 @@ class AmtSvi(GpitchModel):
             self.prediction_pr.pr_dic[str(self.pitches[i])] = aux2[i]
 
             # update piano roll matrix
-            self.prediction_pr.compute_matrix()
+            self.prediction_pr.compute_matrix(binarise=True, th=0.02)
 
     def predict(self, xnew=None):
         if xnew is None:

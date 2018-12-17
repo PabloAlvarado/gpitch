@@ -38,10 +38,20 @@ class Pianoroll:
         self.matrix = []
         self.compute_matrix()
 
-    def compute_matrix(self):
+    def compute_matrix(self, pitch_range=range(21, 109), binarise=False, th=0.1):
         self.matrix = []
-        for pitch in range(21, 109):
+        for pitch in pitch_range:
             self.matrix.append(self.pr_dic[str(pitch)].copy())
 
-        self.matrix = np.asarray(self.matrix).reshape(88, -1)
+
+        self.matrix = np.asarray(self.matrix).reshape(len(pitch_range), -1)
         self.matrix = np.flipud(self.matrix)
+
+        if binarise:
+            self.matrix[self.matrix < th] = 0.
+            self.matrix[self.matrix >= th] = 1.
+
+    def mir_eval_format(self):
+        # detect onsets
+        # detect offsets
+        pass
