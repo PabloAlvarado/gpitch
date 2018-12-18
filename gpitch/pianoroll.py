@@ -1,11 +1,13 @@
 import numpy as np
 import gpitch
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 class Pianoroll:
 
-    def __init__(self, path=None, filename=None, fs=100, duration=10.):
+    def __init__(self, path=None, filename=None, fs=100, duration=10., threshold=0.02):
+        self.threshold = threshold
         self.filename = filename
         self.path = path
         self.duration = duration
@@ -64,7 +66,7 @@ class Pianoroll:
         midi = np.flipud(midi)
         return midi
 
-    def compute_periodogram(self, binarize=False, th=0.1):
+    def compute_periodogram(self, binarize=False):
         per = []  # periodogram
 
         for pitch in self.pitch_range:
@@ -74,14 +76,40 @@ class Pianoroll:
         per = np.flipud(per)
 
         if binarize:
-            per[per < th] = 0.
-            per[per >= th] = 1.
+            per = self.binarize(per)
         return per
 
-    def mir_eval_format(self):
+    def binarize(self, pr):
+        pr[pr < self.threshold] = 0.
+        pr[pr >= self.threshold] = 1.
+        return pr
 
-        # detect onsets
-        # detect offsets
+    def mir_eval_format(self):
+        i = 0
+        for key in self.pitch_list:
+            envelope = self.per_dict[str(key)].copy()
+            gate = self.binarize(envelope.copy())
+            grad = np.diff(gate.reshape(-1, ))
+            sign = np.sign(grad)
+
+            onsets = sign.copy()
+            onsets[onsets < 0] = 0.
+            offsets = sign.copy()
+            offsets[offsets > 0] = 0.
+            offsets = np.abs(offsets)
+
+            idx_onsets = np.argwhere(onsets)
+            idx_offsets = np.argwhere(offsets)
+            onsets_all = self.x[idx_onsets, 0]  # detect onsets
+            offsets_all = self.x[idx_offsets, 0]  # detect offsets
+
+            plt.figure(20)
+            plt.plot(self.x, envelope)
+
+            plt.figure(21)
+            plt.plot(self.x, i + gate, 'C0')
+            plt.plot(onsets_all, i + np.ones(onsets_all.shape), 'oC1')
+            plt.plot(offsets_all, i + np.ones(offsets_all.shape), 'xC2')
+            i += 2
         # convert midi to Hz
         # export arrays for mir_eval
-        pass

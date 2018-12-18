@@ -135,7 +135,7 @@ class AmtSvi(GpitchModel):
 
         # prediction
         plt.subplot(1, 2, 2)
-        plt.imshow(self.prediction_pr.compute_periodogram(binarize=True, th=0.02),
+        plt.imshow(self.prediction_pr.compute_periodogram(binarize=True),
                    cmap=plt.cm.get_cmap('binary'),
                    interpolation="none",
                    extent=[self.data_test.x[0], self.data_test.x[-1], 21, 108],
