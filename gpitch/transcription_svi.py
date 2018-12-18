@@ -1,16 +1,15 @@
 import pickle
 import gpitch
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import time
+import numpy as np
 from gpitch.models import GpitchModel
 from gpflow.kernels import Matern32
 from gpitch.matern12_spectral_mixture import MercerMatern12sm as Mercer
 from gpitch.matern12_spectral_mixture import Matern12sm
 from scipy import signal
-
-import tensorflow as tf
-import matplotlib.pyplot as plt
 from gpitch.myplots import plot_predict
-import numpy as np
-import time
 from gpitch.pianoroll import Pianoroll
 
 
@@ -21,19 +20,21 @@ class Logger:
         self.i = 1
         self.logf = []
 
+    # noinspection PyProtectedMember
     def callback(self, x):
         if (self.i % 20) == 0:
             self.logf.append(self.model._objective(x)[0])
         self.i += 1
 
     def array(self):
-        return (-np.array(self.logf))
+        return -np.array(self.logf)
 
 
 class AmtSvi(GpitchModel):
     """
     Automatic music transcription using stochastic variational inference class
     """
+
     def __init__(self, test_fname,
                  frames, path,
                  pitches=None, gpu='0',
@@ -65,18 +66,18 @@ class AmtSvi(GpitchModel):
         self.model.za.fixed = True
         self.model.zc.fixed = True
         print("analyzing file {0}".format(test_fname))
-        print("number of induncing variables: {0}".format(len(self.model.za[0].value)))
+        print("number of inducing variables: {0}".format(len(self.model.za[0].value)))
         print("pitches to detect {0}".format(self.pitches))
 
     def save_results(self, save_path):
         aux = save_path + self.data_test.filename.strip(".wav") + "_transcription.p"
         pickle.dump(
-                    obj=self.prediction,
-                    file=open(
-                              aux, "wb"
-                             ),
-                    protocol=2
-                   )
+            obj=self.prediction,
+            file=open(
+                aux, "wb"
+            ),
+            protocol=2
+        )
 
     def plot(self):
         self.plot_data_train()
@@ -89,7 +90,7 @@ class AmtSvi(GpitchModel):
         """
         # plot activations and components
         if figsize is None:
-            figsize = (12, 2 * self.pitch_dim )
+            figsize = (12, 2 * self.pitch_dim)
 
         plt.figure(figsize=figsize)
         m_a, v_a, m_c, v_c, esource = self.prediction
@@ -114,32 +115,33 @@ class AmtSvi(GpitchModel):
         # plot sources
         plt.figure(figsize=figsize)
         for j in range(len(self.pitches)):
-            plt.subplot(self.pitch_dim, 1, j+1)
+            plt.subplot(self.pitch_dim, 1, j + 1)
             plt.plot(self.data_test.x, self.data_test.y)
             plt.plot(self.data_test.x, esource[j])
-            plt.plot(self.piano_roll.x, self.piano_roll.pr_dic[str(self.pitches[j])], lw=2)
-            plt.plot(self.prediction_pr.x, self.prediction_pr.pr_dic[str(self.pitches[j])], lw=2)
+            plt.plot(self.piano_roll.x, self.piano_roll.midi_dict[str(self.pitches[j])], lw=2)
+            plt.plot(self.prediction_pr.x, self.prediction_pr.per_dict[str(self.pitches[j])], lw=2)
         # plt.savefig("sources.png")
 
         # plot pianoroll
         # ground truth
         plt.figure(figsize=(12, 4))
         plt.subplot(1, 2, 1)
-        plt.imshow(self.piano_roll.matrix,
+        plt.imshow(self.piano_roll.compute_midi(),
                    cmap=plt.cm.get_cmap('binary'),
                    interpolation="none",
                    extent=[self.data_test.x[0], self.data_test.x[-1], 21, 108],
                    aspect="auto")
+        plt.title("ground truth")
 
         # prediction
         plt.subplot(1, 2, 2)
-        plt.imshow(self.prediction_pr.matrix,
+        plt.imshow(self.prediction_pr.compute_periodogram(binarize=True, th=0.02),
                    cmap=plt.cm.get_cmap('binary'),
                    interpolation="none",
                    extent=[self.data_test.x[0], self.data_test.x[-1], 21, 108],
                    aspect="auto")
+        plt.title("prediction")
         # plt.savefig("piano_roll.png")
-
 
         # plot elbo
         plt.figure(figsize=(12, 4))
@@ -157,16 +159,13 @@ class AmtSvi(GpitchModel):
 
             # get envelope
             aux2.append(signal.convolve(aux1[i].reshape(-1), win, mode='same') / win.size)
-            aux2[i] = np.max(aux1[i])*aux2[i]/np.max(aux2[i])
+            aux2[i] = np.max(aux1[i]) * aux2[i] / np.max(aux2[i])
 
             # downsample
             aux2[i] = aux2[i][::441].reshape(-1, 1)
 
-            # save on dictionary
-            self.prediction_pr.pr_dic[str(self.pitches[i])] = aux2[i]
-
-            # update piano roll matrix
-            self.prediction_pr.compute_matrix(binarise=True, th=0.02)
+            # save on periodogram dictionary
+            self.prediction_pr.per_dict[str(self.pitches[i])] = aux2[i]
 
     def predict(self, xnew=None):
         if xnew is None:
@@ -178,7 +177,7 @@ class AmtSvi(GpitchModel):
         method = tf.train.AdamOptimizer(learning_rate=learning_rate)
         start_time = time.time()
         self.model.optimize(maxiter=maxiter, method=method, callback=self.logger.callback)
-        print("Time optimizing (minutes): {0}".format( (time.time() - start_time)/60. ))
+        print("Time optimizing (minutes): {0}".format((time.time() - start_time) / 60.))
 
     def init_model(self, minibatch_size):
         return gpitch.pdgp.Pdgp(x=self.data_test.x.copy(),
@@ -200,27 +199,27 @@ class AmtSvi(GpitchModel):
             k_act.append(Matern32(1, lengthscales=0.2, variance=3.5))
 
             params.append(
-                          pickle.load(
-                                      open(self.path_load + fname[i], "rb")
-                                     )
-                         )
+                pickle.load(
+                    open(self.path_load + fname[i], "rb")
+                )
+            )
 
             if self.mercer:
                 k_com.append(
-                             Mercer(input_dim=1,
-                                    energy=params[i][1][0:maxh],
-                                    frequency=params[i][2][0:maxh],
-                                    lengthscales=params[i][0],
-                                    variance=1.
-                                    )
-                            )
+                    Mercer(input_dim=1,
+                           energy=params[i][1][0:maxh],
+                           frequency=params[i][2][0:maxh],
+                           lengthscales=params[i][0],
+                           variance=1.
+                           )
+                )
             else:
                 k_com.append(
-                             Matern12sm(input_dim=1,
-                                        energy=params[i][1][0:maxh],
-                                        frequency=params[i][2][0:maxh],
-                                        lengthscales=params[i][0],
-                                        variance=1.)
+                    Matern12sm(input_dim=1,
+                               energy=params[i][1][0:maxh],
+                               frequency=params[i][2][0:maxh],
+                               lengthscales=params[i][0],
+                               variance=1.)
                 )
             if fixed:
                 k_com[i].energy.fixed = True
