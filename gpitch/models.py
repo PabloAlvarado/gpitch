@@ -16,12 +16,11 @@ class GpitchModel:
                                scaled=True, start=start)
         init_settings(gpu)
 
-
         # create piano roll object
         if maps:
             self.piano_roll = Pianoroll(path=self.path_test,
                                         filename=test_fname,
-                                        duration=self.data_test.x[-1, 0].copy())
+                                        x=self.data_test.x.copy())
 
         if pitches is None:
             self.pitches = self.piano_roll.pitch_list

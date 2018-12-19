@@ -1,24 +1,24 @@
 import numpy as np
 import gpitch
 import pandas as pd
-import matplotlib.pyplot as plt
 
 
 class Pianoroll:
 
-    def __init__(self, path=None, filename=None, fs=100, duration=10., threshold=0.02):
+    def __init__(self, x, path=None, filename=None, fs=44100, threshold=0.05):
         self.threshold = threshold
         self.filename = filename
         self.path = path
-        self.duration = duration
         self.fs = fs
-        self.xn = int(round(duration * fs))
-        self.x = np.linspace(0., (self.xn - 1.) / self.fs, self.xn).reshape(-1, 1)
+        self.x = x
+        self.xn = x.size
+        self.duration = x[-1, 0].copy()
         self.pitch_range = range(21, 109)
         self.midi_dict = self.init_dict()
         self.per_dict = self.init_dict()
         self.name = "name"
-        self.pitch_list = []
+        self.pitch_list = None
+        self.pandas_file = None
 
         if self.filename is not None:
             self.load_file()
@@ -42,13 +42,13 @@ class Pianoroll:
 
         pandas_file = pd.read_table(self.path + self.name)
         idx = pandas_file["OnsetTime"] < self.duration
-        pandas_file = pandas_file[idx]
-        self.pitch_list = list(set(pandas_file.MidiPitch.tolist()))
+        self.pandas_file = pandas_file[idx]
+        self.pitch_list = list(set(self.pandas_file.MidiPitch.tolist()))
         self.pitch_list.sort()
 
         for i in range(len(self.pitch_list)):
 
-            pitch_pandas = pandas_file[pandas_file.MidiPitch == self.pitch_list[i]]
+            pitch_pandas = self.pandas_file[self.pandas_file.MidiPitch == self.pitch_list[i]]
             onset = pitch_pandas.OnsetTime.tolist()
             offset = pitch_pandas.OffsetTime.tolist()
             key = str(self.pitch_list[i])
@@ -84,32 +84,57 @@ class Pianoroll:
         pr[pr >= self.threshold] = 1.
         return pr
 
-    def mir_eval_format(self):
-        i = 0
-        for key in self.pitch_list:
-            envelope = self.per_dict[str(key)].copy()
-            gate = self.binarize(envelope.copy())
-            grad = np.diff(gate.reshape(-1, ))
-            sign = np.sign(grad)
+    def get_array_pandas(self, key):
+        list_ = self.pandas_file[key].tolist()
+        return np.asarray(list_).reshape(-1, )
 
-            onsets = sign.copy()
-            onsets[onsets < 0] = 0.
-            offsets = sign.copy()
-            offsets[offsets > 0] = 0.
-            offsets = np.abs(offsets)
+    def mir_eval_format(self, ground_truth=False):
 
-            idx_onsets = np.argwhere(onsets)
-            idx_offsets = np.argwhere(offsets)
-            onsets_all = self.x[idx_onsets, 0]  # detect onsets
-            offsets_all = self.x[idx_offsets, 0]  # detect offsets
+        if ground_truth:
 
-            plt.figure(20)
-            plt.plot(self.x, envelope)
+            onsets = self.get_array_pandas("OnsetTime")
+            offsets = self.get_array_pandas("OffsetTime")
+            intervals = np.ones((onsets.size, 2))
+            intervals[:, 0] = onsets.copy()
+            intervals[:, 1] = offsets.copy()
+            pitches_midi = self.get_array_pandas("MidiPitch")
+            pitches = gpitch.midi2freq(pitches_midi)
 
-            plt.figure(21)
-            plt.plot(self.x, i + gate, 'C0')
-            plt.plot(onsets_all, i + np.ones(onsets_all.shape), 'oC1')
-            plt.plot(offsets_all, i + np.ones(offsets_all.shape), 'xC2')
-            i += 2
-        # convert midi to Hz
-        # export arrays for mir_eval
+        else:
+            list_onsets = []
+            list_pitches = []
+            for pitch in self.pitch_list:
+
+                envelope = self.per_dict[str(pitch)].copy()
+                gate = self.binarize(envelope.copy())
+                diff = np.diff(gate.reshape(-1, ))
+                sign = np.sign(diff)
+                onsets = sign.copy()
+                onsets[onsets < 0] = 0.
+                idx_onsets = np.argwhere(onsets)
+                found_onsets = self.x[idx_onsets, 0]  # detect onsets
+
+                # offsets = sign.copy()
+                # offsets[offsets > 0] = 0.
+                # offsets = np.abs(offsets)
+                # idx_offsets = np.argwhere(offsets)
+                # list_offsets = self.x[idx_offsets, 0]  # detect offsets
+
+                if found_onsets.size is not 0:
+                    list_onsets.append(found_onsets)
+                    list_pitches.append(found_onsets.size * [gpitch.midi2freq(pitch)])
+
+            array_onsets = np.vstack(list_onsets).reshape(-1, )
+            array_pitches = np.hstack(list_pitches).reshape(-1, )
+
+            # sort by onset time
+            idx = np.argsort(array_onsets)
+            array_onsets = array_onsets[idx]
+            array_pitches = array_pitches[idx]
+
+            intervals = np.ones((array_onsets.size, 2))
+            intervals[:, 0] = array_onsets.copy()
+            intervals[:, 1] = 1. + array_onsets.copy()
+            pitches = array_pitches
+
+        return pitches, intervals

@@ -21,12 +21,23 @@ frames = [88200, 2 * 44100]  # train and test number of frames
 m = AmtSvi(test_fname=fname, frames=frames, path=path)
 
 # optimization
-m.optimize(maxiter=2000, learning_rate=0.01)
+m.optimize(maxiter=2500, learning_rate=0.01)
 
 # prediction
 m.predict()
 
+# get list onsets, offset, pitches
+ref_pitches, ref_intervals = m.piano_roll.mir_eval_format(ground_truth=True)
+est_pitches, est_intervals = m.prediction_pr.mir_eval_format()
+
+# compute metrics
+metrics = gpitch.compute_mir_eval(ref_pitches=ref_pitches,
+                                  ref_intervals=ref_intervals,
+                                  est_pitches=est_pitches,
+                                  est_intervals=est_intervals,
+                                  offset_ratio=None)
+print metrics
+
 # show model
 m.plot()
-m.prediction_pr.mir_eval_format()
 plt.show()

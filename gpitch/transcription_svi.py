@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import time
 import numpy as np
 from gpitch.models import GpitchModel
-from gpflow.kernels import Matern32
+from gpflow.kernels import Matern12, Matern32
 from gpitch.matern12_spectral_mixture import MercerMatern12sm as Mercer
 from gpitch.matern12_spectral_mixture import Matern12sm
 from scipy import signal
@@ -61,7 +61,7 @@ class AmtSvi(GpitchModel):
 
         self.prediction_pr = Pianoroll(path=self.path_test,
                                        filename=test_fname,
-                                       duration=self.data_test.x[-1, 0].copy())
+                                       x=self.data_test.x.copy())
 
         self.model.za.fixed = True
         self.model.zc.fixed = True
@@ -162,7 +162,8 @@ class AmtSvi(GpitchModel):
             aux2[i] = np.max(aux1[i]) * aux2[i] / np.max(aux2[i])
 
             # downsample
-            aux2[i] = aux2[i][::441].reshape(-1, 1)
+            # aux2[i] = aux2[i][::44].reshape(-1, 1)
+            aux2[i] = aux2[i][::1].reshape(-1, 1)
 
             # save on periodogram dictionary
             self.prediction_pr.per_dict[str(self.pitches[i])] = aux2[i]
@@ -196,7 +197,7 @@ class AmtSvi(GpitchModel):
         k_act, k_com = [], []
         for i in range(len(fname)):
 
-            k_act.append(Matern32(1, lengthscales=0.2, variance=3.5))
+            k_act.append(Matern12(1, lengthscales=1.0, variance=3.5))
 
             params.append(
                 pickle.load(
