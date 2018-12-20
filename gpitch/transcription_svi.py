@@ -88,13 +88,17 @@ class AmtSvi(GpitchModel):
         """
         plot prediction components and activations
         """
+
         # plot activations and components
         if figsize is None:
+
             figsize = (12, 2 * self.pitch_dim)
 
         plt.figure(figsize=figsize)
         m_a, v_a, m_c, v_c, esource = self.prediction
+
         for j in range(len(self.pitches)):
+
             plt.subplot(self.pitch_dim, 2, 2 * (j + 1) - 1)
             plot_predict(self.data_test.x.copy(),
                          m_a[j],
@@ -110,41 +114,47 @@ class AmtSvi(GpitchModel):
                          v_c[j],
                          self.model.zc[j].value,
                          plot_z=False)
-        # plt.savefig("act_com.png")
 
         # plot sources
         plt.figure(figsize=figsize)
+
         for j in range(len(self.pitches)):
+
             plt.subplot(self.pitch_dim, 1, j + 1)
             plt.plot(self.data_test.x, self.data_test.y)
             plt.plot(self.data_test.x, esource[j])
             plt.plot(self.piano_roll.x, self.piano_roll.midi_dict[str(self.pitches[j])], lw=2)
             plt.plot(self.prediction_pr.x, self.prediction_pr.per_dict[str(self.pitches[j])], lw=2)
-        # plt.savefig("sources.png")
 
-        # plot pianoroll
-        # ground truth
-        plt.figure(figsize=(12, 4))
-        plt.subplot(1, 2, 1)
+        # plot pianoroll ground truth
+        plt.figure(figsize=(16, 4))
+        plt.subplot(1, 3, 1)
         plt.imshow(self.piano_roll.compute_midi(),
                    cmap=plt.cm.get_cmap('binary'),
                    interpolation="none",
                    extent=[self.data_test.x[0], self.data_test.x[-1], 21, 108],
                    aspect="auto")
+        freq, inter = self.piano_roll.mir_eval_format(ground_truth=True)
+        midi = gpitch.freq2midi(freq)
+        onsets = inter[:, 0]
+        plt.plot(onsets, midi, 'or', ms=4)
         plt.title("ground truth")
 
-        # prediction
-        plt.subplot(1, 2, 2)
+        # plot pianoroll prediction
+        plt.subplot(1, 3, 2)
         plt.imshow(self.prediction_pr.compute_periodogram(binarize=True),
                    cmap=plt.cm.get_cmap('binary'),
                    interpolation="none",
                    extent=[self.data_test.x[0], self.data_test.x[-1], 21, 108],
                    aspect="auto")
+        freq, inter = self.prediction_pr.mir_eval_format()
+        midi = gpitch.freq2midi(freq)
+        onsets = inter[:, 0]
+        plt.plot(onsets, midi, 'or', ms=4)
         plt.title("prediction")
-        # plt.savefig("piano_roll.png")
 
-        # plot elbo
-        plt.figure(figsize=(12, 4))
+        # plot ELBO
+        plt.subplot(1, 3, 3)
         plt.title("ELBO")
         plt.plot(self.logger.array())
 

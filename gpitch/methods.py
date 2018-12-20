@@ -280,7 +280,7 @@ def midi2freq(midi):
 
 
 def freq2midi(freq):
-    return int(69. + 12. * np.log2(freq / 440.))
+    return (69. + 12. * np.log2(freq / 440.)).astype(int)
 
 
 lfiles_training = [['011PFNOM_M60_train.wav',
