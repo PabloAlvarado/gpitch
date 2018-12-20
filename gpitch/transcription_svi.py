@@ -104,14 +104,12 @@ class AmtSvi(GpitchModel):
 
         # plot activations and components
         if figsize is None:
-
             figsize = (12, 2 * self.pitch_dim)
 
         plt.figure(figsize=figsize)
         m_a, v_a, m_c, v_c, esource = self.prediction
 
         for j in range(len(self.pitches)):
-
             plt.subplot(self.pitch_dim, 2, 2 * (j + 1) - 1)
             plot_predict(self.data_test.x.copy(),
                          m_a[j],
@@ -132,7 +130,6 @@ class AmtSvi(GpitchModel):
         plt.figure(figsize=figsize)
 
         for j in range(len(self.pitches)):
-
             plt.subplot(self.pitch_dim, 1, j + 1)
             plt.plot(self.data_test.x, self.data_test.y)
             plt.plot(self.data_test.x, esource[j])
@@ -164,7 +161,10 @@ class AmtSvi(GpitchModel):
         midi = gpitch.freq2midi(freq)
         onsets = inter[:, 0]
         plt.plot(onsets, midi, 'sr', ms=4, mfc='none', mew=1)
-        plt.title("prediction")
+        metrics = self.compute_metrics()
+        plt.title("prediction: p={0:.2f}, r={1:.2f}, f-measure={2:.2f}".format(metrics[0],
+                                                                               metrics[1],
+                                                                               metrics[2]))
 
         # plot ELBO
         plt.subplot(1, 3, 3)
