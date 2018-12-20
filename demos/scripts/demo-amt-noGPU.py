@@ -27,7 +27,7 @@ m.optimize(maxiter=5000, learning_rate=0.01)
 m.predict()
 
 # show precision, recall, f-measure
-print m.compute_metrics()
+print(m.compute_metrics())
 
 # show model
 m.plot()
