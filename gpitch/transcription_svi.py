@@ -4,8 +4,8 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import time
 import numpy as np
+import gpflow
 from gpitch.models import GpitchModel
-from gpflow.kernels import Matern12, Matern32
 from gpitch.matern12_spectral_mixture import MercerMatern12sm as Mercer
 from gpitch.matern12_spectral_mixture import Matern12sm
 from scipy import signal
@@ -68,6 +68,19 @@ class AmtSvi(GpitchModel):
         print("analyzing file {0}".format(test_fname))
         print("number of inducing variables: {0}".format(len(self.model.za[0].value)))
         print("pitches to detect {0}".format(self.pitches))
+
+    def compute_metrics(self):
+        # get list onsets, offset, pitches
+        ref_pitches, ref_intervals = self.piano_roll.mir_eval_format(ground_truth=True)
+        est_pitches, est_intervals = self.prediction_pr.mir_eval_format()
+
+        # compute metrics
+        metrics = gpitch.compute_mir_eval(ref_pitches=ref_pitches,
+                                          ref_intervals=ref_intervals,
+                                          est_pitches=est_pitches,
+                                          est_intervals=est_intervals,
+                                          offset_ratio=None)
+        return metrics
 
     def save_results(self, save_path):
         aux = save_path + self.data_test.filename.strip(".wav") + "_transcription.p"
@@ -137,7 +150,7 @@ class AmtSvi(GpitchModel):
         freq, inter = self.piano_roll.mir_eval_format(ground_truth=True)
         midi = gpitch.freq2midi(freq)
         onsets = inter[:, 0]
-        plt.plot(onsets, midi, 'or', ms=4)
+        plt.plot(onsets, midi, 'sr', ms=4, mfc='none', mew=1)
         plt.title("ground truth")
 
         # plot pianoroll prediction
@@ -150,13 +163,20 @@ class AmtSvi(GpitchModel):
         freq, inter = self.prediction_pr.mir_eval_format()
         midi = gpitch.freq2midi(freq)
         onsets = inter[:, 0]
-        plt.plot(onsets, midi, 'or', ms=4)
+        plt.plot(onsets, midi, 'sr', ms=4, mfc='none', mew=1)
         plt.title("prediction")
 
         # plot ELBO
         plt.subplot(1, 3, 3)
         plt.title("ELBO")
         plt.plot(self.logger.array())
+
+        # plot envelopes
+        plt.figure(figsize=(12, 4))
+        plt.title("envelopes")
+        for key in self.prediction_pr.pitch_list:
+            plt.plot(self.prediction_pr.x, self.prediction_pr.per_dict[str(key)])
+        plt.show()
 
     def predict_pianoroll(self):
 
@@ -207,7 +227,7 @@ class AmtSvi(GpitchModel):
         k_act, k_com = [], []
         for i in range(len(fname)):
 
-            k_act.append(Matern12(1, lengthscales=1.0, variance=3.5))
+            k_act.append(gpflow.kernels.Matern32(1, lengthscales=1.0, variance=3.5))
 
             params.append(
                 pickle.load(
