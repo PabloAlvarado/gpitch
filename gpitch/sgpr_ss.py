@@ -64,11 +64,13 @@ class SGPRSS(gpflow.sgpr.SGPR):
         if self.reg:
             # add regularization
             beta = 1000.
-            regularization = -beta * reduce(tf.add, map(tf.abs, self.kern.var_vector))  # L-1 norm
+            # regularization = -beta * reduce(tf.add, map(tf.abs, self.kern.var_vector))  # L-1 norm
+            regularization = -beta * tf.reduce_sum(reduce(tf.add, map(tf.abs, self.kern.var_vector)))
             return bound + regularization
-
         else:
             return bound
+
+
 
     def build_predict_source(self, Xnew, full_cov=False):
         """

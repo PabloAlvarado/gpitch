@@ -44,7 +44,6 @@ jitter = settings.numerics.jitter_level
 #     return m_a_l, v_a_l, m_c_l, v_c_l, m_s_l
 
 
-
 class Pdgp(gpflow.model.Model):
     def __init__(self, x, y, z, kern, whiten=True, minibatch_size=None, nlinfun=logistic_tf, reg=False):
         """

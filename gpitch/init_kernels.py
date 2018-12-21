@@ -35,6 +35,9 @@ def init_kern_com(num_pitches, lengthscale, energy, frequency, len_fixed=True):
                             frequency=frequency[i].copy(),
                             len_fixed=len_fixed)
                         )
+        kern_com[i].energy.fixed = True
+        kern_com[i].frequency.fixed = True
+        # kern_com[i].lengthscales.fixed = True
     return kern_com
 
 

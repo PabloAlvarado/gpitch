@@ -227,7 +227,7 @@ class AmtSvi(GpitchModel):
         k_act, k_com = [], []
         for i in range(len(fname)):
 
-            k_act.append(gpflow.kernels.Matern32(1, lengthscales=1.0, variance=3.5))
+            k_act.append(gpflow.kernels.Matern32(1, lengthscales=0.25, variance=3.5))
 
             params.append(
                 pickle.load(

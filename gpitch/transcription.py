@@ -11,7 +11,14 @@ class AMT:
     """
     Automatic music transcription class
     """
-    def __init__(self, pitches=None, nsec=1, test_filename=None, window_size=2001, gpu='0', reg=False, load=True,
+    def __init__(self,
+                 pitches=None,
+                 nsec=1,
+                 test_filename=None,
+                 window_size=2001,
+                 gpu='0',
+                 reg=False,
+                 load=True,
                  overlap=False):
 
         # define location of files to use
@@ -22,10 +29,6 @@ class AMT:
         # init session
         self.sess, self.path = gpitch.init_settings(visible_device=gpu)
 
-        # create piano roll object
-        self.piano_roll = gpitch.pianoroll.Pianoroll(path=self.path + self.test_path, filename=test_filename,
-                                                     duration=nsec)
-
         # define list of pitches to detect
         if pitches is not None:
             self.pitches = pitches
@@ -34,7 +37,7 @@ class AMT:
 
         # init attributes
         self.train_data = [None]
-        self.test_data = Audio()
+        self.test_data = None
         self.params = [[], [], []]
         self.kern_sampled = [None]
         self.inducing = [None]
@@ -59,6 +62,11 @@ class AMT:
             ncol = len(self.test_data.Y)
             self.matrix_var = np.zeros((nrow, ncol))
             self.matrix_len = np.zeros((nrow, ncol))
+
+        # create piano roll object
+        self.piano_roll = gpitch.pianoroll.Pianoroll(path=self.path + self.test_path,
+                                                     filename=test_filename,
+                                                     x=self.test_data.x.copy())
 
         # initialize kernels
         self.init_kernel(load=load)
@@ -88,8 +96,13 @@ class AMT:
         if train_data_path is not None:
             self.test_path = train_data_path
         path = self.path + self.test_path
-        self.test_data = Audio(path=path, filename=filename, start=start, frames=frames, window_size=window_size,
-                               overlap=overlap)
+        self.test_data = Audio(path=path,
+                               filename=filename,
+                               start=start,
+                               frames=frames,
+                               window_size=window_size,
+                               overlap=overlap,
+                               windowed=True)
 
     def plot_traindata(self, figsize=None, axis_off=True):
         nfiles = len(self.train_data)
@@ -108,7 +121,7 @@ class AMT:
         for i in range(nfiles):
             plt.subplot(nrows, ncols, i+1)
             plt.plot(self.train_data[i].x, self.train_data[i].y)
-            plt.legend([self.train_data[i].name[18:-13]])
+            plt.legend([self.train_data[i].filename[18:-13]])
             if axis_off:
                 plt.axis("off")
         plt.suptitle("train data")
@@ -116,13 +129,13 @@ class AMT:
     def plot_testdata(self, figsize=(16, 2), axis_off=False):
         plt.figure(figsize=figsize)
         plt.plot(self.test_data.x, self.test_data.y)
-        plt.legend([self.test_data.name])
+        plt.legend([self.test_data.filename])
         plt.title("test data")
         if axis_off:
             plt.axis("off")
 
         plt.figure(figsize=figsize)
-        plt.imshow(self.piano_roll.matrix, cmap=plt.cm.get_cmap('binary'))
+        plt.imshow(self.piano_roll.compute_midi(), cmap=plt.cm.get_cmap('binary'))
         plt.axis("auto")
 
     def plot_kernel(self, figsize=None, axis=False):
@@ -145,7 +158,7 @@ class AMT:
 
             plt.plot(self.kern_sampled[0][i], self.kern_sampled[1][i])
             plt.plot(self.kern_sampled[0][i], self.kern_pitches[i].compute_K(self.kern_sampled[0][i], x0))
-            plt.title(self.train_data[i].name[18:-13])
+            plt.title(self.train_data[i].filename[18:-13])
             plt.legend(['sampled kernel', 'approximate kernel'])
             if axis is not True:
                 plt.axis("off")
@@ -185,7 +198,7 @@ class AMT:
 
                 # approx kernel
                 params = gpitch.kernelfit.fit(kern=skern[i], audio=self.train_data[i].y,
-                                              file_name=self.train_data[i].name, max_par=max_par,
+                                              file_name=self.train_data[i].filename, max_par=max_par,
                                               fs=self.train_data[i].fs)[0]
                 self.params[0].append(params[0])  # lengthscale
                 self.params[1].append(params[1])  # variances
@@ -232,9 +245,14 @@ class AMT:
         z = nwin * [None]
 
         for i in range(nwin):
-            a, b = gpitch.init_liv(x=self.test_data.X[i], y=self.test_data.Y[i], num_sources=1)
-            z[i] = a[0][0][::3]
-            u[i] = b[::3]
+            a, b = gpitch.init_inducing_extrema(x=self.test_data.X[i],
+                                                y=self.test_data.Y[i],
+                                                num_sources=1,
+                                                win_size=15,
+                                                thres=0.05,
+                                                dec=1)
+            z[i] = a[0][0].copy()
+            u[i] = b.copy()
         self.inducing = [z, u]
 
     def init_model(self, reg):
@@ -252,7 +270,7 @@ class AMT:
 
     def reset_model(self, x, y, z):
         self.model.X = x.copy()
-        self.model.Y = 20.*y.copy()
+        self.model.Y = 20*y.copy()
         self.model.Z = z.copy()
         self.model.likelihood.variance = 1.
 
